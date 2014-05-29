@@ -159,8 +159,9 @@ namespace RockWeb.Plugins.com_CentralAZ.Utility
             {
                 // Get the highest value stored in this attribute.
                 int maxValue = 0;
-                var maxValueString = new AttributeValueService().Queryable().Where( a => a.AttributeId == thePersonAttribute.Id ).OrderByDescending( av => av.Value ).FirstOrDefault();
-                if ( ! string.IsNullOrEmpty( maxValueString.Value ) )
+                RockContext rockContext = new RockContext();
+                var maxValueString = new AttributeValueService( rockContext ).Queryable().Where( a => a.AttributeId == thePersonAttribute.Id ).OrderByDescending( av => av.Value ).FirstOrDefault();
+                if ( maxValueString != null && ! string.IsNullOrEmpty( maxValueString.Value ) )
                 {
                     maxValue = maxValueString.Value.AsInteger() ?? 0;
                 }
@@ -169,7 +170,7 @@ namespace RockWeb.Plugins.com_CentralAZ.Utility
                 _person.LoadAttributes();
                 int nextNumber = maxValue + 1;
                 _person.SetAttributeValue( attributeKey, nextNumber.ToStringSafe() );
-                _person.SaveAttributeValues( CurrentPersonAlias );
+                _person.SaveAttributeValues();
                 return nextNumber;
             }
             else
