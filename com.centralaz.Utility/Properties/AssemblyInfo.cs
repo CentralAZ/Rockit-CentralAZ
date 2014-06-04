@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("com.centralaz.Utility")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Windows User")]
+[assembly: AssemblyCompany("Central Christian Church (CentralAZ.com)")]
 [assembly: AssemblyProduct("com.centralaz.Utility")]
 [assembly: AssemblyCopyright("Copyright © Windows User 2014")]
 [assembly: AssemblyTrademark("")]

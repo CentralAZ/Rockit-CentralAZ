@@ -1,16 +1,16 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("com.centralaz")]
+[assembly: AssemblyTitle("com.centralaz.Prayer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany( "Central Christian Church (CentralAZ.com)" )]
-[assembly: AssemblyProduct("com.centralaz")]
-[assembly: AssemblyCopyright("Copyright ©  2014")]
+[assembly: AssemblyProduct("com.centralaz.Prayer")]
+[assembly: AssemblyCopyright("Copyright © Windows User 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("5073694c-880a-4487-931c-b11a1cc6b409")]
+[assembly: Guid("86798f59-8760-45e7-baa5-5dedffe52978")]
 
 // Version information for an assembly consists of the following four values:
 //
