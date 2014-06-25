@@ -50,7 +50,6 @@ namespace com.centralaz.Utility.Migrations
             // add sample page to the Power Tools page with the new block on it
             AddPage( "7f1f4130-cb98-473b-9de1-7a886d2283ed", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Sample Contribution Statement Preference Page", "", "703F4902-1D69-4B08-A827-E0EA30BCD9F6", "fa fa-recycle" );
             AddBlock( "703F4902-1D69-4B08-A827-E0EA30BCD9F6", "", "E27853BD-9231-4E21-990B-E3B2B7762898", "Contribution Statement Preference", "Main", "", "", 0, "B7037EF4-32BC-42B2-A75C-82D9E302DDE8" );
-            AddBlockAttributeValue( "B7037EF4-32BC-42B2-A75C-82D9E302DDE8", "TBD", "546F10C6-58E5-4E0B-99A9-1E7B85E1C121")
         }
 
         /// <summary>
