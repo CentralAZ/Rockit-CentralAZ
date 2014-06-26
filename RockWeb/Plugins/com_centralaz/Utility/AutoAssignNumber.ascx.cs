@@ -163,7 +163,7 @@ namespace RockWeb.Plugins.com_CentralAZ.Utility
                 var maxValueString = new AttributeValueService( rockContext ).Queryable().Where( a => a.AttributeId == thePersonAttribute.Id ).OrderByDescending( av => av.Value ).FirstOrDefault();
                 if ( maxValueString != null && ! string.IsNullOrEmpty( maxValueString.Value ) )
                 {
-                    maxValue = maxValueString.Value.AsInteger() ?? 0;
+                    maxValue = maxValueString.Value.AsInteger();
                 }
 
                 // Now load the person's attributes, increment the number, then save it to their record.

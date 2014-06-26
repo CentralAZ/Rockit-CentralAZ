@@ -16,7 +16,7 @@ namespace com.centralaz.Utility.Migrations
         /// </summary>
         public override void Up()
         {
-            UpdateBlockType( "Auto Assign Number", "Automatically increments and assigns the next number for a configured person attribute.", "~/Plugins/com_centralaz/Utility/AutoAssignNumber.ascx", "com_centralaz > Utility", "84D8D97A-8FC3-43CD-8AA0-E56A064B760E " );
+            RockMigrationHelper.UpdateBlockType( "Auto Assign Number", "Automatically increments and assigns the next number for a configured person attribute.", "~/Plugins/com_centralaz/Utility/AutoAssignNumber.ascx", "com_centralaz > Utility", "84D8D97A-8FC3-43CD-8AA0-E56A064B760E " );
         }
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace com.centralaz.Utility.Migrations
         /// </summary>
         public override void Down()
         {
-            DeleteBlockType( "84D8D97A-8FC3-43CD-8AA0-E56A064B760E" ); // Auto Assign Number
+            RockMigrationHelper.DeleteBlockType( "84D8D97A-8FC3-43CD-8AA0-E56A064B760E" ); // Auto Assign Number
         }
     }
 }

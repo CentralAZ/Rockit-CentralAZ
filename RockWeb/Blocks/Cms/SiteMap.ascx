@@ -1,7 +1,9 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="SiteMap.ascx.cs" Inherits="RockWeb.Blocks.Cms.SiteMap" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="SiteMap.ascx.cs" Inherits="RockWeb.Blocks.Cms.SiteMap" %>
 
 <asp:UpdatePanel ID="upPanel" runat="server">
     <ContentTemplate>
+
+        <asp:HiddenField ID="hfExpandedIds" runat="server" ClientIDMode="Static" />
 
         <asp:Panel ID="pnlDetails" runat="server">
             <div id="pages">
@@ -9,15 +11,26 @@
             </div>
         </asp:Panel>
         <script type="text/javascript">
-            $(function () {
+            Sys.Application.add_load(function () {
+
+                var $selectedId = $('#hfSelectedId');
+
                 $('#pages')
                     .on('rockTree:selected', function (e, id) {
+
                         var $li = $(this).find('[data-id="' + id + '"]'),
                             rockTree = $(this).data('rockTree'),
                             modelType,
                             action,
                             i;
                         
+                        // get the data-id values of rock-tree items that are showing visible children (in other words, Expanded Nodes)
+                        var expandedDataIds = $(e.currentTarget).find('.rocktree-children').filter(":visible").closest('.rocktree-item').map(function () {
+                            return $(this).attr('data-id')
+                        }).get().join(',');
+
+                        $('#hfExpandedIds').val(expandedDataIds);
+
                         if ($li.length > 1) {
                             for (i = 0; i < $li.length; i++) {
                                 if (!rockTree.selectedNodes[0].name === $li.find('span').text()) {

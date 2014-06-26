@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="RockUpdate.ascx.cs" Inherits="RockWeb.Blocks.Core.RockUpdate" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="RockUpdate.ascx.cs" Inherits="RockWeb.Blocks.Core.RockUpdate" %>
 <%@ Import namespace="Rock" %>
 <style>
     /* This is here because it prevents the contents from jumping around when/if
@@ -43,8 +43,6 @@
                 </div>
             </div>
 
-             
-
             <asp:Repeater ID="rptPackageVersions" runat="server" Visible="True"  OnItemDataBound="rptPackageVersions_ItemDataBound" OnItemCommand="rptPackageVersions_ItemCommand">
                     <ItemTemplate>
                         <div id="divPanel" runat="server" class="panel">
@@ -84,6 +82,8 @@
                 <p>Update completed successfully... You're now running <asp:Literal ID="lSuccessVersion" runat="server" /> .</p>
             </div>
 
+            <Rock:NotificationBox ID="nbMoreUpdatesAvailable" runat="server" NotificationBoxType="Info" Visible="false" Heading="More Updates Available! " Text="There are additional updates available."/>
+
             <Rock:NotificationBox ID="nbSuccess" runat="server" NotificationBoxType="Success" Heading="Below is a summary of the new toys you have to play with..." />
 
             <Rock:NotificationBox ID="nbDbWarning" runat="server" NotificationBoxType="Warning" Text="<strong>NOTE:</strong> Any database changes will take effect at the next page load." />
@@ -102,8 +102,6 @@
         </asp:Panel>       
 
     </div>
-
-    
 
     </ContentTemplate>
 </asp:UpdatePanel>

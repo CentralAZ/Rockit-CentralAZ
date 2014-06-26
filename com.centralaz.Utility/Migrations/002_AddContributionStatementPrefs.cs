@@ -17,13 +17,13 @@ namespace com.centralaz.Utility.Migrations
         /// </summary>
         public override void Up()
         {
-            UpdateBlockType( "Contribution Statement Preference", "Displays and or sets the user's statement preference such as quarterly, yearly, none.", "~/Plugins/com_centralaz/Utility/ContributionStatementPreference.ascx", "com_centralaz > Utility", "E27853BD-9231-4E21-990B-E3B2B7762898" );
-            AddBlockTypeAttribute( "E27853BD-9231-4E21-990B-E3B2B7762898", "BC48720C-3610-4BCF-AE66-D255A17F1CDF", "Frequency Preference Attribute Guid", "FrequencyPreferenceAttributeGuid", "Finance", "Guid of the person attribute that holds each person's frequency choice.  Note: The attribute must be of type DefinedType.", 0, "546F10C6-58E5-4E0B-99A9-1E7B85E1C121", "6EA9A88D-D052-4AD3-AA64-5D7E85909C3D"  );
+            RockMigrationHelper.UpdateBlockType( "Contribution Statement Preference", "Displays and or sets the user's statement preference such as quarterly, yearly, none.", "~/Plugins/com_centralaz/Utility/ContributionStatementPreference.ascx", "com_centralaz > Utility", "E27853BD-9231-4E21-990B-E3B2B7762898" );
+            RockMigrationHelper.AddBlockTypeAttribute( "E27853BD-9231-4E21-990B-E3B2B7762898", "BC48720C-3610-4BCF-AE66-D255A17F1CDF", "Frequency Preference Attribute Guid", "FrequencyPreferenceAttributeGuid", "Finance", "Guid of the person attribute that holds each person's frequency choice.  Note: The attribute must be of type DefinedType.", 0, "546F10C6-58E5-4E0B-99A9-1E7B85E1C121", "6EA9A88D-D052-4AD3-AA64-5D7E85909C3D" );
 
-            AddDefinedType( "Giving", "Contribution Statement Frequency", "Frequency that paper (USPS mailed) contribution statements can be mailed.", "4F7062A8-3A12-4A83-8C91-2632203653A9" );
-            AddDefinedValue( "4F7062A8-3A12-4A83-8C91-2632203653A9", "yearly", "I only need a year-end paper statement mailed <b>annually</b>", "4C085452-B85F-47EA-BDA3-C3068EDB6F4C", false );
-            AddDefinedValue( "4F7062A8-3A12-4A83-8C91-2632203653A9", "quarterly", "I need a paper statement mailed <b>quarterly</b>", "7951691D-F65D-415F-9013-A854965C275C", false );
-            AddDefinedValue( "4F7062A8-3A12-4A83-8C91-2632203653A9", "never", "I <b>never</b> need a paper statement mailed", "C3F882A2-4261-4708-9354-AE78FA20389E", false );
+            RockMigrationHelper.AddDefinedType( "Giving", "Contribution Statement Frequency", "Frequency that paper (USPS mailed) contribution statements can be mailed.", "4F7062A8-3A12-4A83-8C91-2632203653A9" );
+            RockMigrationHelper.AddDefinedValue( "4F7062A8-3A12-4A83-8C91-2632203653A9", "yearly", "I only need a year-end paper statement mailed <b>annually</b>", "4C085452-B85F-47EA-BDA3-C3068EDB6F4C", false );
+            RockMigrationHelper.AddDefinedValue( "4F7062A8-3A12-4A83-8C91-2632203653A9", "quarterly", "I need a paper statement mailed <b>quarterly</b>", "7951691D-F65D-415F-9013-A854965C275C", false );
+            RockMigrationHelper.AddDefinedValue( "4F7062A8-3A12-4A83-8C91-2632203653A9", "never", "I <b>never</b> need a paper statement mailed", "C3F882A2-4261-4708-9354-AE78FA20389E", false );
 
             // add Statement Frequency Preference attribute and attribute qualifier
             Sql( string.Format( @"
@@ -48,8 +48,8 @@ namespace com.centralaz.Utility.Migrations
 " ) );
 
             // add sample page to the Power Tools page with the new block on it
-            AddPage( "7f1f4130-cb98-473b-9de1-7a886d2283ed", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Sample Contribution Statement Preference Page", "", "703F4902-1D69-4B08-A827-E0EA30BCD9F6", "fa fa-recycle" );
-            AddBlock( "703F4902-1D69-4B08-A827-E0EA30BCD9F6", "", "E27853BD-9231-4E21-990B-E3B2B7762898", "Contribution Statement Preference", "Main", "", "", 0, "B7037EF4-32BC-42B2-A75C-82D9E302DDE8" );
+            RockMigrationHelper.AddPage( "7f1f4130-cb98-473b-9de1-7a886d2283ed", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Sample Contribution Statement Preference Page", "", "703F4902-1D69-4B08-A827-E0EA30BCD9F6", "fa fa-recycle" );
+            RockMigrationHelper.AddBlock( "703F4902-1D69-4B08-A827-E0EA30BCD9F6", "", "E27853BD-9231-4E21-990B-E3B2B7762898", "Contribution Statement Preference", "Main", "", "", 0, "B7037EF4-32BC-42B2-A75C-82D9E302DDE8" );
         }
 
         /// <summary>
@@ -57,11 +57,11 @@ namespace com.centralaz.Utility.Migrations
         /// </summary>
         public override void Down()
         {
-            DeletePage( "703F4902-1D69-4B08-A827-E0EA30BCD9F6" );
-            DeleteBlock( "B7037EF4-32BC-42B2-A75C-82D9E302DDE8" );
-            DeleteBlockType( "E27853BD-9231-4E21-990B-E3B2B7762898" ); // Contribution Statement Preference
-            DeleteDefinedType( "4F7062A8-3A12-4A83-8C91-2632203653A9" ); // Contribution Statement Frequency
-            DeleteAttribute( "546F10C6-58E5-4E0B-99A9-1E7B85E1C121" ); // StatementFrequencyPreference attribute
+            RockMigrationHelper.DeletePage( "703F4902-1D69-4B08-A827-E0EA30BCD9F6" );
+            RockMigrationHelper.DeleteBlock( "B7037EF4-32BC-42B2-A75C-82D9E302DDE8" );
+            RockMigrationHelper.DeleteBlockType( "E27853BD-9231-4E21-990B-E3B2B7762898" ); // Contribution Statement Preference
+            RockMigrationHelper.DeleteDefinedType( "4F7062A8-3A12-4A83-8C91-2632203653A9" ); // Contribution Statement Frequency
+            RockMigrationHelper.DeleteAttribute( "546F10C6-58E5-4E0B-99A9-1E7B85E1C121" ); // StatementFrequencyPreference attribute
         }
     }
 }

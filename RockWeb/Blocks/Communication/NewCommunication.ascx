@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="NewCommunication.ascx.cs" Inherits="RockWeb.Blocks.Communication.NewCommunication" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="NewCommunication.ascx.cs" Inherits="RockWeb.Blocks.Communication.NewCommunication" %>
 
 <asp:UpdatePanel ID="upPanel" runat="server">
     <ContentTemplate>
@@ -28,6 +28,8 @@
                 </ul>
             </div>
         
+            <Rock:NotificationBox ID="nbInvalidTransport" runat="server" NotificationBoxType="Warning" Dismissable="true" Title="Warning" Visible="false" />
+
             <div class="row">
                 <div class="col-md-12">
                     <div class="pull-right">
