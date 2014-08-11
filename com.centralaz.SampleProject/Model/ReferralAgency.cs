@@ -6,7 +6,7 @@ using System.Data.Entity.ModelConfiguration;
 using System.Linq;
 using System.Runtime.Serialization;
 
-using com.centralaz.Data;
+using com.centralaz.SampleProject.Data;
 
 using Rock.Data;
 using Rock.Model;
@@ -18,8 +18,9 @@ namespace com.centralaz.SampleProject.Model
     /// </summary>
     [Table( "_com_centralaz_SampleProject_ReferralAgency" )]
     [DataContract]
-    public class ReferralAgency : com.centralaz.Data.NamedModel<ReferralAgency>
+    public class ReferralAgency : NamedModel<ReferralAgency>
     {
+
         #region Entity Properties
 
         /// <summary>

@@ -49,7 +49,7 @@ namespace RockWeb.Plugins.com_centralaz.SampleProject
             this.BlockUpdated += Block_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlContent );
 
-            var definedType = DefinedTypeCache.Read( com.centralaz.SystemGuid.DefinedType.REFERRAL_AGENCY_TYPE.AsGuid() );
+            var definedType = DefinedTypeCache.Read( com.centralaz.SampleProject.SystemGuid.DefinedType.REFERRAL_AGENCY_TYPE.AsGuid() );
             if (definedType != null)
             {
                 ddlAgencyType.BindToDefinedType( definedType, true );
@@ -80,7 +80,7 @@ namespace RockWeb.Plugins.com_centralaz.SampleProject
 
             string crumbName = ActionTitle.Add( ReferralAgency.FriendlyTypeName );
 
-            int? referralAgencyId = PageParameter( "referralAgencyId" ).AsInteger();
+            int? referralAgencyId = PageParameter( "referralAgencyId" ).AsIntegerOrNull();
             if ( referralAgencyId.HasValue )
             {
                 _referralAgency = new ReferralAgencyService( new SampleProjectContext() ).Get( referralAgencyId.Value );
@@ -130,16 +130,16 @@ namespace RockWeb.Plugins.com_centralaz.SampleProject
             var dataContext = new SampleProjectContext();
             var service = new ReferralAgencyService( dataContext );
 
-            int campusId = int.Parse( hfReferralAgencyId.Value );
+            int referralAgencyId = int.Parse( hfReferralAgencyId.Value );
 
-            if ( campusId == 0 )
+            if ( referralAgencyId == 0 )
             {
                 referralAgency = new ReferralAgency();
                 service.Add( referralAgency );
             }
             else
             {
-                referralAgency = service.Get( campusId );
+                referralAgency = service.Get( referralAgencyId );
             }
 
             referralAgency.Name = tbName.Text;
@@ -170,9 +170,9 @@ namespace RockWeb.Plugins.com_centralaz.SampleProject
         {
             pnlDetails.Visible = true;
 
-            int? referralAgencyId = PageParameter( "referralAgencyId" ).AsInteger();
-            int? campusId = PageParameter( "campusId" ).AsInteger();
-            int? agencyTypeValueId = PageParameter( "agencyTypeId" ).AsInteger();
+            int? referralAgencyId = PageParameter( "referralAgencyId" ).AsIntegerOrNull();
+            int? campusId = PageParameter( "campusId" ).AsIntegerOrNull();
+            int? agencyTypeValueId = PageParameter( "agencyTypeId" ).AsIntegerOrNull();
 
             ReferralAgency referralAgency = null;
             if (referralAgencyId.HasValue)

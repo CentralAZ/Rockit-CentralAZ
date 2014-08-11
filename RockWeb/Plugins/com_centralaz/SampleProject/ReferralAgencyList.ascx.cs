@@ -120,7 +120,7 @@ namespace RockWeb.Plugins.com_centralaz.SampleProject
 
                 case "Agency Type":
                     {
-                        int? valueId = gfSettings.GetUserPreference( "Agency Type" ).AsInteger();
+                        int? valueId = gfSettings.GetUserPreference( "Agency Type" ).AsIntegerOrNull();
                         if ( valueId.HasValue )
                         {
                             var definedValue = DefinedValueCache.Read( valueId.Value );
@@ -210,7 +210,7 @@ namespace RockWeb.Plugins.com_centralaz.SampleProject
             cpCampus.Campuses = campusi;
             cpCampus.Visible = campusi.Any();
 
-            var definedType = DefinedTypeCache.Read( com.centralaz.SystemGuid.DefinedType.REFERRAL_AGENCY_TYPE.AsGuid() );
+            var definedType = DefinedTypeCache.Read( com.centralaz.SampleProject.SystemGuid.DefinedType.REFERRAL_AGENCY_TYPE.AsGuid() );
             if ( definedType != null )
             {
                 ddlAgencyType.BindToDefinedType( definedType, true );
@@ -227,13 +227,13 @@ namespace RockWeb.Plugins.com_centralaz.SampleProject
 
             var qry = service.Queryable( "Campus,AgencyTypeValue" );
 
-            int? campusId = gfSettings.GetUserPreference( "Campus" ).AsInteger();
+            int? campusId = gfSettings.GetUserPreference( "Campus" ).AsIntegerOrNull();
             if ( campusId.HasValue )
             {
                 qry = qry.Where( a => a.CampusId == campusId.Value );
             }
 
-            int? definedValueId = gfSettings.GetUserPreference( "Agency Type" ).AsInteger();
+            int? definedValueId = gfSettings.GetUserPreference( "Agency Type" ).AsIntegerOrNull();
             if ( definedValueId.HasValue )
             {
                 qry = qry.Where( a => a.AgencyTypeValueId == definedValueId.Value );
