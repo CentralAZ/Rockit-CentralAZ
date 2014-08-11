@@ -65,12 +65,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\com.centralaz\com.centralaz.csproj">
-      <Project>{83775a9e-0455-4801-b1ef-dc70d786d09b}</Project>
-      <Name>com.centralaz</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
