@@ -1,4 +1,4 @@
-﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="EditMyAccount.ascx.cs" Inherits="RockWeb.Blocks.Security.EditMyAccount" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeFile="EditMyAccount.ascx.cs" Inherits="RockWeb.Blocks.Security.EditMyAccount" %>
 
 <asp:UpdatePanel ID="upEditPerson" runat="server">
     <ContentTemplate>

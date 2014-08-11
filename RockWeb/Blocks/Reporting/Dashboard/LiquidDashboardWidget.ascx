@@ -1,4 +1,4 @@
-﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="LiquidDashboardWidget.ascx.cs" Inherits="RockWeb.Blocks.Reporting.Dashboard.LiquidDashboardWidget" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeFile="LiquidDashboardWidget.ascx.cs" Inherits="RockWeb.Blocks.Reporting.Dashboard.LiquidDashboardWidget" %>
 
 <asp:UpdatePanel ID="upnlContent" runat="server">
     <ContentTemplate>

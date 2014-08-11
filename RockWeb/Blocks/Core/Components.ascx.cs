@@ -1,4 +1,4 @@
-﻿// <copyright>
+// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +66,7 @@ namespace RockWeb.Blocks.Core
             {
                 PropertyInfo instanceProperty = containerType.GetProperty( "Instance" );
                 if ( instanceProperty != null )
-                {
+                {                   
                     _container = instanceProperty.GetValue( null, null ) as IContainer;
                     if ( _container != null )
                     {

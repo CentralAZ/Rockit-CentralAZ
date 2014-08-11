@@ -1,4 +1,4 @@
-﻿// <copyright>
+// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -280,15 +280,11 @@ namespace RockWeb.Blocks.Prayer
         /// <summary>
         /// Shows the detail.
         /// </summary>
-        /// <param name="itemKey">The item key.</param>
-        /// <param name="itemKeyValue">The item key value.</param>
-        public void ShowDetail( string itemKey, int itemKeyValue )
+        /// <param name="noteId">The note identifier.</param>
+        public void ShowDetail( int noteId )
         {
-            if ( !itemKey.Equals( PrayerCommentKeyParameter ) )
-            {
-                return;
-            }
         }
+
         #endregion
 
         #region View & Edit Details

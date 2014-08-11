@@ -1,4 +1,4 @@
-﻿// <copyright>
+// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -163,7 +163,8 @@ namespace RockWeb.Blocks.Administration
             var blocks = blockService.GetByLayoutAndZone( page.LayoutId, zoneName ).ToList();
             blockService.Reorder( blocks, e.OldIndex, e.NewIndex );
             rockContext.SaveChanges();
-
+            
+            Rock.Web.Cache.PageCache.FlushLayoutBlocks( page.LayoutId );
             BindGrids();
         }
 
@@ -236,6 +237,7 @@ namespace RockWeb.Blocks.Administration
             var blocks = blockService.GetByPageAndZone( page.Id, zoneName ).ToList();
             blockService.Reorder( blocks, e.OldIndex, e.NewIndex );
             rockContext.SaveChanges();
+            page.FlushBlocks();
 
             BindGrids();
         }

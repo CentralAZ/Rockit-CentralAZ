@@ -1,15 +1,25 @@
-﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="SiteMap.ascx.cs" Inherits="RockWeb.Blocks.Cms.SiteMap" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeFile="SiteMap.ascx.cs" Inherits="RockWeb.Blocks.Cms.SiteMap" %>
 
 <asp:UpdatePanel ID="upPanel" runat="server">
     <ContentTemplate>
 
         <asp:HiddenField ID="hfExpandedIds" runat="server" ClientIDMode="Static" />
 
-        <asp:Panel ID="pnlDetails" runat="server">
-            <div id="pages">
-                <asp:Literal ID="lPages" runat="server"></asp:Literal>
+        <asp:Panel ID="pnlDetails" CssClass="panel panel-block" runat="server">
+            
+            <div class="panel-heading">
+                <h1 class="panel-title"><i class="fa fa-sitemap"></i> Site Map</h1>
             </div>
+            <div class="panel-body">
+
+                <div id="pages">
+                    <asp:Literal ID="lPages" runat="server"></asp:Literal>
+                </div>
+
+            </div>
+            
         </asp:Panel>
+
         <script type="text/javascript">
             Sys.Application.add_load(function () {
 

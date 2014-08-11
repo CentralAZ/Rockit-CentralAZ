@@ -1,4 +1,4 @@
-﻿// <copyright>
+// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -161,13 +161,19 @@ namespace RockWeb.Blocks.Cms
                 return;
             }
 
+            var rockContext = new RockContext();
+            var site = SiteCache.Read( siteId, rockContext );
+            if ( site == null )
+            {
+                return;
+            }
+
             hfSiteId.SetValue( siteId );
 
             pnlLayouts.Visible = true;
 
-
             // Add any missing layouts
-            LayoutService.RegisterLayouts( Request.MapPath( "~" ), SiteCache.Read( siteId ) );
+            LayoutService.RegisterLayouts( Request.MapPath( "~" ), site );
 
             LayoutService layoutService = new LayoutService( new RockContext() );
             var qry = layoutService.Queryable().Where( a => a.SiteId.Equals( siteId ) );

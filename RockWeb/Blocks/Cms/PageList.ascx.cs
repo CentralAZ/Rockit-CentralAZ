@@ -1,4 +1,4 @@
-﻿// <copyright>
+// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,17 +75,6 @@ namespace RockWeb.Blocks.Cms
         #endregion
 
         #region Events
-
-        /// <summary>
-        /// Handles the Edit event of the gPages control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="RowEventArgs"/> instance containing the event data.</param>
-        protected void gPages_Edit( object sender, RowEventArgs e )
-        {
-            var queryString = new Dictionary<string, string>();
-            NavigateToPage( new Guid( e.RowKeyValue.ToString() ), queryString );
-        }
 
         /// <summary>
         /// Handles the GridRebind event of the gPages control.

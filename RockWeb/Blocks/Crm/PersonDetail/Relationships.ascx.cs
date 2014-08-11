@@ -1,4 +1,4 @@
-﻿// <copyright>
+// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,15 +76,24 @@ namespace RockWeb.Blocks.Crm.PersonDetail
         {
             base.OnLoad( e );
 
-            bool.TryParse( GetAttributeValue( "ShowRole" ), out ShowRole );
-
-            if ( !Page.IsPostBack )
+            if ( Person != null && Person.Id != 0 )
             {
-                BindData();
+                upRelationships.Visible = true;
+
+                bool.TryParse( GetAttributeValue( "ShowRole" ), out ShowRole );
+
+                if ( !Page.IsPostBack )
+                {
+                    BindData();
+                }
+                else
+                {
+                    ShowDialog();
+                }
             }
             else
             {
-                ShowDialog();
+                upRelationships.Visible = false;
             }
         }
 

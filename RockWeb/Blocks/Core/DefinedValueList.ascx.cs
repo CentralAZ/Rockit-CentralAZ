@@ -1,4 +1,4 @@
-﻿// <copyright>
+// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -259,7 +259,7 @@ namespace RockWeb.Blocks.Core
             Rock.Web.Cache.DefinedTypeCache.Flush( definedValue.DefinedTypeId );
             Rock.Web.Cache.DefinedValueCache.Flush( definedValue.Id );
 
-            RockTransactionScope.WrapTransaction( () =>
+            rockContext.WrapTransaction( () =>
             {
                 if ( definedValue.Id.Equals( 0 ) )
                 {
@@ -285,8 +285,6 @@ namespace RockWeb.Blocks.Core
         /// <summary>
         /// Shows the detail.
         /// </summary>
-        /// <param name="itemKey">The item key.</param>
-        /// <param name="itemKeyValue">The item key value.</param>
         public void ShowDetail()
         {
             pnlList.Visible = true;

@@ -1,4 +1,4 @@
-﻿// <copyright>
+// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -161,9 +161,10 @@ namespace RockWeb.Blocks.Crm.PersonDetail
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void btnSave_Click( object sender, EventArgs e )
         {
-            Rock.Data.RockTransactionScope.WrapTransaction( () =>
+            var rockContext = new RockContext();
+
+            rockContext.WrapTransaction( () =>
             {
-                var rockContext = new RockContext();
                 var personService = new PersonService( rockContext );
 
                 var changes = new List<string>();

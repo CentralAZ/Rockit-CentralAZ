@@ -1,4 +1,4 @@
-﻿// <copyright>
+// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -126,9 +126,18 @@ namespace RockWeb.Blocks.Cms
             int layoutId = PageParameter( "layoutId" ).AsInteger();
             if ( layoutId == 0 )
             {
+                pnlContent.Visible = false;
                 return;
             }
 
+            var rockContext = new RockContext();
+            var layout = LayoutCache.Read( layoutId, rockContext );
+            if (layout == null)
+            {
+                pnlContent.Visible = false;
+                return;
+            }
+                
             hfLayoutId.SetValue( layoutId );
 
             pnlBlocks.Visible = true;

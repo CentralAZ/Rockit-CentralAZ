@@ -1,4 +1,4 @@
-﻿// <copyright>
+// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -405,7 +405,6 @@ namespace RockWeb.Blocks.Cms
         {
             rFilter.Visible = visible;
             pnlMarketingCampaignAds.Visible = visible;
-            lTitle.Visible = visible;
         }
 
         #endregion
