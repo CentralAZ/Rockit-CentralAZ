@@ -18,7 +18,7 @@ namespace com.centralaz.Utility.Migrations
         public override void Up()
         {
             RockMigrationHelper.UpdateBlockType( "Contribution Statement Preference", "Displays and or sets the user's statement preference such as quarterly, yearly, none.", "~/Plugins/com_centralaz/Utility/ContributionStatementPreference.ascx", "com_centralaz > Utility", "E27853BD-9231-4E21-990B-E3B2B7762898" );
-            RockMigrationHelper.AddBlockTypeAttribute( "E27853BD-9231-4E21-990B-E3B2B7762898", "BC48720C-3610-4BCF-AE66-D255A17F1CDF", "Frequency Preference Attribute Guid", "FrequencyPreferenceAttributeGuid", "Finance", "Guid of the person attribute that holds each person's frequency choice.  Note: The attribute must be of type DefinedType.", 0, "546F10C6-58E5-4E0B-99A9-1E7B85E1C121", "6EA9A88D-D052-4AD3-AA64-5D7E85909C3D" );
+            RockMigrationHelper.AddBlockTypeAttribute( "E27853BD-9231-4E21-990B-E3B2B7762898", "BC48720C-3610-4BCF-AE66-D255A17F1CDF", "Frequency Preference Attribute Guid", "FrequencyPreferenceAttributeGuid", null, "Guid of the person attribute that holds each person's frequency choice.  Note: The attribute must be of type DefinedType.", 0, "546F10C6-58E5-4E0B-99A9-1E7B85E1C121", "6EA9A88D-D052-4AD3-AA64-5D7E85909C3D" );
 
             RockMigrationHelper.AddDefinedType( "Giving", "Contribution Statement Frequency", "Frequency that paper (USPS mailed) contribution statements can be mailed.", "4F7062A8-3A12-4A83-8C91-2632203653A9" );
             RockMigrationHelper.AddDefinedValue( "4F7062A8-3A12-4A83-8C91-2632203653A9", "yearly", "I only need a year-end paper statement mailed <b>annually</b>", "4C085452-B85F-47EA-BDA3-C3068EDB6F4C", false );
