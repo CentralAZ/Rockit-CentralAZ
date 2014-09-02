@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -143,8 +143,20 @@ namespace RockWeb.Blocks.WorkFlow
             if ( _workflowType != null && !ConfiguredType )
             {
                 RockPage.PageTitle = _workflowType.Name;
-            }
 
+                // we can only override if the page does not have a icon
+                if ( string.IsNullOrWhiteSpace( RockPage.PageIcon ) && !string.IsNullOrWhiteSpace( _workflowType.IconCssClass ) )
+                {
+                    RockPage.PageIcon = _workflowType.IconCssClass;
+                }
+
+                lTitle.Text = string.Format( "{0} Entry", _workflowType.WorkTerm );
+
+                if ( ! string.IsNullOrWhiteSpace( _workflowType.IconCssClass ) )
+                {
+                    lIconHtml.Text = string.Format( "<i class='{0}' ></i>", _workflowType.IconCssClass );
+                }
+            }
         }
 
 
@@ -686,6 +698,7 @@ namespace RockWeb.Blocks.WorkFlow
             nbMessage.Title = title;
             nbMessage.Text = message;
             nbMessage.Visible = true;
+            nbMessage.Dismissable = false;
 
             if ( hideForm )
             {

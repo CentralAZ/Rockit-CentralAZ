@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="RockControlGallery.ascx.cs" Inherits="RockWeb.Blocks.Examples.RockControlGallery" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="RockControlGallery.ascx.cs" Inherits="RockWeb.Blocks.Examples.RockControlGallery" %>
 <script type="text/javascript">
     function pageLoad() {
         prettyPrint();
@@ -20,7 +20,7 @@
 
         <div class="panel panel-block">
             <div class="panel-heading">
-                <h1 class="panel-title"><i class="fa fa-magic"></i>Control Gallery</h1>
+                <h1 class="panel-title"><i class="fa fa-magic"></i> Control Gallery</h1>
             </div>
             <div class="panel-body">
                 <asp:Panel ID="pnlDetails" runat="server">
@@ -111,6 +111,16 @@
                     <a id="DataTextBox"></a>
                     <div runat="server" class="r-example">
                         <Rock:DataTextBox ID="dtbExample" runat="server" Label="Rock:DataTextBox" LabelTextFromPropertyName="false" SourceTypeName="Rock.Model.GroupType, Rock" PropertyName="Description" />
+                    </div>
+
+                    <a id="EmailBox"></a>
+                    <div runat="server" class="r-example">
+                        <Rock:EmailBox ID="ebEmail" runat="server" Label="Rock:EmailBox" />
+                    </div>
+
+                    <a id="UrlLinkBox"></a>
+                    <div runat="server" class="r-example">
+                        <Rock:UrlLinkBox ID="ulLink" runat="server" Label="Rock:UrlLinkBox" />
                     </div>
 
                     <a id="NumberBox"></a>

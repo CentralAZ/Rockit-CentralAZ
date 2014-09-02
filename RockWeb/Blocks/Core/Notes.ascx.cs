@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,19 +71,6 @@ namespace RockWeb.Blocks.Core
                 var rockContext = new RockContext();
                 var service = new NoteTypeService( rockContext );
                 var noteType = service.Get( contextEntity.TypeId, noteTypeName );
-
-                // If a note type with the specified name does not exist for the context entity type, create one
-                if ( noteType == null )
-                {
-                    noteType = new NoteType();
-                    noteType.IsSystem = false;
-                    noteType.EntityTypeId = contextEntity.TypeId;
-                    noteType.EntityTypeQualifierColumn = string.Empty;
-                    noteType.EntityTypeQualifierValue = string.Empty;
-                    noteType.Name = noteTypeName;
-                    service.Add( noteType );
-                    rockContext.SaveChanges();
-                }
 
                 notesTimeline.NoteTypeId = noteType.Id;
                 notesTimeline.EntityId = contextEntity.Id;

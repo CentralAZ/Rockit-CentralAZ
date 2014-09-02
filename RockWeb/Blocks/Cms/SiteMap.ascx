@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="SiteMap.ascx.cs" Inherits="RockWeb.Blocks.Cms.SiteMap" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="SiteMap.ascx.cs" Inherits="RockWeb.Blocks.Cms.SiteMap" %>
 
 <asp:UpdatePanel ID="upPanel" runat="server">
     <ContentTemplate>
@@ -12,7 +12,7 @@
             </div>
             <div class="panel-body">
 
-                <div id="pages">
+                <div id="pages" style="display:none">
                     <asp:Literal ID="lPages" runat="server"></asp:Literal>
                 </div>
 
@@ -68,6 +68,8 @@
                             include: [ 'model' ]
                         }
                     });
+
+                $('#pages').show();
             });
         </script>
     </ContentTemplate>

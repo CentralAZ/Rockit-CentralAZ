@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="MarketingCampaignDetail.ascx.cs" Inherits="RockWeb.Blocks.Cms.MarketingCampaignDetail" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="MarketingCampaignDetail.ascx.cs" Inherits="RockWeb.Blocks.Cms.MarketingCampaignDetail" %>
 
 <asp:UpdatePanel ID="upMarketingCampaigns" runat="server">
     <ContentTemplate>
@@ -58,7 +58,9 @@
                 
                     <div class="panel-heading">
                         <h1 class="panel-title"><i class="fa fa-bullhorn"></i> <asp:Literal ID="lCampaignTitle" runat="server" /></h1>
-                        <asp:Literal ID="lCampusLabels" runat="server"></asp:Literal>
+                        <div class="panel-labels">
+                            <asp:Literal ID="lCampusLabels" runat="server"></asp:Literal>
+                        </div>
                     </div>
                     <div class="panel-body">
 
