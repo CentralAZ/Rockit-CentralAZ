@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="CommunicationList.ascx.cs" Inherits="RockWeb.Blocks.Communication.CommunicationList" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="CommunicationList.ascx.cs" Inherits="RockWeb.Blocks.Communication.CommunicationList" %>
 <script>
     Sys.Application.add_load(function () {
         $('.grid-table span.badge').tooltip({ html: true, container: 'body', delay: { show: 500, hide: 100 } });
@@ -19,6 +19,7 @@
                         <Rock:ComponentPicker ID="cpChannel" runat="server" ContainerType="Rock.Communication.ChannelContainer, Rock" Label="Channel" />
                         <Rock:RockDropDownList ID="ddlStatus" runat="server" Label="Status" />
                         <Rock:PersonPicker ID="ppSender" runat="server" Label="Created By" />
+                        <Rock:DateRangePicker ID="drpDates" runat="server" Label="Date Range" />
                         <Rock:RockTextBox ID="tbContent" runat="server" Label="Content" />
                     </Rock:GridFilter>
 

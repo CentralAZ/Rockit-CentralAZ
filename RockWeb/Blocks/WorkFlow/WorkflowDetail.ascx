@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="WorkflowDetail.ascx.cs" Inherits="RockWeb.Blocks.WorkFlow.WorkflowDetail" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="WorkflowDetail.ascx.cs" Inherits="RockWeb.Blocks.WorkFlow.WorkflowDetail" %>
 
 <asp:UpdatePanel ID="upDetail" runat="server">
     <ContentTemplate>
@@ -6,8 +6,10 @@
         <asp:Panel ID="pnlDetails" CssClass="panel panel-block" runat="server" Visible="false">
             <div class="panel-heading">
                 <h1 class="panel-title"><i class="fa fa-cog"></i> <asp:Literal ID="lReadOnlyTitle" runat="server" /></h1>
-                <Rock:HighlightLabel ID="hlInactive" runat="server" LabelType="Danger" Text="Inactive" />
-                <Rock:HighlightLabel ID="hlType" runat="server" LabelType="Type" />
+                <div class="panel-labels">
+                    <Rock:HighlightLabel ID="hlInactive" runat="server" LabelType="Danger" Text="Inactive" />
+                    <Rock:HighlightLabel ID="hlType" runat="server" LabelType="Type" />
+                </div>
             </div>
             <div class="panel-body">
 

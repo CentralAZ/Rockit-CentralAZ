@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -209,11 +209,6 @@ namespace RockWeb.Blocks.Reporting
                 metricValue = new MetricValue { Id = 0, MetricId = metricId.Value };
                 metricValue.Metric = metricValue.Metric ?? new MetricService( new RockContext() ).Get( metricValue.MetricId );
                 lActionTitle.Text = ActionTitle.Add( MetricValue.FriendlyTypeName ).FormatAsHtmlTitle();
-            }
-            else
-            {
-                pnlDetails.Visible = false;
-                return;
             }
 
             hfMetricValueId.Value = metricValue.Id.ToString();

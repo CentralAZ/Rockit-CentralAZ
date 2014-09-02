@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="MetricValueDetail.ascx.cs" Inherits="RockWeb.Blocks.Reporting.MetricValueDetail" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="MetricValueDetail.ascx.cs" Inherits="RockWeb.Blocks.Reporting.MetricValueDetail" %>
 
 <asp:UpdatePanel ID="upMetricValueDetail" runat="server">
     <ContentTemplate>
@@ -26,7 +26,9 @@
                             <Rock:RockDropDownList ID="ddlMetricValueType" runat="server" Label="Type" />
                             <Rock:DateTimePicker ID="dtpMetricValueDateTime" runat="server" Label="Value Date/Time" />
                             <Rock:NumberBox ID="tbYValue" runat="server" Label="Value" NumberType="Double" />
-                            <Rock:DataTextBox ID="tbXValue" runat="server" SourceTypeName="Rock.Model.MetricValue, Rock" PropertyName="XValue" />
+
+                            <%-- Hide X Value for now until we implement XValue (In most cases, the Metric.Xaxis is ignored and MetricValueDateTime is used as the X-Axis --%>
+                            <Rock:DataTextBox ID="tbXValue" runat="server" SourceTypeName="Rock.Model.MetricValue, Rock" PropertyName="XValue" Visible="false" />
                         </div>
                         <div class="col-md-6">
                             <asp:PlaceHolder ID="phEntityTypeEntityIdValue" runat="server" />

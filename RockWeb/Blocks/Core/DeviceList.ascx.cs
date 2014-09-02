@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -129,7 +129,7 @@ namespace RockWeb.Blocks.Core
                         var definedValue = DefinedValueCache.Read( definedValueId );
                         if ( definedValue != null )
                         {
-                            e.Value = definedValue.Name;
+                            e.Value = definedValue.Value;
                         }
                     }
 
@@ -254,7 +254,7 @@ namespace RockWeb.Blocks.Core
                 {
                     a.Id,
                     a.Name,
-                    DeviceTypeName = a.DeviceType.Name,
+                    DeviceTypeName = a.DeviceType.Value,
                     a.IPAddress,
                     a.PrintToOverride,
                     a.PrintFrom,

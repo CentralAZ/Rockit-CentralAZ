@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 using System.ComponentModel;
 using Rock.Model;
 using Rock.Reporting.Dashboard;
+using Rock.Web.UI.Controls;
 
 namespace RockWeb.Blocks.Reporting.Dashboard
 {
@@ -34,7 +35,7 @@ namespace RockWeb.Blocks.Reporting.Dashboard
         /// <value>
         /// The flot chart control.
         /// </value>
-        public override Rock.Web.UI.Controls.FlotChart FlotChartControl
+        public override FlotChart FlotChartControl
         {
             get { return lcChart; }
         }
@@ -48,6 +49,18 @@ namespace RockWeb.Blocks.Reporting.Dashboard
         public override Rock.Web.UI.Controls.NotificationBox MetricWarningControl
         {
             get { return nbMetricWarning; }
+        }
+
+        /// <summary>
+        /// Loads the chart.
+        /// </summary>
+        public override void LoadChart()
+        {
+            base.LoadChart();
+            pnlDashboardTitle.Visible = !string.IsNullOrEmpty( this.Title );
+            pnlDashboardSubtitle.Visible = !string.IsNullOrEmpty( this.Subtitle );
+            lDashboardTitle.Text = this.Title;
+            lDashboardSubtitle.Text = this.Subtitle;
         }
     }
 }

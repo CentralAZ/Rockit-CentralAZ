@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -116,7 +116,7 @@ namespace RockWeb.Blocks.Groups
                         var purpose = DefinedValueCache.Read( id.Value );
                         if ( purpose != null )
                         {
-                            e.Value = purpose.Name;
+                            e.Value = purpose.Value;
                         }
                     }
 
@@ -235,7 +235,7 @@ namespace RockWeb.Blocks.Groups
                     a.Id,
                     a.Name,
                     a.Description,
-                    Purpose = a.GroupTypePurposeValue.Name,
+                    Purpose = a.GroupTypePurposeValue.Value,
                     GroupsCount = a.Groups.Count(),
                     a.IsSystem
                 } );

@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,6 +79,11 @@ namespace RockWeb.Blocks.WorkFlow
                             {
                                 entity = new GroupService( rockContext ).Get( groupId.Value );
                             }
+                        }
+
+                        foreach( string key in Request.QueryString.AllKeys )
+                        {
+                            workflow.SetAttributeValue( key, Request.QueryString[key] );
                         }
 
                         var qryParams = new Dictionary<string, string>();

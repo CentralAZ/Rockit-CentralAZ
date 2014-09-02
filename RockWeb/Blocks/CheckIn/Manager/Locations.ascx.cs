@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,6 @@ using Rock;
 using Rock.Attribute;
 using Rock.Data;
 using Rock.Model;
-using Rock.Reporting.Dashboard.Flot;
 using Rock.Web.Cache;
 using Rock.Web.UI.Controls;
 
@@ -383,7 +382,7 @@ namespace RockWeb.Blocks.CheckIn.Manager
                 var img = e.Item.FindControl( "imgPerson" ) as Literal;
                 if (img != null)
                 {
-                    img.Text = Person.GetPhotoImageTag( person.PhotoId, person.Gender, 50, 50 );
+                    img.Text = Person.GetPhotoImageTag( person.PhotoId, null, person.Gender, 50, 50 );
                 }
 
                 var lStatus = e.Item.FindControl( "lStatus" ) as Literal;

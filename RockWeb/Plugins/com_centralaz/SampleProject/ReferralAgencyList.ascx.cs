@@ -126,7 +126,7 @@ namespace RockWeb.Plugins.com_centralaz.SampleProject
                             var definedValue = DefinedValueCache.Read( valueId.Value );
                             if ( definedValue != null )
                             {
-                                e.Value = definedValue.Name;
+                                e.Value = definedValue.Value;
                             }
                         }
                         break;

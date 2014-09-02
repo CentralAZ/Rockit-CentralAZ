@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="CheckinScheduleBuilder.ascx.cs" Inherits="RockWeb.Blocks.CheckIn.CheckinScheduleBuilder" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="CheckinScheduleBuilder.ascx.cs" Inherits="RockWeb.Blocks.CheckIn.CheckinScheduleBuilder" %>
 
 <asp:UpdatePanel ID="upCheckinScheduleBuilder" runat="server">
     <ContentTemplate>
@@ -19,7 +19,12 @@
                     </Rock:GridFilter>
                     <Rock:Grid ID="gGroupLocationSchedule" runat="server" AllowSorting="true" AllowPaging="false" OnRowDataBound="gGroupLocationSchedule_RowDataBound" >
                         <Columns>
-                            <asp:BoundField DataField="GroupName" HeaderText="Group" SortExpression="Group.Name" />
+		                    <asp:TemplateField HeaderText="Group" SortExpression="Group.Name">
+		                        <ItemTemplate>
+		                            <%#Eval("GroupName")%><br />
+		                            <small><%#Eval("Path")%></small>
+		                        </ItemTemplate>
+		                    </asp:TemplateField>
                             <asp:BoundField DataField="LocationName" HeaderText="Location" SortExpression="Location.Name" />
                         </Columns>
                     </Rock:Grid>

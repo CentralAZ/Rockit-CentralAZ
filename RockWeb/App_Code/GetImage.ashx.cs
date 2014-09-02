@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,10 +58,6 @@ namespace RockWeb
             catch ( Exception ex )
             {
                 ExceptionLogService.LogException( ex, context );
-                context.Response.StatusCode = 500;
-                context.Response.StatusDescription = ex.Message;
-                context.Response.Flush();
-                context.ApplicationInstance.CompleteRequest();
             }
         }
 

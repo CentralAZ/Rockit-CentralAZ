@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -278,12 +278,13 @@ namespace RockWeb.Blocks.Core
                 } );
             }
 
+            var rockContext = new RockContext();
             foreach ( var component in components)
             {
                 Type type = component.Value.Value.GetType();
-                if ( Rock.Attribute.Helper.UpdateAttributes( type, Rock.Web.Cache.EntityTypeCache.GetId( type.FullName ), string.Empty, string.Empty, null ) )
+                if ( Rock.Attribute.Helper.UpdateAttributes( type, Rock.Web.Cache.EntityTypeCache.GetId( type.FullName ), string.Empty, string.Empty, rockContext ) )
                 {
-                    component.Value.Value.LoadAttributes();
+                    component.Value.Value.LoadAttributes( rockContext );
                 }
 
                 dataSource.Add( new ComponentDescription( component.Key, component.Value ) );

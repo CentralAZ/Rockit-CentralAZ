@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -563,7 +563,7 @@ namespace RockWeb.Blocks.Cms
             List<DefinedValue> list = qry.ToList();
             if ( list.Count == 0 )
             {
-                list.Add( new DefinedValue { Id = None.Id, Name = None.Text } );
+                list.Add( new DefinedValue { Id = None.Id, Value = None.Text } );
                 btnAddMarketingCampaignAudience.Enabled = false;
                 btnAddMarketingCampaignAudience.CssClass = "btn btn-primary disabled";
             }
@@ -607,10 +607,10 @@ namespace RockWeb.Blocks.Cms
         /// </summary>
         private void BindMarketingCampaignAudiencesGrid()
         {
-            gMarketingCampaignAudiencesPrimary.DataSource = MarketingCampaignAudiencesState.Where( a => a.IsPrimary ).OrderBy( a => DefinedValueCache.Read(a.AudienceTypeValueId).Name ).ToList();
+            gMarketingCampaignAudiencesPrimary.DataSource = MarketingCampaignAudiencesState.Where( a => a.IsPrimary ).OrderBy( a => DefinedValueCache.Read(a.AudienceTypeValueId).Value ).ToList();
             gMarketingCampaignAudiencesPrimary.DataBind();
 
-            gMarketingCampaignAudiencesSecondary.DataSource = MarketingCampaignAudiencesState.Where( a => !a.IsPrimary ).OrderBy( a => DefinedValueCache.Read( a.AudienceTypeValueId ).Name ).ToList();
+            gMarketingCampaignAudiencesSecondary.DataSource = MarketingCampaignAudiencesState.Where( a => !a.IsPrimary ).OrderBy( a => DefinedValueCache.Read( a.AudienceTypeValueId ).Value ).ToList();
             gMarketingCampaignAudiencesSecondary.DataBind();
         }
 
