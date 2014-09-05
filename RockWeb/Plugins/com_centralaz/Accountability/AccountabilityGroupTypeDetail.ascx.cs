@@ -1,0 +1,455 @@
+﻿using com.centralaz.SampleProject.Data;
+using com.centralaz.SampleProject.Model;
+using Newtonsoft.Json;
+using Rock;
+using Rock.Attribute;
+using Rock.Constants;
+using Rock.Data;
+using Rock.Model;
+using Rock.Security;
+using Rock.Web;
+using Rock.Web.Cache;
+using Rock.Web.UI;
+using Rock.Web.UI.Controls;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using Attribute = Rock.Model.Attribute;
+
+namespace RockWeb.Plugins.com_centralaz.Accountability
+{
+    /// <summary>
+    /// Displays the details of an Accountability Group Type.
+    /// </summary>
+    [DisplayName("Accountability Group Type Detail")]
+    [Category("com_centralaz > Accountability")]
+    [Description("Displays the details of an Accountability Group Type.")]
+
+    public partial class AccountabilityGroupTypeDetail : Rock.Web.UI.RockBlock
+    {
+
+        #region Control Methods
+
+        /// <summary>
+        /// Restores the view-state information from a previous user control request that was saved by the <see cref="M:System.Web.UI.UserControl.SaveViewState" /> method.
+        /// </summary>
+        /// <param name="savedState">An <see cref="T:System.Object" /> that represents the user control state to be restored.</param>
+        protected override void LoadViewState(object savedState)
+        {
+            base.LoadViewState(savedState);
+        }
+
+        /// <summary>
+        /// Raises the <see cref="E:System.Web.UI.Control.Init" /> event.
+        /// </summary>
+        /// <param name="e">An <see cref="T:System.EventArgs" /> object that contains the event data.</param>
+        protected override void OnInit(EventArgs e)
+        {
+            base.OnInit(e);
+
+            btnDelete.Attributes["onclick"] = string.Format("javascript: return Rock.dialogs.confirmDelete(event, '{0}');", Group.FriendlyTypeName);
+
+            // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
+            this.BlockUpdated += Block_BlockUpdated;
+            this.AddConfigurationUpdateTrigger(upnlGroupList);
+        }
+
+        /// <summary>
+        /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
+        /// </summary>
+        /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            if (!Page.IsPostBack)
+            {
+                string groupTypeId = PageParameter("GroupTypepId");
+                if (!string.IsNullOrWhiteSpace(groupTypeId))
+                {
+                    ShowDetail(groupTypeId.AsInteger());
+                }
+                else
+                {
+                    pnlDetails.Visible = false;
+                }
+            }
+
+
+        }
+
+        /// <summary>
+        /// Saves any user control view-state changes that have occurred since the last page postback.
+        /// </summary>
+        /// <returns>
+        /// Returns the user control's current view state. If there is no view state associated with the control, it returns null.
+        /// </returns>
+        protected override object SaveViewState()
+        {
+            var jsonSetting = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                ContractResolver = new Rock.Utility.IgnoreUrlEncodedKeyContractResolver()
+            };
+
+            return base.SaveViewState();
+        }
+
+        /// <summary>
+        /// Returns breadcrumbs specific to the block that should be added to navigation
+        /// based on the current page reference.  This function is called during the page's
+        /// oninit to load any initial breadcrumbs.
+        /// </summary>
+        /// <param name="pageReference">The <see cref="Rock.Web.PageReference" />.</param>
+        /// <returns>
+        /// A <see cref="System.Collections.Generic.List{BreadCrumb}" /> of block related <see cref="Rock.Web.UI.BreadCrumb">BreadCrumbs</see>.
+        /// </returns>
+        public override List<BreadCrumb> GetBreadCrumbs(PageReference pageReference)
+        {
+            var breadCrumbs = new List<BreadCrumb>();
+
+            int? groupTypeId = PageParameter(pageReference, "groupTypeId").AsIntegerOrNull();
+            if (groupTypeId != null)
+            {
+                GroupType groupType = new GroupTypeService(new RockContext()).Get(groupTypeId.Value);
+                if (groupType != null)
+                {
+                    breadCrumbs.Add(new BreadCrumb(groupType.Name, pageReference));
+                }
+                else
+                {
+                    breadCrumbs.Add(new BreadCrumb("New Accountability Group Type", pageReference));
+                }
+            }
+            else
+            {
+                // don't show a breadcrumb if we don't have a pageparam to work with
+            }
+
+            return breadCrumbs;
+        }
+
+        #endregion
+
+        #region Edit Events
+
+        /// <summary>
+        /// Handles the Click event of the btnEdit control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
+        protected void btnEdit_Click(object sender, EventArgs e)
+        {
+            ShowEditDetails(GetGroupType(hfGroupTypeId.Value.AsInteger()));
+        }
+
+        /// <summary>
+        /// Handles the Click event of the btnDelete control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
+        protected void btnDelete_Click(object sender, EventArgs e)
+        {
+            RockContext rockContext = new RockContext();
+
+            GroupTypeService groupTypeService = new GroupTypeService(rockContext);
+            AuthService authService = new AuthService(rockContext);
+            GroupType groupType = groupTypeService.Get(int.Parse(hfGroupTypeId.Value));
+
+            if (groupType != null)
+            {
+                if (!groupType.IsAuthorized(Authorization.EDIT, this.CurrentPerson))
+                {
+                    mdDeleteWarning.Show("You are not authorized to delete this group type.", ModalAlertType.Information);
+                    return;
+                }
+
+                string errorMessage;
+                if (!groupTypeService.CanDelete(groupType, out errorMessage))
+                {
+                    mdDeleteWarning.Show(errorMessage, ModalAlertType.Information);
+                    return;
+                }
+
+                groupTypeService.Delete(groupType);
+
+                rockContext.SaveChanges();
+
+            }
+
+            NavigateToParentPage();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the btnSave control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
+        protected void btnSave_Click(object sender, EventArgs e)
+        {
+            GroupType groupType;
+            RockContext rockContext = new RockContext();
+            GroupTypeService groupTypeService = new GroupTypeService(rockContext);
+            AttributeService attributeService = new AttributeService(rockContext);
+            AttributeQualifierService attributeQualifierService = new AttributeQualifierService(rockContext);
+
+            int groupTypeId = int.Parse(hfGroupTypeId.Value);
+
+            if (groupTypeId == 0)
+            {
+                groupType = new GroupType();
+                groupType.IsSystem = false;
+                groupType.Name = string.Empty;
+            }
+            else
+            {
+                groupType = groupTypeService.Get(groupTypeId);
+            }
+
+            groupType.Name = tbName.Text;
+            groupType.Description = tbDescription.Text;
+            groupType.GroupTypePurposeValue = new DefinedValueService(rockContext).GetByDefinedTypeGuid(Rock.SystemGuid.DefinedType.GROUPTYPE_PURPOSE.AsGuid()).Where(a => a.Value == "Accountability Groups").FirstOrDefault();
+            if (!Page.IsValid)
+            {
+                return;
+            }
+
+            if (!groupType.IsValid)
+            {
+                // Controls will render the error messages                    
+                return;
+            }
+
+            // use WrapTransaction since SaveAttributeValues does it's own RockContext.SaveChanges()
+            rockContext.WrapTransaction(() =>
+            {
+                if (groupType.Id.Equals(0))
+                {
+                    groupTypeService.Add(groupType);
+                }
+                rockContext.SaveChanges();
+                groupType.LoadAttributes();
+                groupType.SetAttributeValue("ReportStartDate", dpReportStartDate.SelectedDate.ToString());
+                groupType.SetAttributeValue("WeekEndingDate", dpWeekEndingDay.SelectedDayOfWeek.ConvertToInt().ToString());
+                groupType.SaveAttributeValues(rockContext);
+
+                /* Take care of Group Member Attributes */
+                var entityTypeId = EntityTypeCache.Read(typeof(GroupMember)).Id;
+                string qualifierColumn = "GroupId";
+                string qualifierValue = groupType.Id.ToString();
+
+                // Get the existing attributes for this entity type and qualifier value
+                var attributes = attributeService.Get(entityTypeId, qualifierColumn, qualifierValue);
+
+                rockContext.SaveChanges();
+            });
+
+            var qryParams = new Dictionary<string, string>();
+            qryParams["GroupTypeId"] = groupType.Id.ToString();
+
+            NavigateToPage(RockPage.Guid, qryParams);
+        }
+
+        /// <summary>
+        /// Handles the Click event of the btnCancel control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
+        protected void btnCancel_Click(object sender, EventArgs e)
+        {
+            if (hfGroupTypeId.Value.Equals("0"))
+            {
+                // Cancelling on Add.  Return to Grid
+                    NavigateToParentPage();
+                
+            }
+            else
+            {
+                // Cancelling on Edit.  Return to Details
+                ShowReadonlyDetails(GetGroupType(hfGroupTypeId.Value.AsInteger()));
+            }
+        }
+
+        #endregion
+
+        #region Control Events
+
+        /// <summary>
+        /// Handles the BlockUpdated event of the control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected void Block_BlockUpdated(object sender, EventArgs e)
+        {
+            ShowReadonlyDetails(GetGroupType(hfGroupTypeId.Value.AsInteger()));
+        }
+
+        #endregion
+
+        #region Internal Methods
+
+        /// <summary>
+        /// Shows the detail.
+        /// </summary>
+        /// <param name="groupId">The group identifier.</param>
+        /// <param name="parentGroupId">The parent group identifier.</param>
+        public void ShowDetail(int groupTypeId)
+        {
+            GroupType groupType = null;
+
+            bool editAllowed = true;
+
+            if (!groupTypeId.Equals(0))
+            {
+                groupType = GetGroupType(groupTypeId);
+                if (groupType != null)
+                {
+                    editAllowed = groupType.IsAuthorized(Authorization.EDIT, CurrentPerson);
+                }
+            }
+
+            if (groupType == null)
+            {
+                groupType = new GroupType { Id = 0, Name = "", Description="" };
+            }
+
+            pnlDetails.Visible = true;
+
+            hfGroupTypeId.Value = groupType.Id.ToString();
+
+            // render UI based on Authorized and IsSystem
+            bool readOnly = false;
+
+            nbEditModeMessage.Text = string.Empty;
+            if (!editAllowed || !IsUserAuthorized(Authorization.EDIT))
+            {
+                readOnly = true;
+                nbEditModeMessage.Text = EditModeMessage.ReadOnlyEditActionNotAllowed(GroupType.FriendlyTypeName);
+            }
+
+            if (groupType.IsSystem)
+            {
+                nbEditModeMessage.Text = EditModeMessage.System(GroupType.FriendlyTypeName);
+            }
+
+            if (readOnly)
+            {
+                btnEdit.Visible = false;
+                btnDelete.Visible = false;
+                ShowReadonlyDetails(groupType);
+            }
+            else
+            {
+                btnEdit.Visible = true;
+                btnDelete.Visible = !groupType.IsSystem;
+                if (groupType.Id > 0)
+                {
+                    ShowReadonlyDetails(groupType);
+                }
+                else
+                {
+                    ShowEditDetails(groupType);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Shows the edit details.
+        /// </summary>
+        /// <param name="group">The group.</param>
+        private void ShowEditDetails(GroupType groupType)
+        {
+            if (groupType.Id == 0)
+            {
+                lReadOnlyTitle.Text = ActionTitle.Add(GroupType.FriendlyTypeName).FormatAsHtmlTitle();
+
+            }
+            else
+            {
+                lReadOnlyTitle.Text = groupType.Name.FormatAsHtmlTitle();
+            }
+
+            SetEditMode(true);
+
+            tbName.Text = groupType.Name;
+            tbDescription.Text = groupType.Description;
+
+            var rockContext = new RockContext();
+            GroupType groupTypeAttributes = new GroupTypeService(rockContext).Get(groupType.Id);
+            groupTypeAttributes.LoadAttributes();
+            var attributes = new List<Rock.Web.Cache.AttributeCache>();
+            String reportString = groupType.GetAttributeValue("ReportStartDate");
+            DateTime reportDate;
+            DateTime.TryParse(reportString, out reportDate);
+            dpReportStartDate.SelectedDate = reportDate;
+
+            String weekInt = groupType.GetAttributeValue("WeekEndingDay");
+            dpWeekEndingDay.SelectedDayOfWeek = (DayOfWeek)(int.Parse(weekInt));
+
+        }
+       
+        /// <summary>
+        /// Shows the readonly details.
+        /// </summary>
+        /// <param name="group">The group.</param>
+        private void ShowReadonlyDetails(GroupType groupType)
+        {
+            SetEditMode(false);
+            var rockContext = new RockContext();
+
+            hfGroupTypeId.SetValue(groupType.Id);
+            lReadOnlyTitle.Text = groupType.Name.FormatAsHtmlTitle();
+
+            lGroupDescription.Text = groupType.Description;
+            GroupType groupTypeAttributes = new GroupTypeService(rockContext).Get(groupType.Id);
+            groupTypeAttributes.LoadAttributes();
+            var attributes = new List<Rock.Web.Cache.AttributeCache>();
+            lReportStartDate.Text = groupType.GetAttributeValue("ReportStartDate");
+            lWeekEndingDay.Text = groupType.GetAttributeValue("WeekEndingDay");
+
+
+           
+        }
+
+        /// <summary>
+        /// Sets the edit mode.
+        /// </summary>
+        /// <param name="editable">if set to <c>true</c> [editable].</param>
+        private void SetEditMode(bool editable)
+        {
+            pnlEditDetails.Visible = editable;
+            fieldsetViewDetails.Visible = !editable;
+
+            this.HideSecondaryBlocks(editable);
+        }
+
+        /// <summary>
+        /// Gets the group.
+        /// </summary>
+        /// <param name="groupId">The group identifier.</param>
+        /// <returns></returns>
+        private GroupType GetGroupType(int groupTypeId)
+        {
+            string key = string.Format("GroupType:{0}", groupTypeId);
+            GroupType groupType = RockPage.GetSharedItem(key) as GroupType;
+            if (groupType == null)
+            {
+                groupType = new GroupTypeService(new RockContext()).Queryable()
+                    .Where(g => g.Id == groupTypeId)
+                    .FirstOrDefault();
+                RockPage.SaveSharedItem(key, groupType);
+            }
+
+            return groupType;
+        }
+
+
+        #endregion
+
+    }
+}

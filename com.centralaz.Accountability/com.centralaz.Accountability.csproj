@@ -57,6 +57,7 @@
     <Compile Include="Data\AccountabilityContext.cs" />
     <Compile Include="Data\AccountabilityService.cs" />
     <Compile Include="Data\NamedModel.cs" />
+    <Compile Include="Migrations\001_CreateDb.cs" />
     <Compile Include="Model\Question.cs" />
     <Compile Include="Model\QuestionService.cs" />
     <Compile Include="Model\Response.cs" />
@@ -65,9 +66,7 @@
     <Compile Include="Model\ResponseSetService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
