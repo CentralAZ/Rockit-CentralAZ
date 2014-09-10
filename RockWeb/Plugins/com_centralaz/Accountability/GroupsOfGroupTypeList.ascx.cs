@@ -350,7 +350,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
         public void SetVisible(bool visible)
         {
-            upnlContent.Visible = visible;
+            pnlContent.Visible = visible;
         }
     }
 }

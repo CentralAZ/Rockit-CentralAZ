@@ -69,7 +69,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
             if (!Page.IsPostBack)
             {
-                string groupTypeId = PageParameter("GroupTypepId");
+                string groupTypeId = PageParameter("GroupTypeId");
                 if (!string.IsNullOrWhiteSpace(groupTypeId))
                 {
                     ShowDetail(groupTypeId.AsInteger());
@@ -89,16 +89,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <returns>
         /// Returns the user control's current view state. If there is no view state associated with the control, it returns null.
         /// </returns>
-        protected override object SaveViewState()
-        {
-            var jsonSetting = new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                ContractResolver = new Rock.Utility.IgnoreUrlEncodedKeyContractResolver()
-            };
 
-            return base.SaveViewState();
-        }
 
         /// <summary>
         /// Returns breadcrumbs specific to the block that should be added to navigation
@@ -213,7 +204,8 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
             groupType.Name = tbName.Text;
             groupType.Description = tbDescription.Text;
-            groupType.GroupTypePurposeValue = new DefinedValueService(rockContext).GetByDefinedTypeGuid(Rock.SystemGuid.DefinedType.GROUPTYPE_PURPOSE.AsGuid()).Where(a => a.Value == "Accountability Groups").FirstOrDefault();
+            groupType.GroupTypePurposeValue = new DefinedValueService(rockContext).GetByDefinedTypeGuid(Rock.SystemGuid.DefinedType.GROUPTYPE_PURPOSE.AsGuid()).Where(a => a.Value == "Accountability Group").FirstOrDefault();
+            groupType.InheritedGroupTypeId = GroupTypeCache.Read(com.centralaz.Accountability.SystemGuid.GroupType.ACCOUNTABILITY_GROUP_TYPE.AsGuid()).Id;
             if (!Page.IsValid)
             {
                 return;
@@ -226,28 +218,15 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             }
 
             // use WrapTransaction since SaveAttributeValues does it's own RockContext.SaveChanges()
-            rockContext.WrapTransaction(() =>
-            {
+            //rockContext.WrapTransaction(() =>
+           // {
                 if (groupType.Id.Equals(0))
                 {
                     groupTypeService.Add(groupType);
                 }
                 rockContext.SaveChanges();
-                groupType.LoadAttributes();
-                groupType.SetAttributeValue("ReportStartDate", dpReportStartDate.SelectedDate.ToString());
-                groupType.SetAttributeValue("WeekEndingDate", dpWeekEndingDay.SelectedDayOfWeek.ConvertToInt().ToString());
-                groupType.SaveAttributeValues(rockContext);
-
-                /* Take care of Group Member Attributes */
-                var entityTypeId = EntityTypeCache.Read(typeof(GroupMember)).Id;
-                string qualifierColumn = "GroupId";
-                string qualifierValue = groupType.Id.ToString();
-
-                // Get the existing attributes for this entity type and qualifier value
-                var attributes = attributeService.Get(entityTypeId, qualifierColumn, qualifierValue);
-
-                rockContext.SaveChanges();
-            });
+               
+        //    });
 
             var qryParams = new Dictionary<string, string>();
             qryParams["GroupTypeId"] = groupType.Id.ToString();
@@ -379,17 +358,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             tbName.Text = groupType.Name;
             tbDescription.Text = groupType.Description;
 
-            var rockContext = new RockContext();
-            GroupType groupTypeAttributes = new GroupTypeService(rockContext).Get(groupType.Id);
-            groupTypeAttributes.LoadAttributes();
-            var attributes = new List<Rock.Web.Cache.AttributeCache>();
-            String reportString = groupType.GetAttributeValue("ReportStartDate");
-            DateTime reportDate;
-            DateTime.TryParse(reportString, out reportDate);
-            dpReportStartDate.SelectedDate = reportDate;
-
-            String weekInt = groupType.GetAttributeValue("WeekEndingDay");
-            dpWeekEndingDay.SelectedDayOfWeek = (DayOfWeek)(int.Parse(weekInt));
+   
 
         }
        
@@ -400,20 +369,13 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         private void ShowReadonlyDetails(GroupType groupType)
         {
             SetEditMode(false);
-            var rockContext = new RockContext();
 
             hfGroupTypeId.SetValue(groupType.Id);
             lReadOnlyTitle.Text = groupType.Name.FormatAsHtmlTitle();
 
             lGroupDescription.Text = groupType.Description;
-            GroupType groupTypeAttributes = new GroupTypeService(rockContext).Get(groupType.Id);
-            groupTypeAttributes.LoadAttributes();
-            var attributes = new List<Rock.Web.Cache.AttributeCache>();
-            lReportStartDate.Text = groupType.GetAttributeValue("ReportStartDate");
-            lWeekEndingDay.Text = groupType.GetAttributeValue("WeekEndingDay");
+   
 
-
-           
         }
 
         /// <summary>
