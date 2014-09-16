@@ -49,67 +49,9 @@
                             </div>
                         </div>
 
-                        <Rock:PanelWidget ID="wpGeneral" runat="server" Title="General">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <Rock:DataDropDownList ID="ddlGroupType" runat="server" DataTextField="Name" DataValueField="Id" SourceTypeName="Rock.Model.GroupType, Rock" PropertyName="Name" Label="Group Type" AutoPostBack="true" OnSelectedIndexChanged="ddlGroupType_SelectedIndexChanged" />
-                                    <Rock:GroupPicker ID="gpParentGroup" runat="server" Required="false" Label="Parent Group" OnSelectItem="ddlParentGroup_SelectedIndexChanged" />
-                                </div>
-                                <div class="col-md-6">
-                                    <Rock:DataDropDownList ID="ddlCampus" runat="server" DataTextField="Name" DataValueField="Id" SourceTypeName="Rock.Model.Campus, Rock" PropertyName="Name" Label="Campus" />
-                                    <Rock:RockCheckBox ID="cbIsSecurityRole" runat="server" Label="Security Role" Text="Yes" />
-                                </div>
-                            </div>
-                        </Rock:PanelWidget>
+                        <asp:PlaceHolder ID="phGroupAttributes" runat="server" EnableViewState="false"></asp:PlaceHolder>
 
-                        <Rock:PanelWidget ID="wpLocations" runat="server" Title="Meeting Details">
-                            <div class="grid">
-                                <Rock:Grid ID="gLocations" runat="server" AllowPaging="false" DisplayType="Light" RowItemText="Location">
-                                    <Columns>
-                                        <asp:BoundField DataField="Location" HeaderText="Location" />
-                                        <asp:BoundField DataField="Type" HeaderText="Type" />
-                                        <asp:BoundField DataField="Schedules" HeaderText="Schedule(s)" />
-                                        <Rock:EditField OnClick="gLocations_Edit" />
-                                        <Rock:DeleteField OnClick="gLocations_Delete" />
-                                    </Columns>
-                                </Rock:Grid>
-                            </div>
-                        </Rock:PanelWidget>
 
-                        <Rock:PanelWidget ID="wpGroupAttributes" runat="server" Title="Group Attribute Values">
-                            <asp:PlaceHolder ID="phGroupAttributes" runat="server" EnableViewState="false"></asp:PlaceHolder>
-                        </Rock:PanelWidget>
-
-                        <Rock:PanelWidget ID="wpGroupMemberAttributes" runat="server" Title="Member Attributes" CssClass="group-type-attribute-panel">
-                            <Rock:NotificationBox ID="nbGroupMemberAttributes" runat="server" NotificationBoxType="Info"
-                                Text="Member Attributes apply to members in this group.  Each member will have their own value for these attributes" />
-                            <Rock:RockControlWrapper ID="rcGroupMemberAttributesInherited" runat="server" Label="Inherited Attribute(s)">
-                                <div class="grid">
-                                    <Rock:Grid ID="gGroupMemberAttributesInherited" runat="server" AllowPaging="false" DisplayType="Light" ShowHeader="false" RowItemText="Inherited Member Attribute">
-                                        <Columns>
-                                            <asp:BoundField DataField="Name" />
-                                            <asp:BoundField DataField="Description" />
-                                            <asp:TemplateField>
-                                                <ItemTemplate>(Inherited from <a href='<%# Eval("Url") %>' target='_blank'><%# Eval("GroupType") %></a>)</ItemTemplate>
-                                            </asp:TemplateField>
-                                        </Columns>
-                                    </Rock:Grid>
-                                </div>
-                            </Rock:RockControlWrapper>
-
-                            <div class="grid">
-                                <Rock:Grid ID="gGroupMemberAttributes" runat="server" AllowPaging="false" DisplayType="Light" RowItemText="Member Attribute" ShowConfirmDeleteDialog="false">
-                                    <Columns>
-                                        <Rock:ReorderField />
-                                        <asp:BoundField DataField="Name" HeaderText="Attribute" />
-                                        <asp:BoundField DataField="Description" HeaderText="Description" />
-                                        <Rock:BoolField DataField="IsRequired" HeaderText="Required" />
-                                        <Rock:EditField OnClick="gGroupMemberAttributes_Edit" />
-                                        <Rock:DeleteField OnClick="gGroupMemberAttributes_Delete" />
-                                    </Columns>
-                                </Rock:Grid>
-                            </div>
-                        </Rock:PanelWidget>
 
 
                         <div class="actions">
@@ -154,45 +96,7 @@
 
         <asp:HiddenField ID="hfActiveDialog" runat="server" />
 
-        <Rock:ModalDialog ID="dlgGroupMemberAttribute" runat="server" Title="Group Member Attributes" OnSaveClick="dlgGroupMemberAttribute_SaveClick" OnCancelScript="clearActiveDialog();" ValidationGroup="GroupMemberAttribute">
-            <Content>
-                <Rock:AttributeEditor ID="edtGroupMemberAttributes" runat="server" ShowActions="false" ValidationGroup="GroupMemberAttribute" />
-            </Content>
-        </Rock:ModalDialog>
 
-        <Rock:ModalDialog ID="dlgLocations" runat="server" Title="Group Location" OnSaveClick="dlgLocations_SaveClick" OnCancelScript="clearActiveDialog();" ValidationGroup="Location">
-            <Content>
-
-                <asp:HiddenField ID="hfAddLocationGroupGuid" runat="server" />
-
-                <asp:ValidationSummary ID="valLocationSummary" runat="server" HeaderText="Please Correct the Following" CssClass="alert alert-danger" ValidationGroup="Location" />
-
-                <ul id="ulNav" runat="server" class="nav nav-pills">
-                    <asp:Repeater ID="rptLocationTypes" runat="server">
-                        <ItemTemplate>
-                            <li class='<%# GetTabClass(Container.DataItem) %>'>
-                                <asp:LinkButton ID="lbLocationType" runat="server" Text='<%# Container.DataItem %>' OnClick="lbLocationType_Click" CausesValidation="false">
-                                </asp:LinkButton>
-                            </li>
-                        </ItemTemplate>
-                    </asp:Repeater>
-                </ul>
-
-                <div class="tabContent">
-                    <asp:Panel ID="pnlMemberSelect" runat="server" Visible="true">
-                        <Rock:RockDropDownList ID="ddlMember" runat="server" Label="Member" ValidationGroup="Location" />
-                    </asp:Panel>
-                    <asp:Panel ID="pnlLocationSelect" runat="server" Visible="false">
-                        <Rock:LocationPicker ID="locpGroupLocation" runat="server" Label="Location" ValidationGroup="Location" />
-                    </asp:Panel>
-                </div>
-
-                <Rock:RockDropDownList ID="ddlLocationType" runat="server" Label="Type" DataValueField="Id" DataTextField="Value" ValidationGroup="Location" />
-
-                <Rock:SchedulePicker ID="spSchedules" runat="server" Label="Schedule(s)" ValidationGroup="Location" AllowMultiSelect="true" />
-
-            </Content>
-        </Rock:ModalDialog>
 
     </ContentTemplate>
 </asp:UpdatePanel>

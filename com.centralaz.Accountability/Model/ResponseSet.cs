@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using com.centralaz.Accountability.Data;
+using Rock.Data;
+using Rock.Model;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;
 using System.Linq;
 using System.Runtime.Serialization;
-
-using com.centralaz.Accountability.Data;
-
-using Rock.Data;
-using Rock.Model;
 
 namespace com.centralaz.Accountability.Model
 {
@@ -40,7 +40,7 @@ namespace com.centralaz.Accountability.Model
         /// The date the response set was submitted for.
         /// </value>
         [DataMember]
-        public DateTimeFormat SubmitForDate { get; set; }
+        public DateTime SubmitForDate { get; set; }
 
         /// <summary>
         /// Gets or sets the response set score.

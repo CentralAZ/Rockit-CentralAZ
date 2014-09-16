@@ -22,6 +22,8 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
     [DisplayName("Submit Report")]
     [Category("com_centralaz > Accountability")]
     [Description("The Submit Report Block")]
+
+    [LinkedPage("Detail Page", "", true, "", "", 0)]
     public partial class SubmitReportBlock : Rock.Web.UI.RockBlock
     {
 
@@ -58,7 +60,12 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
+            Dictionary<String, String> parameters = new Dictionary<string,string>(){
+                {"GroupId", PageParameter("GroupId")},
+                {"PersonId", CurrentPersonId.ToString()}
 
+            };
+            NavigateToLinkedPage("DetailPage", parameters);
         }
         protected void WriteMessage()
         {
@@ -69,35 +76,46 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             }
             else
             {
-                int groupId = int.Parse(PageParameter( "GroupId" ));
-                ResponseSet recentReport=new ResponseSetService(new RockContext()).GetMostRecentReport(CurrentPersonId, groupId);
-                DateTime ReportStartDate=new GroupTypeService(new RockContext()).Queryable("Group, GroupType")
-                    .Where(g=> (g.Id==groupId))
-                    .Select(g=> g.GroupType.InheritedGroupType)
-                    .First();
-                DateTime NextDueDate=NextReportDate(ReportStartDate);
-                IsReportOverdue(NextDueDate, recentReport.SubmitForDate);
 
+                int groupId = int.Parse(PageParameter("GroupId"));
+                DateTime recentReportDate;
+                Group group = GetGroup(groupId);
+                group.LoadAttributes();
+                DateTime reportStartDate = DateTime.Parse(group.GetAttributeValue("ReportStartDate"));
+                try
+                {
+                    ResponseSet recentReport = new ResponseSetService(new AccountabilityContext()).GetMostRecentReport(CurrentPersonId, groupId);
+                    recentReportDate = recentReport.SubmitForDate; 
                 }
+                catch (Exception e)
+                {
+                    recentReportDate =reportStartDate;
+                }
+                DateTime nextDueDate = NextReportDate(reportStartDate);
+
+                IsReportOverdue(nextDueDate, recentReportDate);
 
             }
-        protected void IsReportOverdue(DateTime NextDueDate, DateTime LastReportDate)
+
+        }
+        protected void IsReportOverdue(DateTime nextDueDate, DateTime lastReportDate)
         {
-            int daysElapsed = (NextDueDate - LastReportDate).Days;
-            int daysUntilDueDate = (NextDueDate - DateTime.Today).Days;
+            int daysElapsed = (nextDueDate - lastReportDate).Days;
+            int daysUntilDueDate = (nextDueDate - DateTime.Today).Days;
             //All caught up case
-            if (daysElapsed <= 7 && daysUntilDueDate >= 5)
+            if (daysElapsed <= 7 && daysUntilDueDate >= 6)
             {
                 lblStatusMessage.Text = "Report Submitted";
             }
             //Submit report for this week case
-            if(daysElapsed<=7 && daysUntilDueDate<5){
-                lblStatusMessage.Text="Report due in {0} days", daysUntilDueDate;
+            if (daysElapsed <= 7 && daysUntilDueDate < 6)
+            {
+                lblStatusMessage.Text = "Report due in " + daysUntilDueDate + " days";
             }
             //Report overdue case
             if (daysElapsed > 7)
             {
-                lblStatusMessage.Text = "Report Overdue";
+                lblStatusMessage.Text = "Report Overdue for week of " + nextDueDate.AddDays(-7);
             }
         }
         protected DateTime NextReportDate(DateTime reportStartDate)
@@ -120,12 +138,26 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             bool isMember = false;
             var qry = new GroupMemberService(new RockContext()).Queryable()
             .Where(gm => (gm.PersonId == CurrentPersonId) && (gm.GroupId == groupId))
-            .First();
+            .FirstOrDefault();
             if (qry != null)
             {
                 isMember = true;
             }
             return isMember;
+        }
+        private Group GetGroup(int groupId)
+        {
+            string key = string.Format("Group:{0}", groupId);
+            Group group = RockPage.GetSharedItem(key) as Group;
+            if (group == null)
+            {
+                group = new GroupService(new RockContext()).Queryable("GroupType,GroupLocations.Schedules")
+                    .Where(g => g.Id == groupId)
+                    .FirstOrDefault();
+                RockPage.SaveSharedItem(key, group);
+            }
+
+            return group;
         }
         #endregion
     }

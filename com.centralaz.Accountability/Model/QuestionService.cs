@@ -19,6 +19,12 @@ namespace com.centralaz.Accountability.Model
         /// </summary>
         /// <param name="context">The context.</param>
         public QuestionService(AccountabilityContext context) : base(context) { }
-
+        public string GetShortForm(double questionId)
+        {
+            Question question = Queryable()
+                .Where(q => q.Id == questionId)
+                .FirstOrDefault();
+            return question.ShortForm;
+        }
     }
 }

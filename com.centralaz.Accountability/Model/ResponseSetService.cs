@@ -20,13 +20,90 @@ namespace com.centralaz.Accountability.Model
         /// <param name="context">The context.</param>
         public ResponseSetService(AccountabilityContext context) : base(context) { }
 
-        public ResponseSet GetMostRecentReport(int pId, int groupId){
+        public ResponseSet GetMostRecentReport(int? pId, int groupId)
+        {
             var qry = Queryable()
-                .Where(r=> (r.PersonId == pId) && (r.GroupId == groupId))
-                .OrderBy(r=> r.SubmitForDate)
-                .First();
+                .Where(r => (r.PersonId == pId) && (r.GroupId == groupId))
+                .OrderBy(r => r.SubmitForDate)
+                .FirstOrDefault();
             return qry;
 
+        }
+
+        
+        public double GetOverallScore(int PersonId, int GroupId)
+        {
+            double overallScore = -1;
+            var qry = Queryable()
+                .Where(r => (r.PersonId == PersonId) && (r.GroupId == GroupId));
+            foreach (ResponseSet r in qry)
+            {
+                overallScore += r.Score;
+            }
+             overallScore=overallScore/qry.Count();
+            return overallScore;
+        }
+        public double[] GetWeakScore(int PersonId, int GroupId)
+        {
+            double[] weakScore = new double[2];
+            weakScore[0] = -1;
+            QuestionService questionService = new QuestionService(new AccountabilityContext());
+            ResponseService responseService = new ResponseService(new AccountabilityContext());
+
+            GroupService groupService = new GroupService(new Rock.Data.RockContext());
+            int groupTypeId = groupService.Queryable()
+                .Where(g => g.Id == GroupId)
+                .Select(g => g.GroupTypeId)
+                .FirstOrDefault();
+            //get questions in responseset
+            var questions = questionService.Queryable()
+                .Where(q => q.GroupTypeId == groupTypeId);
+            //for each question get ResponsePercentage
+            foreach (Question q in questions)
+            {
+                int[] score = responseService.ResponsePercentage(PersonId, GroupId, q.Id);
+                if (score[1] != null && score[1] != 0)
+                {
+                    double scorePercentage = score[0] / score[1];
+                    if (weakScore[0] != -1 && weakScore[0] > scorePercentage)
+                    {
+                        weakScore[0] = scorePercentage;
+                        weakScore[1] = q.Id;
+                    }
+                }
+            }
+            return weakScore;
+        }
+        public double[] GetStrongScore(int PersonId, int GroupId)
+        {
+            double[] strongScore = new double[2];
+            strongScore[0] = -1;
+            QuestionService questionService = new QuestionService(new AccountabilityContext());
+            ResponseService responseService = new ResponseService(new AccountabilityContext());
+
+            GroupService groupService = new GroupService(new Rock.Data.RockContext());
+            int groupTypeId = groupService.Queryable()
+                .Where(g => g.Id == GroupId)
+                .Select(g => g.GroupTypeId)
+                .FirstOrDefault();
+            //get questions in responseset
+            var questions = questionService.Queryable()
+                .Where(q => q.GroupTypeId == groupTypeId);
+            //for each question get ResponsePercentage
+            foreach (Question q in questions)
+            {
+                int[] score = responseService.ResponsePercentage(PersonId, GroupId, q.Id);
+                if (score[1] != null && score[1] != 0)
+                {
+                    double scorePercentage = score[0] / score[1];
+                    if (strongScore[0] != -1 && strongScore[0] < scorePercentage)
+                    {
+                        strongScore[0] = scorePercentage;
+                        strongScore[1] = q.Id;
+                    }
+                }
+            }
+            return strongScore;
         }
 
     }
