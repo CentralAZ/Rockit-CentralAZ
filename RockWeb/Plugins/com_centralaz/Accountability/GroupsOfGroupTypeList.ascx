@@ -1,5 +1,4 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="GroupsOfGroupTypeList.ascx.cs" Inherits="RockWeb.Plugins.com_centralaz.Accountability.GroupsOfGroupTypeList" %>
-
 <asp:UpdatePanel ID="upnlContent" runat="server">
     <ContentTemplate>
         <asp:Panel ID="pnlContent" runat="server">

@@ -16,16 +16,16 @@ using Rock.Web.UI.Controls;
 
 namespace RockWeb.Plugins.com_centralaz.Accountability
 {
-    [DisplayName("Groups of Group Type List")]
-    [Category("com_centralaz > Accountability")]
-    [Description("Lists all groups for the configured group types.")]
+    [DisplayName( "Groups of Group Type List" )]
+    [Category( "com_centralaz > Accountability" )]
+    [Description( "Lists all groups for the configured group types." )]
 
-    [LinkedPage("Detail Page", "", true, "", "", 0)]
-    [BooleanField("Limit to Security Role Groups", "Any groups can be flagged as a security group (even if they're not a security role).  Should the list of groups be limited to these groups?", false, "", 2)]
-    [BooleanField("Display Description Column", "Should the Description column be displayed?", true, "", 5)]
-    [BooleanField("Display Active Status Column", "Should the Active Status column be displayed?", false, "", 6)]
-    [BooleanField("Display System Column", "Should the System column be displayed?", true, "", 6)]
-    [BooleanField("Display Filter", "Should filter be displayed to allow filtering by group type?", false, "", 7)]
+    [LinkedPage( "Detail Page", "", true, "", "", 0 )]
+    [BooleanField( "Limit to Security Role Groups", "Any groups can be flagged as a security group (even if they're not a security role).  Should the list of groups be limited to these groups?", false, "", 2 )]
+    [BooleanField( "Display Description Column", "Should the Description column be displayed?", true, "", 5 )]
+    [BooleanField( "Display Active Status Column", "Should the Active Status column be displayed?", false, "", 6 )]
+    [BooleanField( "Display System Column", "Should the System column be displayed?", true, "", 6 )]
+    [BooleanField( "Display Filter", "Should filter be displayed to allow filtering by group type?", false, "", 7 )]
     [ContextAware]
     public partial class GroupsOfGroupTypeList : Rock.Web.UI.RockBlock, Rock.Web.UI.ISecondaryBlock
     {
@@ -37,11 +37,11 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Raises the <see cref="E:System.Web.UI.Control.Init" /> event.
         /// </summary>
         /// <param name="e">An <see cref="T:System.EventArgs" /> object that contains the event data.</param>
-        protected override void OnInit(EventArgs e)
+        protected override void OnInit( EventArgs e )
         {
-            base.OnInit(e);
+            base.OnInit( e );
 
-            gfSettings.Visible = (GetAttributeValue("DisplayFilter") ?? "false").AsBoolean();
+            gfSettings.Visible = ( GetAttributeValue( "DisplayFilter" ) ?? "false" ).AsBoolean();
             gfSettings.ApplyFilterClick += gfSettings_ApplyFilterClick;
 
             gGroups.DataKeyNames = new string[] { "id" };
@@ -56,14 +56,14 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
         /// </summary>
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
-        protected override void OnLoad(EventArgs e)
+        protected override void OnLoad( EventArgs e )
         {
-            if (!Page.IsPostBack)
+            if ( !Page.IsPostBack )
             {
                 BindGrid();
             }
 
-            base.OnLoad(e);
+            base.OnLoad( e );
         }
 
         #endregion
@@ -75,15 +75,15 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        protected void gfSettings_ApplyFilterClick(object sender, EventArgs e)
+        protected void gfSettings_ApplyFilterClick( object sender, EventArgs e )
         {
-            if (ddlActiveFilter.SelectedValue == "all")
+            if ( ddlActiveFilter.SelectedValue == "all" )
             {
-                gfSettings.SaveUserPreference("Active Status", string.Empty);
+                gfSettings.SaveUserPreference( "Active Status", string.Empty );
             }
             else
             {
-                gfSettings.SaveUserPreference("Active Status", ddlActiveFilter.SelectedValue);
+                gfSettings.SaveUserPreference( "Active Status", ddlActiveFilter.SelectedValue );
             }
 
             BindGrid();
@@ -94,16 +94,16 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The e.</param>
-        protected void rFilter_DisplayFilterValue(object sender, GridFilter.DisplayFilterValueArgs e)
+        protected void rFilter_DisplayFilterValue( object sender, GridFilter.DisplayFilterValueArgs e )
         {
-            switch (e.Key)
+            switch ( e.Key )
             {
                 case "Group Type":
 
                     int id = e.Value.AsInteger();
 
-                    var groupType = GroupTypeCache.Read(id);
-                    if (groupType != null)
+                    var groupType = GroupTypeCache.Read( id );
+                    if ( groupType != null )
                     {
                         e.Value = groupType.Name;
                     }
@@ -117,9 +117,9 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        protected void gGroups_Add(object sender, EventArgs e)
+        protected void gGroups_Add( object sender, EventArgs e )
         {
-            NavigateToLinkedPage("DetailPage", "GroupId", 0);
+            NavigateToLinkedPage( "DetailPage", "GroupId", 0 );
         }
 
         /// <summary>
@@ -127,9 +127,9 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="RowEventArgs" /> instance containing the event data.</param>
-        protected void gGroups_Edit(object sender, RowEventArgs e)
+        protected void gGroups_Edit( object sender, RowEventArgs e )
         {
-            NavigateToLinkedPage("DetailPage", "GroupId", e.RowKeyId);
+            NavigateToLinkedPage( "DetailPage", "GroupId", e.RowKeyId );
         }
 
         /// <summary>
@@ -137,43 +137,43 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="RowEventArgs" /> instance containing the event data.</param>
-        protected void gGroups_Delete(object sender, RowEventArgs e)
+        protected void gGroups_Delete( object sender, RowEventArgs e )
         {
             var rockContext = new RockContext();
-            GroupService groupService = new GroupService(rockContext);
-            AuthService authService = new AuthService(rockContext);
-            Group group = groupService.Get(e.RowKeyId);
+            GroupService groupService = new GroupService( rockContext );
+            AuthService authService = new AuthService( rockContext );
+            Group group = groupService.Get( e.RowKeyId );
 
-            if (group != null)
+            if ( group != null )
             {
-                if (!group.IsAuthorized(Authorization.EDIT, this.CurrentPerson))
+                if ( !group.IsAuthorized( Authorization.EDIT, this.CurrentPerson ) )
                 {
-                    mdGridWarning.Show("You are not authorized to delete this group", ModalAlertType.Information);
+                    mdGridWarning.Show( "You are not authorized to delete this group", ModalAlertType.Information );
                     return;
                 }
 
                 string errorMessage;
-                if (!groupService.CanDelete(group, out errorMessage))
+                if ( !groupService.CanDelete( group, out errorMessage ) )
                 {
-                    mdGridWarning.Show(errorMessage, ModalAlertType.Information);
+                    mdGridWarning.Show( errorMessage, ModalAlertType.Information );
                     return;
                 }
 
-                bool isSecurityRoleGroup = group.IsSecurityRole || group.GroupType.Guid.Equals(Rock.SystemGuid.GroupType.GROUPTYPE_SECURITY_ROLE.AsGuid());
-                if (isSecurityRoleGroup)
+                bool isSecurityRoleGroup = group.IsSecurityRole || group.GroupType.Guid.Equals( Rock.SystemGuid.GroupType.GROUPTYPE_SECURITY_ROLE.AsGuid() );
+                if ( isSecurityRoleGroup )
                 {
-                    Rock.Security.Role.Flush(group.Id);
-                    foreach (var auth in authService.Queryable().Where(a => a.GroupId == group.Id).ToList())
+                    Rock.Security.Role.Flush( group.Id );
+                    foreach ( var auth in authService.Queryable().Where( a => a.GroupId == group.Id ).ToList() )
                     {
-                        authService.Delete(auth);
+                        authService.Delete( auth );
                     }
                 }
 
-                groupService.Delete(group);
+                groupService.Delete( group );
 
                 rockContext.SaveChanges();
 
-                if (isSecurityRoleGroup)
+                if ( isSecurityRoleGroup )
                 {
                     Rock.Security.Authorization.Flush();
                 }
@@ -187,7 +187,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        private void gGroups_GridRebind(object sender, EventArgs e)
+        private void gGroups_GridRebind( object sender, EventArgs e )
         {
             BindGrid();
         }
@@ -203,8 +203,8 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         {
 
             // Set the Active Status
-            var itemActiveStatus = ddlActiveFilter.Items.FindByValue(gfSettings.GetUserPreference("Active Status"));
-            if (itemActiveStatus != null)
+            var itemActiveStatus = ddlActiveFilter.Items.FindByValue( gfSettings.GetUserPreference( "Active Status" ) );
+            if ( itemActiveStatus != null )
             {
                 itemActiveStatus.Selected = true;
             }
@@ -216,39 +216,39 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         private void BindGrid()
         {
             // Find all the Group Types
-            int? groupTypeId = PageParameter("groupTypeId").AsIntegerOrNull();
+            int? groupTypeId = PageParameter( "groupTypeId" ).AsIntegerOrNull();
 
             var rockContext = new RockContext();
 
             SortProperty sortProperty = gGroups.SortProperty;
-            if (sortProperty == null)
+            if ( sortProperty == null )
             {
-                sortProperty = new SortProperty(new GridViewSortEventArgs("GroupTypeOrder, GroupTypeName, GroupOrder, Name", SortDirection.Ascending));
+                sortProperty = new SortProperty( new GridViewSortEventArgs( "GroupTypeOrder, GroupTypeName, GroupOrder, Name", SortDirection.Ascending ) );
             }
 
-            bool onlySecurityGroups = GetAttributeValue("LimittoSecurityRoleGroups").AsBoolean();
-            bool showDescriptionColumn = GetAttributeValue("DisplayDescriptionColumn").AsBoolean();
-            bool showActiveStatusColumn = GetAttributeValue("DisplayActiveStatusColumn").AsBoolean();
-            bool showSystemColumn = GetAttributeValue("DisplaySystemColumn").AsBoolean();
+            bool onlySecurityGroups = GetAttributeValue( "LimittoSecurityRoleGroups" ).AsBoolean();
+            bool showDescriptionColumn = GetAttributeValue( "DisplayDescriptionColumn" ).AsBoolean();
+            bool showActiveStatusColumn = GetAttributeValue( "DisplayActiveStatusColumn" ).AsBoolean();
+            bool showSystemColumn = GetAttributeValue( "DisplaySystemColumn" ).AsBoolean();
 
-            if (!showDescriptionColumn)
+            if ( !showDescriptionColumn )
             {
                 gGroups.TooltipField = "Description";
             }
 
-            Dictionary<string, BoundField> boundFields = gGroups.Columns.OfType<BoundField>().ToDictionary(a => a.DataField);
+            Dictionary<string, BoundField> boundFields = gGroups.Columns.OfType<BoundField>().ToDictionary( a => a.DataField );
             boundFields["Description"].Visible = showDescriptionColumn;
 
-            Dictionary<string, BoolField> boolFields = gGroups.Columns.OfType<BoolField>().ToDictionary(a => a.DataField);
+            Dictionary<string, BoolField> boolFields = gGroups.Columns.OfType<BoolField>().ToDictionary( a => a.DataField );
             boolFields["IsActive"].Visible = showActiveStatusColumn;
             boolFields["IsSystem"].Visible = showSystemColumn;
 
             // Person context will exist if used on a person detail page
-            int personEntityTypeId = EntityTypeCache.Read("Rock.Model.Person").Id;
-            if (ContextTypesRequired.Any(e => e.Id == personEntityTypeId))
+            int personEntityTypeId = EntityTypeCache.Read( "Rock.Model.Person" ).Id;
+            if ( ContextTypesRequired.Any( e => e.Id == personEntityTypeId ) )
             {
                 var personContext = ContextEntity<Person>();
-                if (personContext != null)
+                if ( personContext != null )
                 {
                     boundFields["GroupRole"].Visible = true;
                     boundFields["DateAdded"].Visible = true;
@@ -256,29 +256,29 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
                     gGroups.Actions.ShowAdd = false;
                     gGroups.IsDeleteEnabled = false;
-                    gGroups.Columns.OfType<DeleteField>().ToList().ForEach(f => f.Visible = false);
+                    gGroups.Columns.OfType<DeleteField>().ToList().ForEach( f => f.Visible = false );
 
-                    var qry = new GroupMemberService(rockContext).Queryable(true)
-                        .Where(m =>
+                    var qry = new GroupMemberService( rockContext ).Queryable( true )
+                        .Where( m =>
                             m.PersonId == personContext.Id &&
-                            (groupTypeId == m.Group.GroupTypeId) &&
-                            (!onlySecurityGroups || m.Group.IsSecurityRole));
+                            ( groupTypeId == m.Group.GroupTypeId ) &&
+                            ( !onlySecurityGroups || m.Group.IsSecurityRole ) );
 
                     // Filter by active/inactive
-                    if (ddlActiveFilter.SelectedIndex > -1)
+                    if ( ddlActiveFilter.SelectedIndex > -1 )
                     {
-                        if (ddlActiveFilter.SelectedValue == "inactive")
+                        if ( ddlActiveFilter.SelectedValue == "inactive" )
                         {
-                            qry = qry.Where(a => a.Group.IsActive == false);
+                            qry = qry.Where( a => a.Group.IsActive == false );
                         }
-                        else if (ddlActiveFilter.SelectedValue == "active")
+                        else if ( ddlActiveFilter.SelectedValue == "active" )
                         {
-                            qry = qry.Where(a => a.Group.IsActive == true);
+                            qry = qry.Where( a => a.Group.IsActive == true );
                         }
                     }
 
                     gGroups.DataSource = qry
-                        .Select(m => new
+                        .Select( m => new
                         {
                             Id = m.Group.Id,
                             Name = m.Group.Name,
@@ -290,14 +290,14 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                             DateAdded = m.CreatedDateTime,
                             IsActive = m.Group.IsActive,
                             MemberCount = 0
-                        })
-                        .Sort(sortProperty)
+                        } )
+                        .Sort( sortProperty )
                         .ToList();
                 }
             }
             else
             {
-                bool canEdit = IsUserAuthorized(Authorization.EDIT);
+                bool canEdit = IsUserAuthorized( Authorization.EDIT );
                 gGroups.Actions.ShowAdd = canEdit;
                 gGroups.IsDeleteEnabled = canEdit;
 
@@ -305,25 +305,25 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 boundFields["DateAdded"].Visible = false;
                 boundFields["MemberCount"].Visible = true;
 
-                var qry = new GroupService(rockContext).Queryable()
-                    .Where(g =>
-                        (groupTypeId == g.GroupTypeId) &&
-                        (!onlySecurityGroups || g.IsSecurityRole));
+                var qry = new GroupService( rockContext ).Queryable()
+                    .Where( g =>
+                        ( groupTypeId == g.GroupTypeId ) &&
+                        ( !onlySecurityGroups || g.IsSecurityRole ) );
 
                 // Filter by active/inactive
-                if (ddlActiveFilter.SelectedIndex > -1)
+                if ( ddlActiveFilter.SelectedIndex > -1 )
                 {
-                    if (ddlActiveFilter.SelectedValue == "inactive")
+                    if ( ddlActiveFilter.SelectedValue == "inactive" )
                     {
-                        qry = qry.Where(a => a.IsActive == false);
+                        qry = qry.Where( a => a.IsActive == false );
                     }
-                    else if (ddlActiveFilter.SelectedValue == "active")
+                    else if ( ddlActiveFilter.SelectedValue == "active" )
                     {
-                        qry = qry.Where(a => a.IsActive == true);
+                        qry = qry.Where( a => a.IsActive == true );
                     }
                 }
 
-                gGroups.DataSource = qry.Select(g => new
+                gGroups.DataSource = qry.Select( g => new
                 {
                     Id = g.Id,
                     Name = g.Name,
@@ -336,19 +336,21 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     GroupRole = string.Empty,
                     DateAdded = DateTime.MinValue,
                     MemberCount = g.Members.Count()
-                })
-                    .Sort(sortProperty)
+                } )
+                    .Sort( sortProperty )
                     .ToList();
             }
 
             gGroups.DataBind();
         }
 
-
-
         #endregion
 
-        public void SetVisible(bool visible)
+        /// <summary>
+        /// Determines the visibility of the block.
+        /// </summary>
+        /// <param name="visible">The boolean that determines whether the block is visible or not</param>
+        public void SetVisible( bool visible )
         {
             pnlContent.Visible = visible;
         }

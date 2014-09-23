@@ -5,6 +5,9 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
+using com.centralaz.Accountability.Model;
+using com.centralaz.Accountability.Data;
+
 using Rock;
 using Rock.Attribute;
 using Rock.Data;
@@ -16,19 +19,20 @@ using Rock.Web.UI.Controls;
 
 namespace RockWeb.Plugins.com_centralaz.Accountability
 {
-    [DisplayName("Accountability Group Member List")]
-    [Category("com_centralaz > Accountability")]
-    [Description("Lists all members in the accountability group")]
+    [DisplayName( "Accountability Group Member List" )]
+    [Category( "com_centralaz > Accountability" )]
+    [Description( "Lists all members in the accountability group" )]
 
-    [LinkedPage("Detail Page", "", true, "", "", 0)]
-    [LinkedPage("Add Member Page", "", true, "", "", 0)]
+    [LinkedPage( "Detail Page", "", true, "", "", 0 )]
+    [LinkedPage( "Add Member Page", "", true, "", "", 0 )]
     public partial class AccountabilityGroupMemberList : Rock.Web.UI.RockBlock
     {
         #region Private Variables
 
         private DefinedValueCache _inactiveStatus = null;
         private Group _group = null;
-
+        private List<ResponseSet> _responseSets = null;
+        private DateTime _reportStartDate;
         #endregion
 
         #region Control Methods
@@ -37,32 +41,31 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Raises the <see cref="E:System.Web.UI.Control.Init" /> event.
         /// </summary>
         /// <param name="e">An <see cref="T:System.EventArgs" /> object that contains the event data.</param>
-        protected override void OnInit(EventArgs e)
+        protected override void OnInit( EventArgs e )
         {
-            base.OnInit(e);
+            base.OnInit( e );
 
             // if this block has a specific GroupId set, use that, otherwise, determine it from the PageParameters
-            int groupId = GetAttributeValue("Group").AsInteger();
-            if (groupId == 0)
+            int groupId = GetAttributeValue( "Group" ).AsInteger();
+            if ( groupId == 0 )
             {
-                groupId = PageParameter("GroupId").AsInteger();
+                groupId = PageParameter( "GroupId" ).AsInteger();
             }
 
-            if (groupId != 0)
+            if ( groupId != 0 )
             {
-                string key = string.Format("Group:{0}", groupId);
-                _group = RockPage.GetSharedItem(key) as Group;
-                if (_group == null)
+                string key = string.Format( "Group:{0}", groupId );
+                _group = RockPage.GetSharedItem( key ) as Group;
+                if ( _group == null )
                 {
-                    _group = new GroupService(new RockContext()).Queryable("GroupType")
-                        .Where(g => g.Id == groupId)
+                    _group = new GroupService( new RockContext() ).Queryable( "GroupType" )
+                        .Where( g => g.Id == groupId )
                         .FirstOrDefault();
-                    RockPage.SaveSharedItem(key, _group);
+                    RockPage.SaveSharedItem( key, _group );
                 }
 
-                if (_group != null)
+                if ( _group != null )
                 {
-                    rFilter.ApplyFilterClick += rFilter_ApplyFilterClick;
                     gGroupMembers.DataKeyNames = new string[] { "Id" };
                     gGroupMembers.CommunicateMergeFields = new List<string> { "GroupRole.Name" };
                     gGroupMembers.PersonIdField = "PersonId";
@@ -75,17 +78,21 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     gGroupMembers.ExportFilename = _group.Name;
 
                     // make sure they have Auth to the block AND Edit to the Group
-                    bool canEditBlock = IsUserAuthorized(Authorization.EDIT) && _group.IsAuthorized(Authorization.EDIT, this.CurrentPerson);
+                    bool canEditBlock = /*IsUserAuthorized( Authorization.EDIT ) &&*/ _group.IsAuthorized( Authorization.EDIT, this.CurrentPerson );
                     gGroupMembers.Actions.ShowAdd = canEditBlock;
                     gGroupMembers.IsDeleteEnabled = canEditBlock;
 
                     // Add attribute columns
                     AddAttributeColumns();
 
-                    // Add delete column
-                    var deleteField = new DeleteField();
-                    gGroupMembers.Columns.Add(deleteField);
-                    deleteField.Click += DeleteGroupMember_Click;
+                    if ( canEditBlock )
+                    {
+                        // Add delete column
+                        var deleteField = new DeleteField();
+                        gGroupMembers.Columns.Add( deleteField );
+                        deleteField.Click += DeleteGroupMember_Click;
+                    }
+                    
                 }
             }
         }
@@ -94,20 +101,26 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
         /// </summary>
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
-        protected override void OnLoad(EventArgs e)
+        protected override void OnLoad( EventArgs e )
         {
-            base.OnLoad(e);
+            base.OnLoad( e );
 
-            if (!Page.IsPostBack)
+            if ( !Page.IsPostBack )
             {
-                BindFilter();
-
-                tbFirstName.Text = rFilter.GetUserPreference("First Name");
-                tbLastName.Text = rFilter.GetUserPreference("Last Name");
-                cblRole.SetValues(rFilter.GetUserPreference("Role").Split(';').ToList());
-                cblStatus.SetValues(rFilter.GetUserPreference("Status").Split(';').ToList());
-
-                BindGroupMembersGrid();
+                int groupId = int.Parse( PageParameter( "GroupId" ) );
+                if ( groupId == 0 )
+                {
+                    SetVisible( false );
+                }
+                else
+                {
+                    _responseSets = new ResponseSetService( new AccountabilityContext() ).GetResponseSetsForGroup( groupId );
+                    Group group = new GroupService( new RockContext() ).Get( groupId );
+                    group.LoadAttributes();
+                    _reportStartDate = DateTime.Parse( group.GetAttributeValue( "ReportStartDate" ) );
+                    BindGroupMembersGrid();
+                }
+                
             }
         }
 
@@ -120,64 +133,62 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Web.UI.WebControls.GridViewRowEventArgs"/> instance containing the event data.</param>
-        void gGroupMembers_RowDataBound(object sender, System.Web.UI.WebControls.GridViewRowEventArgs e)
+        public void gGroupMembers_RowDataBound( object sender, System.Web.UI.WebControls.GridViewRowEventArgs e )
         {
-            if (e.Row.RowType == DataControlRowType.DataRow)
+            if ( e.Row.RowType == DataControlRowType.DataRow )
             {
                 var groupMember = e.Row.DataItem as GroupMember;
-                if (groupMember != null && groupMember.Person != null)
+                if ( groupMember != null && groupMember.Person != null )
                 {
-                    if (_inactiveStatus != null &&
+                    if ( _inactiveStatus != null &&
                         groupMember.Person.RecordStatusValueId.HasValue &&
-                        groupMember.Person.RecordStatusValueId == _inactiveStatus.Id)
+                        groupMember.Person.RecordStatusValueId == _inactiveStatus.Id )
                     {
-                        e.Row.AddCssClass("inactive");
+                        e.Row.AddCssClass( "inactive" );
                     }
 
-                    if (groupMember.Person.IsDeceased ?? false)
+                    if ( groupMember.Person.IsDeceased ?? false )
                     {
-                        e.Row.AddCssClass("deceased");
+                        e.Row.AddCssClass( "deceased" );
+                    }
+
+                    String[] personInfo = GetPersonInfo( _responseSets, groupMember.PersonId );
+
+                    Literal lFirstReport = e.Row.FindControl( "lFirstReport" ) as Literal;
+                    if ( lFirstReport != null )
+                    {
+                        lFirstReport.Text = personInfo[0];
+                    }
+
+                    Literal lLastReport = e.Row.FindControl( "lLastReport" ) as Literal;
+                    if ( lLastReport != null )
+                    {
+                        lLastReport.Text = personInfo[1];
+                    }
+
+                    Literal lWeeksSinceLast = e.Row.FindControl( "lWeeksSinceLast" ) as Literal;
+                    if ( lWeeksSinceLast != null )
+                    {
+                        lWeeksSinceLast.Text = personInfo[2];
+                    }
+
+                    Literal lReportsOpportunities = e.Row.FindControl( "lReportsOpportunities" ) as Literal;
+                    if ( lReportsOpportunities != null )
+                    {
+                        lReportsOpportunities.Text = personInfo[3];
+                    }
+
+                    Literal lPercentSubmitted = e.Row.FindControl( "lPercentSubmitted" ) as Literal;
+                    if ( lPercentSubmitted != null )
+                    {
+                        lPercentSubmitted.Text = personInfo[4];
+                    }
+                    Literal lScore = e.Row.FindControl( "lScore" ) as Literal;
+                    if ( lScore != null )
+                    {
+                        lScore.Text = personInfo[5];
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Handles the ApplyFilterClick event of the rFilter control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        protected void rFilter_ApplyFilterClick(object sender, EventArgs e)
-        {
-            rFilter.SaveUserPreference("First Name", tbFirstName.Text);
-            rFilter.SaveUserPreference("Last Name", tbLastName.Text);
-            rFilter.SaveUserPreference("Role", GetCheckBoxListValues(cblRole));
-            rFilter.SaveUserPreference("Status", GetCheckBoxListValues(cblStatus));
-
-            BindGroupMembersGrid();
-        }
-
-        /// <summary>
-        /// Rs the filter_ display filter value.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The e.</param>
-        protected void rFilter_DisplayFilterValue(object sender, GridFilter.DisplayFilterValueArgs e)
-        {
-            switch (e.Key)
-            {
-                case "First Name":
-                case "Last Name":
-                    break;
-                case "Role":
-                    e.Value = ResolveValues(e.Value, cblRole);
-                    break;
-                case "Status":
-                    e.Value = ResolveValues(e.Value, cblStatus);
-                    break;
-                default:
-                    e.Value = string.Empty;
-                    break;
             }
         }
 
@@ -186,30 +197,30 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="Rock.Web.UI.Controls.RowEventArgs" /> instance containing the event data.</param>
-        protected void DeleteGroupMember_Click(object sender, Rock.Web.UI.Controls.RowEventArgs e)
+        protected void DeleteGroupMember_Click( object sender, Rock.Web.UI.Controls.RowEventArgs e )
         {
             RockContext rockContext = new RockContext();
-            GroupMemberService groupMemberService = new GroupMemberService(rockContext);
-            GroupMember groupMember = groupMemberService.Get(e.RowKeyId);
-            if (groupMember != null)
+            GroupMemberService groupMemberService = new GroupMemberService( rockContext );
+            GroupMember groupMember = groupMemberService.Get( e.RowKeyId );
+            if ( groupMember != null )
             {
                 string errorMessage;
-                if (!groupMemberService.CanDelete(groupMember, out errorMessage))
+                if ( !groupMemberService.CanDelete( groupMember, out errorMessage ) )
                 {
-                    mdGridWarning.Show(errorMessage, ModalAlertType.Information);
+                    maGridWarning.Show( errorMessage, ModalAlertType.Information );
                     return;
                 }
 
                 int groupId = groupMember.GroupId;
 
-                groupMemberService.Delete(groupMember);
+                groupMemberService.Delete( groupMember );
                 rockContext.SaveChanges();
 
-                Group group = new GroupService(rockContext).Get(groupId);
-                if (group.IsSecurityRole || group.GroupType.Guid.Equals(Rock.SystemGuid.GroupType.GROUPTYPE_SECURITY_ROLE.AsGuid()))
+                Group group = new GroupService( rockContext ).Get( groupId );
+                if ( group.IsSecurityRole || group.GroupType.Guid.Equals( Rock.SystemGuid.GroupType.GROUPTYPE_SECURITY_ROLE.AsGuid() ) )
                 {
                     // person removed from SecurityRole, Flush
-                    Rock.Security.Role.Flush(group.Id);
+                    Rock.Security.Role.Flush( group.Id );
                     Rock.Security.Authorization.Flush();
                 }
             }
@@ -223,19 +234,19 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         /// <exception cref="System.NotImplementedException"></exception>
-        protected void gGroupMembers_AddClick(object sender, EventArgs e)
+        protected void gGroupMembers_AddClick( object sender, EventArgs e )
         {
-            NavigateToLinkedPage("AddMemberPage", "GroupMemberId", 0, "GroupId", _group.Id);
+            NavigateToLinkedPage( "AddMemberPage", "GroupMemberId", 0, "GroupId", _group.Id );
         }
 
         /// <summary>
-        /// Handles the Edit event of the gGroupMembers control.
+        /// Handles the View event of the gGroupMembers control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="RowEventArgs" /> instance containing the event data.</param>
-        protected void gGroupMembers_Edit(object sender, RowEventArgs e)
+        protected void gGroupMembers_View( object sender, RowEventArgs e )
         {
-            NavigateToLinkedPage("DetailPage", "GroupMemberId", e.RowKeyId);
+            NavigateToLinkedPage( "DetailPage", "GroupMemberId", e.RowKeyId );
         }
 
         /// <summary>
@@ -244,7 +255,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         /// <exception cref="System.NotImplementedException"></exception>
-        protected void gGroupMembers_GridRebind(object sender, EventArgs e)
+        protected void gGroupMembers_GridRebind( object sender, EventArgs e )
         {
             BindGroupMembersGrid();
         }
@@ -253,19 +264,6 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
         #region Internal Methods
 
-        /// <summary>
-        /// Binds the filter.
-        /// </summary>
-        private void BindFilter()
-        {
-            if (_group != null)
-            {
-                cblRole.DataSource = _group.GroupType.Roles.OrderBy(a => a.Order).ToList();
-                cblRole.DataBind();
-            }
-
-            cblStatus.BindToEnum(typeof(GroupMemberStatus));
-        }
 
         /// <summary>
         /// Adds the attribute columns.
@@ -273,43 +271,43 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         private void AddAttributeColumns()
         {
             // Remove attribute columns
-            foreach (var column in gGroupMembers.Columns.OfType<AttributeField>().ToList())
+            foreach ( var column in gGroupMembers.Columns.OfType<AttributeField>().ToList() )
             {
-                gGroupMembers.Columns.Remove(column);
+                gGroupMembers.Columns.Remove( column );
             }
 
-            if (_group != null)
+            if ( _group != null )
             {
                 // Add attribute columns
                 int entityTypeId = new GroupMember().TypeId;
                 string groupQualifier = _group.Id.ToString();
                 string groupTypeQualifier = _group.GroupTypeId.ToString();
-                foreach (var attribute in new AttributeService(new RockContext()).Queryable()
-                    .Where(a =>
+                foreach ( var attribute in new AttributeService( new RockContext() ).Queryable()
+                    .Where( a =>
                         a.EntityTypeId == entityTypeId &&
                         a.IsGridColumn &&
-                        ((a.EntityTypeQualifierColumn.Equals("GroupId", StringComparison.OrdinalIgnoreCase) && a.EntityTypeQualifierValue.Equals(groupQualifier)) ||
-                         (a.EntityTypeQualifierColumn.Equals("GroupTypeId", StringComparison.OrdinalIgnoreCase) && a.EntityTypeQualifierValue.Equals(groupTypeQualifier))))
-                    .OrderByDescending(a => a.EntityTypeQualifierColumn)
-                    .ThenBy(a => a.Order)
-                    .ThenBy(a => a.Name))
+                        ( ( a.EntityTypeQualifierColumn.Equals( "GroupId", StringComparison.OrdinalIgnoreCase ) && a.EntityTypeQualifierValue.Equals( groupQualifier ) ) ||
+                         ( a.EntityTypeQualifierColumn.Equals( "GroupTypeId", StringComparison.OrdinalIgnoreCase ) && a.EntityTypeQualifierValue.Equals( groupTypeQualifier ) ) ) )
+                    .OrderByDescending( a => a.EntityTypeQualifierColumn )
+                    .ThenBy( a => a.Order )
+                    .ThenBy( a => a.Name ) )
                 {
                     string dataFieldExpression = attribute.Key;
-                    bool columnExists = gGroupMembers.Columns.OfType<AttributeField>().FirstOrDefault(a => a.DataField.Equals(dataFieldExpression)) != null;
-                    if (!columnExists)
+                    bool columnExists = gGroupMembers.Columns.OfType<AttributeField>().FirstOrDefault( a => a.DataField.Equals( dataFieldExpression ) ) != null;
+                    if ( !columnExists )
                     {
                         AttributeField boundField = new AttributeField();
                         boundField.DataField = dataFieldExpression;
                         boundField.HeaderText = attribute.Name;
                         boundField.SortExpression = string.Empty;
 
-                        var attributeCache = Rock.Web.Cache.AttributeCache.Read(attribute.Id);
-                        if (attributeCache != null)
+                        var attributeCache = Rock.Web.Cache.AttributeCache.Read( attribute.Id );
+                        if ( attributeCache != null )
                         {
                             boundField.ItemStyle.HorizontalAlign = attributeCache.FieldType.Field.AlignValue;
                         }
 
-                        gGroupMembers.Columns.Add(boundField);
+                        gGroupMembers.Columns.Add( boundField );
                     }
                 }
             }
@@ -320,81 +318,30 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         protected void BindGroupMembersGrid()
         {
-            if (_group != null)
+            if ( _group != null )
             {
                 pnlGroupMembers.Visible = true;
 
-                lHeading.Text = string.Format("{0} {1}", _group.GroupType.GroupTerm, _group.GroupType.GroupMemberTerm.Pluralize());
+                lHeading.Text = string.Format( "{0} {1}", _group.GroupType.GroupTerm, _group.GroupType.GroupMemberTerm.Pluralize() );
 
-                if (_group.GroupType.Roles.Any())
+                if ( _group.GroupType.Roles.Any() )
                 {
                     nbRoleWarning.Visible = false;
-                    rFilter.Visible = true;
                     gGroupMembers.Visible = true;
 
-                    GroupMemberService groupMemberService = new GroupMemberService(new RockContext());
-                    var qry = groupMemberService.Queryable("Person,GroupRole", true)
-                        .Where(m => m.GroupId == _group.Id);
-
-                    // Filter by First Name
-                    string firstName = rFilter.GetUserPreference("First Name");
-                    if (!string.IsNullOrWhiteSpace(firstName))
-                    {
-                        qry = qry.Where(m => m.Person.FirstName.StartsWith(firstName));
-                    }
-
-                    // Filter by Last Name
-                    string lastName = rFilter.GetUserPreference("Last Name");
-                    if (!string.IsNullOrWhiteSpace(lastName))
-                    {
-                        qry = qry.Where(m => m.Person.LastName.StartsWith(lastName));
-                    }
-
-                    // Filter by role
-                    var roles = new List<int>();
-                    foreach (string role in rFilter.GetUserPreference("Role").Split(';'))
-                    {
-                        if (!string.IsNullOrWhiteSpace(role))
-                        {
-                            int roleId = int.MinValue;
-                            if (int.TryParse(role, out roleId))
-                            {
-                                roles.Add(roleId);
-                            }
-                        }
-                    }
-
-                    if (roles.Any())
-                    {
-                        qry = qry.Where(m => roles.Contains(m.GroupRoleId));
-                    }
-
-                    // Filter by Sttus
-                    var statuses = new List<GroupMemberStatus>();
-                    foreach (string status in rFilter.GetUserPreference("Status").Split(';'))
-                    {
-                        if (!string.IsNullOrWhiteSpace(status))
-                        {
-                            statuses.Add(status.ConvertToEnum<GroupMemberStatus>());
-                        }
-                    }
-
-                    if (statuses.Any())
-                    {
-                        qry = qry.Where(m => statuses.Contains(m.GroupMemberStatus));
-                    }
-
-                    _inactiveStatus = DefinedValueCache.Read(Rock.SystemGuid.DefinedValue.PERSON_RECORD_STATUS_INACTIVE);
+                    GroupMemberService groupMemberService = new GroupMemberService( new RockContext() );
+                    var qry = groupMemberService.Queryable( "Person,GroupRole", true )
+                        .Where( m => m.GroupId == _group.Id );
 
                     SortProperty sortProperty = gGroupMembers.SortProperty;
 
-                    if (sortProperty != null)
+                    if ( sortProperty != null )
                     {
-                        gGroupMembers.DataSource = qry.Sort(sortProperty).ToList();
+                        gGroupMembers.DataSource = qry.Sort( sortProperty ).ToList();
                     }
                     else
                     {
-                        gGroupMembers.DataSource = qry.OrderBy(a => a.GroupRole.Order).ThenBy(a => a.Person.LastName).ThenBy(a => a.Person.FirstName).ToList();
+                        gGroupMembers.DataSource = qry.OrderBy( a => a.GroupRole.Order ).ThenBy( a => a.Person.LastName ).ThenBy( a => a.Person.FirstName ).ToList();
                     }
 
                     gGroupMembers.DataBind();
@@ -405,10 +352,9 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                         "{0} cannot be added to this {1} because the '{2}' group type does not have any roles defined.",
                         _group.GroupType.GroupMemberTerm.Pluralize(),
                         _group.GroupType.GroupTerm,
-                        _group.GroupType.Name);
+                        _group.GroupType.Name );
 
                     nbRoleWarning.Visible = true;
-                    rFilter.Visible = false;
                     gGroupMembers.Visible = false;
                 }
             }
@@ -419,55 +365,117 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         }
 
         /// <summary>
-        /// Gets the check box list values by evaluating the posted form values for each input item in the rendered checkbox list.  
-        /// This is required because of a bug in ASP.NET that results in the Selected property for CheckBoxList items to not be
-        /// set correctly on a postback.
+        /// For a group member, calculates the values for the columns
         /// </summary>
-        /// <param name="checkBoxList">The check box list.</param>
-        /// <returns></returns>
-        private string GetCheckBoxListValues(System.Web.UI.WebControls.CheckBoxList checkBoxList)
+        /// <param name="responseSets">The group's reports</param>
+        /// <param name="personId">The member's PersonId</param>
+        /// <returns>Returns a string array. 
+        /// personInfo[0] holds the first report. 
+        /// personInfo[1] holds the last report.
+        /// personInfo[2] holds the weeks since last report
+        /// personInfo[3] holds the reports / opportunities
+        /// personInfo[4] holds the reports/opportunites percentage
+        /// personInfo[5] holds the person's score</returns>
+        private String[] GetPersonInfo( List<ResponseSet> responseSets, int personId )
         {
-            var selectedItems = new List<string>();
+            DateTime firstReport = new DateTime();
+            DateTime lastReport = new DateTime();
+            DateTime defaultDate = new DateTime();
+            int? weeksSinceLast = null;
+            int reports = 0;
+            int opportunities = 0;
+            double? percentSubmitted = null;
+            double score = 0;
 
-            for (int i = 0; i < checkBoxList.Items.Count; i++)
+            //Iterate through the responseSets
+            for ( int i = 0; i < responseSets.Count; i++ )
             {
-                string value = Request.Form[checkBoxList.UniqueID + "$" + i.ToString()];
-                if (value != null)
+                if ( responseSets[i].PersonId == personId )
                 {
-                    checkBoxList.Items[i].Selected = true;
-                    selectedItems.Add(value);
-                }
-                else
-                {
-                    checkBoxList.Items[i].Selected = false;
+                    reports++;
+                    score += responseSets[i].Score;
+                    if ( firstReport == defaultDate || firstReport > responseSets[i].SubmitForDate )
+                    {
+                        firstReport = responseSets[i].SubmitForDate;
+                    }
+                    if ( lastReport == defaultDate || lastReport < responseSets[i].SubmitForDate )
+                    {
+                        lastReport = responseSets[i].SubmitForDate;
+                    }
                 }
             }
+            if ( lastReport != defaultDate )
+            {
+                weeksSinceLast = ( ( DateTime.Today - lastReport ).Days ) / 7;
+            }
+            if ( _reportStartDate != null )
+            {
+                opportunities = ( ( ( NextReportDate( _reportStartDate ) - _reportStartDate ).Days ) / 7 ) + 1;
+                score = score / opportunities;
+                percentSubmitted = reports / opportunities;
+            }
+            else
+            {
+                score = 0;
+            }
 
-            return selectedItems.AsDelimited(";");
+            //Put info into string array
+            String[] personInfo = new String[6];
+            if ( firstReport != defaultDate )
+            {
+                personInfo[0] = firstReport.ToShortDateString();
+            }
+            else
+            {
+                personInfo[0] = "-";
+            }
+            if ( lastReport != defaultDate )
+            {
+                personInfo[1] = lastReport.ToShortDateString();
+            }
+            else
+            {
+                personInfo[1] = "-";
+            }
+            if ( weeksSinceLast != null )
+            {
+                personInfo[2] = weeksSinceLast.ToString();
+            }
+            else
+            {
+                personInfo[2] = "no reports";
+            }
+            if ( _reportStartDate != null )
+            {
+                personInfo[3] = string.Format( "{0} / {1}", reports, opportunities );
+                personInfo[4] = string.Format( "{0:P0}", reports / opportunities );
+            }
+            else
+            {
+                personInfo[3] = "-";
+                personInfo[4] = "-";
+            }
+            personInfo[5] = score.ToString();
+            return personInfo;
         }
 
         /// <summary>
-        /// Resolves the values.
+        /// Gets the next report date based on the report start date
         /// </summary>
-        /// <param name="values">The values.</param>
-        /// <param name="listControl">The list control.</param>
-        /// <returns></returns>
-        private string ResolveValues(string values, System.Web.UI.WebControls.CheckBoxList checkBoxList)
+        /// <param name="reportStartDate">The group's report start date</param>
+        /// <returns>Returns the next date the report is due</returns>
+        protected DateTime NextReportDate( DateTime reportStartDate )
         {
-            var resolvedValues = new List<string>();
+            DateTime today = DateTime.Now;
 
-            foreach (string value in values.Split(';'))
-            {
-                var item = checkBoxList.Items.FindByValue(value);
-                if (item != null)
-                {
-                    resolvedValues.Add(item.Text);
-                }
-            }
+            int daysElapsed = ( today - reportStartDate ).Days;
+            int remainder = daysElapsed % 7;
+            int daysUntil = 7 - remainder;
 
-            return resolvedValues.AsDelimited(", ");
+            DateTime reportDue = today.AddDays( daysUntil );
+
+            return reportDue;
         }
-
         #endregion
 
         #region ISecondaryBlock
@@ -476,7 +484,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Sets the visible.
         /// </summary>
         /// <param name="visible">if set to <c>true</c> [visible].</param>
-        public void SetVisible(bool visible)
+        public void SetVisible( bool visible )
         {
             pnlContent.Visible = visible;
         }

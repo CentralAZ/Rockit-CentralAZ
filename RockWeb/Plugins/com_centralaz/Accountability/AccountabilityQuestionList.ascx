@@ -12,7 +12,7 @@
                 <div class="panel-body">
 
 
-                    <Rock:ModalAlert ID="mdGridWarning" runat="server" />
+                    <Rock:ModalAlert ID="maGridWarning" runat="server" />
 
                     <Rock:Grid ID="gAccountabilityQuestions" runat="server" AllowSorting="true" OnRowSelected="gAccountabilityQuestions_Edit" TooltipField="Description">
                         <Columns>

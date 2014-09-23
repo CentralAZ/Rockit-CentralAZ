@@ -19,11 +19,11 @@ using Rock.Web.UI.Controls;
 
 namespace RockWeb.Plugins.com_centralaz.Accountability
 {
-    [DisplayName("Submit Report")]
-    [Category("com_centralaz > Accountability")]
-    [Description("The Submit Report Block")]
+    [DisplayName( "Submit Report" )]
+    [Category( "com_centralaz > Accountability" )]
+    [Description( "The Submit Report Block" )]
 
-    [LinkedPage("Detail Page", "", true, "", "", 0)]
+    [LinkedPage( "Detail Page", "", true, "", "", 0 )]
     public partial class SubmitReportBlock : Rock.Web.UI.RockBlock
     {
 
@@ -33,24 +33,22 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Raises the <see cref="E:System.Web.UI.Control.Init" /> event.
         /// </summary>
         /// <param name="e">An <see cref="T:System.EventArgs" /> object that contains the event data.</param>
-        protected override void OnInit(EventArgs e)
+        protected override void OnInit( EventArgs e )
         {
-            base.OnInit(e);
-
-            lblStatusMessage.Text = "Submit Report by 12/4/14";
+            base.OnInit( e );
         }
 
         /// <summary>
         /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
         /// </summary>
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
-        protected override void OnLoad(EventArgs e)
+        protected override void OnLoad( EventArgs e )
         {
-            if (!Page.IsPostBack)
+            if ( !Page.IsPostBack )
             {
             }
-            WriteMessage();
-            base.OnLoad(e);
+            GetDatesForMessage();
+            base.OnLoad( e );
         }
 
         #endregion
@@ -58,103 +56,136 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
         #region Internal Methods
 
-        protected void btnSubmit_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Handles the OnClick event of the lbSubmit control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
+        protected void lbSubmit_Click( object sender, EventArgs e )
         {
-            Dictionary<String, String> parameters = new Dictionary<string,string>(){
-                {"GroupId", PageParameter("GroupId")},
-                {"PersonId", CurrentPersonId.ToString()}
-
-            };
-            NavigateToLinkedPage("DetailPage", parameters);
+            int groupId = int.Parse( PageParameter( "GroupId" ) );
+            NavigateToLinkedPage( "DetailPage", "GroupId", groupId );
         }
-        protected void WriteMessage()
+
+        /// <summary>
+        /// Grabs the dates for the due date message and passes them to the WriteDueDateMessage method.
+        /// </summary>
+        protected void GetDatesForMessage()
         {
             bool canSubmit = IsGroupMember();
-            if (!canSubmit)
+            if ( !canSubmit )
             {
                 pnlContent.Visible = false;
             }
             else
             {
 
-                int groupId = int.Parse(PageParameter("GroupId"));
+                int groupId = int.Parse( PageParameter( "GroupId" ) );
                 DateTime recentReportDate;
-                Group group = GetGroup(groupId);
+                Group group = GetGroup( groupId );
                 group.LoadAttributes();
-                DateTime reportStartDate = DateTime.Parse(group.GetAttributeValue("ReportStartDate"));
+                DateTime reportStartDate = DateTime.Parse( group.GetAttributeValue( "ReportStartDate" ) );
                 try
                 {
-                    ResponseSet recentReport = new ResponseSetService(new AccountabilityContext()).GetMostRecentReport(CurrentPersonId, groupId);
-                    recentReportDate = recentReport.SubmitForDate; 
+                    ResponseSet recentReport = new ResponseSetService( new AccountabilityContext() ).GetMostRecentReport( CurrentPersonId, groupId );
+                    recentReportDate = recentReport.SubmitForDate;
                 }
-                catch (Exception e)
+                catch ( Exception e )
                 {
-                    recentReportDate =reportStartDate;
+                    recentReportDate = reportStartDate;
                 }
-                DateTime nextDueDate = NextReportDate(reportStartDate);
+                DateTime nextDueDate = NextReportDate( reportStartDate );
 
-                IsReportOverdue(nextDueDate, recentReportDate);
-
+                WriteDueDateMessage( nextDueDate, recentReportDate );
             }
-
         }
-        protected void IsReportOverdue(DateTime nextDueDate, DateTime lastReportDate)
+
+        /// <summary>
+        /// Populates the lStatesMessage literal with the due date message.
+        /// </summary>
+        /// <param name="nextDueDate">The next due date</param>
+        /// <param name="lastReportDate">The last report date</param>
+        protected void WriteDueDateMessage( DateTime nextDueDate, DateTime lastReportDate )
         {
-            int daysElapsed = (nextDueDate - lastReportDate).Days;
-            int daysUntilDueDate = (nextDueDate - DateTime.Today).Days;
+            int daysElapsed = ( nextDueDate - lastReportDate ).Days;
+            int daysUntilDueDate = ( nextDueDate - DateTime.Today ).Days;
             //All caught up case
-            if (daysElapsed <= 7 && daysUntilDueDate >= 6)
+            if ( daysElapsed <= 7 && daysUntilDueDate >= 6 )
             {
-                lblStatusMessage.Text = "Report Submitted";
+                lStatusMessage.Text = "Report Submitted";
+                lbSubmitReport.Enabled = false;
             }
             //Submit report for this week case
-            if (daysElapsed <= 7 && daysUntilDueDate < 6)
+            if ( daysElapsed <= 7 && daysUntilDueDate < 6 )
             {
-                lblStatusMessage.Text = "Report due in " + daysUntilDueDate + " days";
+                if ( daysUntilDueDate == 1 )
+                {
+                    lStatusMessage.Text = "Report due in 1 day";
+                }
+                else
+                {
+                    lStatusMessage.Text = "Report due in " + daysUntilDueDate + " days";
+                }
             }
             //Report overdue case
-            if (daysElapsed > 7)
+            if ( daysElapsed > 7 )
             {
-                lblStatusMessage.Text = "Report Overdue for week of " + nextDueDate.AddDays(-7);
+                lStatusMessage.Text = "Report Overdue for week of " + nextDueDate.AddDays( -7 ).ToShortDateString();
             }
         }
-        protected DateTime NextReportDate(DateTime reportStartDate)
+
+        /// <summary>
+        /// Returns the next report due date.
+        /// </summary>
+        /// <param name="reportStartDate">The group's report start date</param>
+        /// <returns>The next report due date</returns>
+        protected DateTime NextReportDate( DateTime reportStartDate )
         {
             DateTime today = DateTime.Now;
 
-            int daysElapsed = (today - reportStartDate).Days;
+            int daysElapsed = ( today - reportStartDate ).Days;
             int remainder = daysElapsed % 7;
             int daysUntil = 7 - remainder;
 
-            DateTime reportDue = today.AddDays(daysUntil);
+            DateTime reportDue = today.AddDays( daysUntil );
 
             return reportDue;
         }
 
+        /// <summary>
+        /// Checks if the current person is a group member
+        /// </summary>
+        /// <returns>A bool of whether the current person is a member or not</returns>
         protected bool IsGroupMember()
         {
 
-            int groupId = int.Parse(PageParameter("GroupId"));
+            int groupId = int.Parse( PageParameter( "GroupId" ) );
             bool isMember = false;
-            var qry = new GroupMemberService(new RockContext()).Queryable()
-            .Where(gm => (gm.PersonId == CurrentPersonId) && (gm.GroupId == groupId))
+            var qry = new GroupMemberService( new RockContext() ).Queryable()
+            .Where( gm => ( gm.PersonId == CurrentPersonId ) && ( gm.GroupId == groupId ) )
             .FirstOrDefault();
-            if (qry != null)
+            if ( qry != null )
             {
                 isMember = true;
             }
             return isMember;
         }
-        private Group GetGroup(int groupId)
+
+        /// <summary>
+        /// Returns the group with id groupId.
+        /// </summary>
+        /// <param name="groupId">the groupId.</param>
+        /// <returns>Returns the group</returns>
+        private Group GetGroup( int groupId )
         {
-            string key = string.Format("Group:{0}", groupId);
-            Group group = RockPage.GetSharedItem(key) as Group;
-            if (group == null)
+            string key = string.Format( "Group:{0}", groupId );
+            Group group = RockPage.GetSharedItem( key ) as Group;
+            if ( group == null )
             {
-                group = new GroupService(new RockContext()).Queryable("GroupType,GroupLocations.Schedules")
-                    .Where(g => g.Id == groupId)
+                group = new GroupService( new RockContext() ).Queryable( "GroupType,GroupLocations.Schedules" )
+                    .Where( g => g.Id == groupId )
                     .FirstOrDefault();
-                RockPage.SaveSharedItem(key, group);
+                RockPage.SaveSharedItem( key, group );
             }
 
             return group;

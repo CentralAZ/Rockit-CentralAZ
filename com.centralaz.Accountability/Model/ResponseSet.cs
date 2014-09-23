@@ -49,7 +49,7 @@ namespace com.centralaz.Accountability.Model
         /// The response set score.
         /// </value>
         [DataMember]
-        public int Score { get; set; }
+        public double Score { get; set; }
 
         /// <summary>
         /// Gets or sets the group identifier.

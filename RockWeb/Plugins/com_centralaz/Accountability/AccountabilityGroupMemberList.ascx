@@ -1,6 +1,6 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="AccountabilityGroupMemberList.ascx.cs" Inherits="RockWeb.Plugins.com_centralaz.Accountability.AccountabilityGroupMemberList" %>
 
-<asp:UpdatePanel ID="upList" runat="server">
+<asp:UpdatePanel ID="upnlList" runat="server">
     <ContentTemplate>
 
         <asp:Panel ID="pnlContent" runat="server">
@@ -17,23 +17,51 @@
                     </div>
 
                     <div class="panel-body">
-                        <Rock:ModalAlert ID="mdGridWarning" runat="server" />
+                        <Rock:ModalAlert ID="maGridWarning" runat="server" />
 
                         <Rock:NotificationBox ID="nbRoleWarning" runat="server" NotificationBoxType="Warning" Title="No roles!" Visible="false" />
 
                         <div class="grid grid-panel">
-                            <Rock:GridFilter ID="rFilter" runat="server" OnDisplayFilterValue="rFilter_DisplayFilterValue">
-                                <Rock:RockTextBox ID="tbFirstName" runat="server" Label="First Name" />
-                                <Rock:RockTextBox ID="tbLastName" runat="server" Label="Last Name" />
-                                <Rock:RockCheckBoxList ID="cblRole" runat="server" Label="Role" DataTextField="Name" DataValueField="Id" RepeatDirection="Horizontal" />
-                                <Rock:RockCheckBoxList ID="cblStatus" runat="server" Label="Status" RepeatDirection="Horizontal" />
-                            </Rock:GridFilter>
-                            <Rock:Grid ID="gGroupMembers" runat="server" DisplayType="Full" AllowSorting="true" OnRowSelected="gGroupMembers_Edit">
+                            <Rock:Grid ID="gGroupMembers" runat="server" DisplayType="Full" AllowSorting="true" OnRowDataBound="gGroupMembers_RowDataBound" OnRowSelected="gGroupMembers_View">
                                 <Columns>
-                                    <asp:BoundField DataField="Person.NickName" HeaderText="First Name" SortExpression="Person.NickName" />
-                                    <asp:BoundField DataField="Person.LastName" HeaderText="Last Name" SortExpression="Person.LastName" />
-                                    <asp:BoundField DataField="GroupRole.Name" HeaderText="Role" SortExpression="GroupRole.Name" />
-                                    <asp:BoundField DataField="GroupMemberStatus" HeaderText="Status" SortExpression="GroupMemberStatus" />
+
+                                    <asp:BoundField DataField="Person.FullName" HeaderText="First Name" SortExpression="Person.NickName" />
+                                    
+                                    <asp:TemplateField SortExpression="FirstReport" HeaderText="First Report">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lFirstReport" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    
+                                    <asp:TemplateField SortExpression="LastReport" HeaderText="Last Report">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lLastReport" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    
+                                    <asp:TemplateField SortExpression="WeeksSinceLast" HeaderText="Weeks Since Last">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lWeeksSinceLast" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    
+                                    <asp:TemplateField SortExpression="ReportsOpportunities" HeaderText="Reports / Opportunities">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lReportsOpportunities" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                   
+                                     <asp:TemplateField SortExpression="PercentSubmitted" HeaderText="% Submitted">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lPercentSubmitted" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    
+                                    <asp:TemplateField SortExpression="Score" HeaderText="Score">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lScore" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
                                 </Columns>
                             </Rock:Grid>
                         </div>

@@ -21,7 +21,7 @@ namespace com.centralaz.Accountability.Model
         public ResponseService(AccountabilityContext context) : base(context) { }
 
         /// <summary>
-        /// Returns the question the response is to
+        /// Returns the response the responseId is to
         /// </summary>
         public Response GetResponse(int responseId)
         {
@@ -46,6 +46,49 @@ namespace com.centralaz.Accountability.Model
             qry = qry.Where(r => r.IsResponseYes == true);
             percentage[0] = qry.Count();
             return percentage;
+        }
+
+        /// <summary>
+        /// Gets the responses for a response set.
+        /// </summary>
+        /// <param name="responseSetId">The Id of the response set</param>
+        /// <returns>Returns a list of responses</returns>
+        public List<Response> GetResponsesForResponseSet(int responseSetId)
+        {
+            List<Response> responses = Queryable("ResponseSet")
+                .Where(r => r.ResponseSetId == responseSetId)
+                .ToList();
+            return responses;
+        }
+
+        /// <summary>
+        /// Gets a particular response for a response set and question
+        /// </summary>
+        /// <param name="responseSetId">The response set id</param>
+        /// <param name="questionId">The question id</param>
+        /// <returns>Returns the response</returns>
+        public Response GetResponseForResponseSetAndQuestion(int responseSetId, int questionId)
+        {
+            Response response = null;
+            var qry = Queryable()
+                .Where(r => r.ResponseSetId == responseSetId && r.QuestionId == questionId);
+            if (qry.Count() != 0)
+            {
+                response = qry.First();
+            }  
+            return response;
+        }
+        /// <summary>
+        /// Returns all the responses for a question
+        /// </summary>
+        /// <param name="questionId">The question Id</param>
+        /// <returns>The List of responses</returns>
+        public List<Response> GetResponsesForQuestion( int questionId )
+        {
+            List<Response> responseList = Queryable()
+                .Where( r => r.QuestionId == questionId )
+                .ToList();
+            return responseList;               
         }
 
     }

@@ -26,5 +26,12 @@ namespace com.centralaz.Accountability.Model
                 .FirstOrDefault();
             return question.ShortForm;
         }
+        public List<Question> GetQuestionsFromGroupTypeID(int groupTypeId)
+        {
+            List<Question> questions = Queryable("GroupType")
+                .Where(q => q.GroupTypeId == groupTypeId)
+                .ToList();
+            return questions;
+        }
     }
 }

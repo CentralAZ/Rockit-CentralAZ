@@ -29,18 +29,33 @@ namespace com.centralaz.Accountability.Model
             return qry;
 
         }
+        public List<ResponseSet> GetResponseSetsForGroup(int groupId)
+        {
+            List<ResponseSet> responseSets = Queryable()
+                .Where(r => r.GroupId == groupId)
+                .ToList();
+            return responseSets;
+        }
 
         
         public double GetOverallScore(int PersonId, int GroupId)
         {
-            double overallScore = -1;
+            double overallScore = 0;
             var qry = Queryable()
                 .Where(r => (r.PersonId == PersonId) && (r.GroupId == GroupId));
             foreach (ResponseSet r in qry)
             {
                 overallScore += r.Score;
             }
-             overallScore=overallScore/qry.Count();
+            if (qry.Count() == 0)
+            {
+                overallScore = -1;
+            }
+            else
+            {
+                overallScore = overallScore / qry.Count();
+            }
+             
             return overallScore;
         }
         public double[] GetWeakScore(int PersonId, int GroupId)

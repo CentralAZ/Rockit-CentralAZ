@@ -21,22 +21,22 @@
                     </h1>
 
                     <div class="panel-labels">
-                        <Rock:HighlightLabel ID="hlInactive" runat="server" LabelType="Danger" Text="Inactive" />
-                        <Rock:HighlightLabel ID="hlType" runat="server" LabelType="Type" />
-                        <Rock:HighlightLabel ID="hlCampus" runat="server" LabelType="Campus" />
+                        <Rock:HighlightLabel ID="hlblInactive" runat="server" LabelType="Danger" Text="Inactive" />
+                        <Rock:HighlightLabel ID="hlblType" runat="server" LabelType="Type" />
+                        <Rock:HighlightLabel ID="hlblCampus" runat="server" LabelType="Campus" />
                     </div>
                 </div>
 
                 <div class="panel-body">
+
                     <Rock:NotificationBox ID="nbEditModeMessage" runat="server" NotificationBoxType="Info" />
                     <Rock:NotificationBox ID="nbRoleLimitWarning" runat="server" NotificationBoxType="Warning" Heading="Role Limit Warning" />
-                    <asp:ValidationSummary ID="ValidationSummary1" runat="server" HeaderText="Please Correct the Following" CssClass="alert alert-danger" />
 
                     <div id="pnlEditDetails" runat="server">
 
                         <div class="row">
                             <div class="col-md-6">
-                                <Rock:DataTextBox ID="tbName" runat="server" SourceTypeName="Rock.Model.Group, Rock" PropertyName="Name" />
+                                <Rock:DataTextBox ID="dtbName" runat="server" SourceTypeName="Rock.Model.Group, Rock" PropertyName="Name" />
                             </div>
                             <div class="col-md-6">
                                 <Rock:RockCheckBox ID="cbIsActive" runat="server" Text="Active" />
@@ -44,19 +44,22 @@
                         </div>
 
                         <div class="row">
+                            <div class="col-md-6">
+                                <Rock:DataDropDownList ID="ddlGroupType" runat="server" DataTextField="Name" DataValueField="Id" SourceTypeName="Rock.Model.GroupType, Rock" PropertyName="Name" Label="Group Type" AutoPostBack="true" OnSelectedIndexChanged="ddlGroupType_SelectedIndexChanged" />
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-12">
-                                <Rock:DataTextBox ID="tbDescription" runat="server" SourceTypeName="Rock.Model.Group, Rock" PropertyName="Description" TextMode="MultiLine" Rows="4" />
+                                <Rock:DataTextBox ID="dtbDescription" runat="server" SourceTypeName="Rock.Model.Group, Rock" PropertyName="Description" TextMode="MultiLine" Rows="4" />
                             </div>
                         </div>
 
                         <asp:PlaceHolder ID="phGroupAttributes" runat="server" EnableViewState="false"></asp:PlaceHolder>
 
-
-
-
                         <div class="actions">
-                            <asp:LinkButton ID="btnSave" runat="server" Text="Save" CssClass="btn btn-primary" OnClick="btnSave_Click" />
-                            <asp:LinkButton ID="btnCancel" runat="server" Text="Cancel" CssClass="btn btn-link" CausesValidation="false" OnClick="btnCancel_Click" />
+                            <asp:LinkButton ID="lbSave" runat="server" Text="Save" CssClass="btn btn-primary" OnClick="lbSave_Click" />
+                            <asp:LinkButton ID="lbCancel" runat="server" Text="Cancel" CssClass="btn btn-link" CausesValidation="false" OnClick="lbCancel_Click" />
                         </div>
 
                     </div>
@@ -69,7 +72,7 @@
 
                         <div class="row">
                             <div class="col-md-6">
-                                <asp:Literal ID="lblMainDetails" runat="server" />
+                                <asp:Literal ID="lMainDetails" runat="server" />
                                 <asp:PlaceHolder ID="phAttributes" runat="server"></asp:PlaceHolder>
                             </div>
                             <div class="col-md-6 location-maps">
@@ -77,14 +80,13 @@
                             </div>
                         </div>
 
-
                         <div class="actions">
-                            <asp:LinkButton ID="btnEdit" runat="server" Text="Edit" CssClass="btn btn-primary" OnClick="btnEdit_Click" CausesValidation="false" />
-                            <Rock:ModalAlert ID="mdDeleteWarning" runat="server" />
-                            <asp:LinkButton ID="btnDelete" runat="server" Text="Delete" CssClass="btn btn-link" OnClick="btnDelete_Click" CausesValidation="false" />
+                            <asp:LinkButton ID="lbEdit" runat="server" Text="Edit" CssClass="btn btn-primary" OnClick="lbEdit_Click" CausesValidation="false" />
+                            <Rock:ModalAlert ID="maDeleteWarning" runat="server" />
+                            <asp:LinkButton ID="lbDelete" runat="server" Text="Delete" CssClass="btn btn-link" OnClick="lbDelete_Click" CausesValidation="false" />
                             <span class="pull-right">
                                 <asp:HyperLink ID="hlMap" runat="server" CssClass="btn btn-sm btn-default" ToolTip="Interactive Map"><i class="fa fa-map-marker"></i></asp:HyperLink>
-                                <Rock:SecurityButton ID="btnSecurity" runat="server" class="btn btn-sm btn-security" Title="Secure Group" />
+                                <Rock:SecurityButton ID="sbtnSecurity" runat="server" class="btn btn-sm btn-security" Title="Secure Group" />
                             </span>
                         </div>
 
@@ -95,8 +97,6 @@
         </asp:Panel>
 
         <asp:HiddenField ID="hfActiveDialog" runat="server" />
-
-
 
     </ContentTemplate>
 </asp:UpdatePanel>

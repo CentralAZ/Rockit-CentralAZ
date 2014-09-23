@@ -1,12 +1,13 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+
 using Newtonsoft.Json;
+
 using Rock;
 using Rock.Attribute;
 using Rock.Constants;
@@ -21,16 +22,16 @@ using Attribute = Rock.Model.Attribute;
 
 namespace RockWeb.Plugins.com_centralaz.Accountability
 {
-    [DisplayName("Accountability Group Detail")]
-    [Category("com_centralaz > Accountability")]
-    [Description("Displays the details of the given accountability group.")]
+    [DisplayName( "Accountability Group Detail" )]
+    [Category( "com_centralaz > Accountability" )]
+    [Description( "Displays the details of the given accountability group." )]
 
-    [GroupTypesField("Group Types", "Select group types to show in this block.  Leave all unchecked to show all group types.", false, "", "", 0)]
-    [BooleanField("Show Edit", "", true, "", 1)]
-    [BooleanField("Limit to Security Role Groups", "", false, "", 2)]
-    [BooleanField("Limit to Group Types that are shown in navigation", "", false, "", 3, "LimitToShowInNavigationGroupTypes")]
-    [DefinedValueField(Rock.SystemGuid.DefinedType.MAP_STYLES, "Map Style", "The style of maps to use", false, false, Rock.SystemGuid.DefinedValue.MAP_STYLE_ROCK, "", 4)]
-    [LinkedPage("Group Map Page", "The page to display detailed group map.")]
+    [GroupTypesField( "Group Types", "Select group types to show in this block.  Leave all unchecked to show all group types.", false, "", "", 0 )]
+    [BooleanField( "Show Edit", "", true, "", 1 )]
+    [BooleanField( "Limit to Security Role Groups", "", false, "", 2 )]
+    [BooleanField( "Limit to Group Types that are shown in navigation", "", false, "", 3, "LimitToShowInNavigationGroupTypes" )]
+    [DefinedValueField( Rock.SystemGuid.DefinedType.MAP_STYLES, "Map Style", "The style of maps to use", false, false, Rock.SystemGuid.DefinedValue.MAP_STYLE_ROCK, "", 4 )]
+    [LinkedPage( "Group Map Page", "The page to display detailed group map." )]
     public partial class AccountabilityGroupDetail : RockBlock, IDetailBlock
     {
         #region Constants
@@ -75,38 +76,38 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Restores the view-state information from a previous user control request that was saved by the <see cref="M:System.Web.UI.UserControl.SaveViewState" /> method.
         /// </summary>
         /// <param name="savedState">An <see cref="T:System.Object" /> that represents the user control state to be restored.</param>
-        protected override void LoadViewState(object savedState)
+        protected override void LoadViewState( object savedState )
         {
-            base.LoadViewState(savedState);
+            base.LoadViewState( savedState );
 
             string json = ViewState["GroupLocationsState"] as string;
-            if (string.IsNullOrWhiteSpace(json))
+            if ( string.IsNullOrWhiteSpace( json ) )
             {
                 GroupLocationsState = new List<GroupLocation>();
             }
             else
             {
-                GroupLocationsState = JsonConvert.DeserializeObject<List<GroupLocation>>(json);
+                GroupLocationsState = JsonConvert.DeserializeObject<List<GroupLocation>>( json );
             }
 
             json = ViewState["GroupMemberAttributesInheritedState"] as string;
-            if (string.IsNullOrWhiteSpace(json))
+            if ( string.IsNullOrWhiteSpace( json ) )
             {
                 GroupMemberAttributesInheritedState = new List<InheritedAttribute>();
             }
             else
             {
-                GroupMemberAttributesInheritedState = JsonConvert.DeserializeObject<List<InheritedAttribute>>(json);
+                GroupMemberAttributesInheritedState = JsonConvert.DeserializeObject<List<InheritedAttribute>>( json );
             }
 
             json = ViewState["GroupMemberAttributesState"] as string;
-            if (string.IsNullOrWhiteSpace(json))
+            if ( string.IsNullOrWhiteSpace( json ) )
             {
                 GroupMemberAttributesState = new List<Attribute>();
             }
             else
             {
-                GroupMemberAttributesState = JsonConvert.DeserializeObject<List<Attribute>>(json);
+                GroupMemberAttributesState = JsonConvert.DeserializeObject<List<Attribute>>( json );
             }
 
             AllowMultipleLocations = ViewState["AllowMultipleLocations"] as bool? ?? false;
@@ -116,33 +117,33 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Raises the <see cref="E:System.Web.UI.Control.Init" /> event.
         /// </summary>
         /// <param name="e">An <see cref="T:System.EventArgs" /> object that contains the event data.</param>
-        protected override void OnInit(EventArgs e)
+        protected override void OnInit( EventArgs e )
         {
-            base.OnInit(e);
+            base.OnInit( e );
 
 
-            btnDelete.Attributes["onclick"] = string.Format("javascript: return Rock.dialogs.confirmDelete(event, '{0}');", Group.FriendlyTypeName);
-            btnSecurity.EntityTypeId = EntityTypeCache.Read(typeof(Rock.Model.Group)).Id;
+            lbDelete.Attributes["onclick"] = string.Format( "javascript: return Rock.dialogs.confirmDelete(event, '{0}');", Group.FriendlyTypeName );
+            sbtnSecurity.EntityTypeId = EntityTypeCache.Read( typeof( Rock.Model.Group ) ).Id;
 
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
-            this.AddConfigurationUpdateTrigger(upnlGroupList);
+            this.AddConfigurationUpdateTrigger( upnlGroupList );
         }
 
         /// <summary>
         /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
         /// </summary>
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
-        protected override void OnLoad(EventArgs e)
+        protected override void OnLoad( EventArgs e )
         {
-            base.OnLoad(e);
+            base.OnLoad( e );
 
-            if (!Page.IsPostBack)
+            if ( !Page.IsPostBack )
             {
-                string groupId = PageParameter("GroupId");
-                if (!string.IsNullOrWhiteSpace(groupId))
+                string groupId = PageParameter( "GroupId" );
+                if ( !string.IsNullOrWhiteSpace( groupId ) )
                 {
-                    ShowDetail(groupId.AsInteger(), PageParameter("ParentGroupId").AsIntegerOrNull());
+                    ShowDetail( groupId.AsInteger(), PageParameter( "ParentGroupId" ).AsIntegerOrNull() );
                 }
                 else
                 {
@@ -151,17 +152,16 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             }
             else
             {
-              
+
             }
 
             // Rebuild the attribute controls on postback based on group type
-            if (pnlDetails.Visible)
+            if ( pnlDetails.Visible )
             {
-                Group oldGroup = GetGroup(hfGroupId.Value.AsInteger());
-                var group = new Group { GroupTypeId = oldGroup.GroupTypeId };
-                if (group.GroupTypeId > 0)
+                var group = new Group { GroupTypeId = ddlGroupType.SelectedValueAsInt() ?? 0 };
+                if ( group.GroupTypeId > 0 )
                 {
-                    ShowGroupTypeEditDetails(GroupTypeCache.Read(group.GroupTypeId), group, false);
+                    ShowGroupTypeEditDetails( GroupTypeCache.Read( group.GroupTypeId ), group, false );
                 }
             }
         }
@@ -180,9 +180,9 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 ContractResolver = new Rock.Utility.IgnoreUrlEncodedKeyContractResolver()
             };
 
-            ViewState["GroupLocationsState"] = JsonConvert.SerializeObject(GroupLocationsState, Formatting.None, jsonSetting);
-            ViewState["GroupMemberAttributesInheritedState"] = JsonConvert.SerializeObject(GroupMemberAttributesInheritedState, Formatting.None, jsonSetting);
-            ViewState["GroupMemberAttributesState"] = JsonConvert.SerializeObject(GroupMemberAttributesState, Formatting.None, jsonSetting);
+            ViewState["GroupLocationsState"] = JsonConvert.SerializeObject( GroupLocationsState, Formatting.None, jsonSetting );
+            ViewState["GroupMemberAttributesInheritedState"] = JsonConvert.SerializeObject( GroupMemberAttributesInheritedState, Formatting.None, jsonSetting );
+            ViewState["GroupMemberAttributesState"] = JsonConvert.SerializeObject( GroupMemberAttributesState, Formatting.None, jsonSetting );
             ViewState["AllowMultipleLocations"] = AllowMultipleLocations;
 
             return base.SaveViewState();
@@ -197,21 +197,21 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <returns>
         /// A <see cref="System.Collections.Generic.List{BreadCrumb}" /> of block related <see cref="Rock.Web.UI.BreadCrumb">BreadCrumbs</see>.
         /// </returns>
-        public override List<BreadCrumb> GetBreadCrumbs(PageReference pageReference)
+        public override List<BreadCrumb> GetBreadCrumbs( PageReference pageReference )
         {
             var breadCrumbs = new List<BreadCrumb>();
 
-            int? groupId = PageParameter(pageReference, "GroupId").AsIntegerOrNull();
-            if (groupId != null)
+            int? groupId = PageParameter( pageReference, "GroupId" ).AsIntegerOrNull();
+            if ( groupId != null )
             {
-                Group group = new GroupService(new RockContext()).Get(groupId.Value);
-                if (group != null)
+                Group group = new GroupService( new RockContext() ).Get( groupId.Value );
+                if ( group != null )
                 {
-                    breadCrumbs.Add(new BreadCrumb(group.Name, pageReference));
+                    breadCrumbs.Add( new BreadCrumb( group.Name, pageReference ) );
                 }
                 else
                 {
-                    breadCrumbs.Add(new BreadCrumb("New Group", pageReference));
+                    breadCrumbs.Add( new BreadCrumb( "New Group", pageReference ) );
                 }
             }
             else
@@ -227,60 +227,60 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         #region Edit Events
 
         /// <summary>
-        /// Handles the Click event of the btnEdit control.
+        /// Handles the Click event of the lbEdit control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        protected void btnEdit_Click(object sender, EventArgs e)
+        protected void lbEdit_Click( object sender, EventArgs e )
         {
-            ShowEditDetails(GetGroup(hfGroupId.Value.AsInteger()));
+            ShowEditDetails( GetGroup( hfGroupId.Value.AsInteger() ) );
         }
 
         /// <summary>
-        /// Handles the Click event of the btnDelete control.
+        /// Handles the Click event of the lbDelete control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        protected void btnDelete_Click(object sender, EventArgs e)
+        protected void lbDelete_Click( object sender, EventArgs e )
         {
             int? parentGroupId = null;
             RockContext rockContext = new RockContext();
 
-            GroupService groupService = new GroupService(rockContext);
-            AuthService authService = new AuthService(rockContext);
-            Group group = groupService.Get(int.Parse(hfGroupId.Value));
+            GroupService groupService = new GroupService( rockContext );
+            AuthService authService = new AuthService( rockContext );
+            Group group = groupService.Get( int.Parse( hfGroupId.Value ) );
 
-            if (group != null)
+            if ( group != null )
             {
-                if (!group.IsAuthorized(Authorization.EDIT, this.CurrentPerson))
+                if ( !group.IsAuthorized( Authorization.EDIT, this.CurrentPerson ) )
                 {
-                    mdDeleteWarning.Show("You are not authorized to delete this group.", ModalAlertType.Information);
+                    maDeleteWarning.Show( "You are not authorized to delete this group.", ModalAlertType.Information );
                     return;
                 }
 
                 parentGroupId = group.ParentGroupId;
                 string errorMessage;
-                if (!groupService.CanDelete(group, out errorMessage))
+                if ( !groupService.CanDelete( group, out errorMessage ) )
                 {
-                    mdDeleteWarning.Show(errorMessage, ModalAlertType.Information);
+                    maDeleteWarning.Show( errorMessage, ModalAlertType.Information );
                     return;
                 }
 
-                bool isSecurityRoleGroup = group.IsSecurityRole || group.GroupType.Guid.Equals(Rock.SystemGuid.GroupType.GROUPTYPE_SECURITY_ROLE.AsGuid());
-                if (isSecurityRoleGroup)
+                bool isSecurityRoleGroup = group.IsSecurityRole || group.GroupType.Guid.Equals( Rock.SystemGuid.GroupType.GROUPTYPE_SECURITY_ROLE.AsGuid() );
+                if ( isSecurityRoleGroup )
                 {
-                    Rock.Security.Role.Flush(group.Id);
-                    foreach (var auth in authService.Queryable().Where(a => a.GroupId == group.Id).ToList())
+                    Rock.Security.Role.Flush( group.Id );
+                    foreach ( var auth in authService.Queryable().Where( a => a.GroupId == group.Id ).ToList() )
                     {
-                        authService.Delete(auth);
+                        authService.Delete( auth );
                     }
                 }
 
-                groupService.Delete(group);
+                groupService.Delete( group );
 
                 rockContext.SaveChanges();
 
-                if (isSecurityRoleGroup)
+                if ( isSecurityRoleGroup )
                 {
                     Rock.Security.Authorization.Flush();
                 }
@@ -288,38 +288,42 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
             // reload page, selecting the deleted group's parent
             var qryParams = new Dictionary<string, string>();
-            if (parentGroupId != null)
+            if ( parentGroupId != null )
             {
                 qryParams["GroupId"] = parentGroupId.ToString();
             }
 
-            NavigateToPage(RockPage.Guid, qryParams);
+            NavigateToPage( RockPage.Guid, qryParams );
         }
 
         /// <summary>
-        /// Handles the Click event of the btnSave control.
+        /// Handles the Click event of the lbSave control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        protected void btnSave_Click(object sender, EventArgs e)
+        protected void lbSave_Click( object sender, EventArgs e )
         {
             Group group;
             bool wasSecurityRole = false;
 
             RockContext rockContext = new RockContext();
 
-            GroupService groupService = new GroupService(rockContext);
-            GroupLocationService groupLocationService = new GroupLocationService(rockContext);
-            ScheduleService scheduleService = new ScheduleService(rockContext);
-            AttributeService attributeService = new AttributeService(rockContext);
-            AttributeQualifierService attributeQualifierService = new AttributeQualifierService(rockContext);
-            CategoryService categoryService = new CategoryService(rockContext);
+            GroupService groupService = new GroupService( rockContext );
+            GroupLocationService groupLocationService = new GroupLocationService( rockContext );
+            ScheduleService scheduleService = new ScheduleService( rockContext );
+            AttributeService attributeService = new AttributeService( rockContext );
+            AttributeQualifierService attributeQualifierService = new AttributeQualifierService( rockContext );
+            CategoryService categoryService = new CategoryService( rockContext );
 
+            if ( ( ddlGroupType.SelectedValueAsInt() ?? 0 ) == 0 )
+            {
+                ddlGroupType.ShowErrorMessage( Rock.Constants.WarningMessage.CannotBeBlank( GroupType.FriendlyTypeName ) );
+                return;
+            }
 
+            int groupId = int.Parse( hfGroupId.Value );
 
-            int groupId = int.Parse(hfGroupId.Value);
-
-            if (groupId == 0)
+            if ( groupId == 0 )
             {
                 group = new Group();
                 group.IsSystem = false;
@@ -327,118 +331,119 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             }
             else
             {
-                group = groupService.Queryable("GroupLocations.Schedules").Where(g => g.Id == groupId).FirstOrDefault();
+                group = groupService.Queryable( "GroupLocations.Schedules" ).Where( g => g.Id == groupId ).FirstOrDefault();
                 wasSecurityRole = group.IsSecurityRole;
 
-                var selectedLocations = GroupLocationsState.Select(l => l.Guid);
-                foreach (var groupLocation in group.GroupLocations.Where(l => !selectedLocations.Contains(l.Guid)).ToList())
+                var selectedLocations = GroupLocationsState.Select( l => l.Guid );
+                foreach ( var groupLocation in group.GroupLocations.Where( l => !selectedLocations.Contains( l.Guid ) ).ToList() )
                 {
-                    group.GroupLocations.Remove(groupLocation);
-                    groupLocationService.Delete(groupLocation);
+                    group.GroupLocations.Remove( groupLocation );
+                    groupLocationService.Delete( groupLocation );
                 }
             }
 
-            foreach (var groupLocationState in GroupLocationsState)
+            foreach ( var groupLocationState in GroupLocationsState )
             {
-                GroupLocation groupLocation = group.GroupLocations.Where(l => l.Guid == groupLocationState.Guid).FirstOrDefault();
-                if (groupLocation == null)
+                GroupLocation groupLocation = group.GroupLocations.Where( l => l.Guid == groupLocationState.Guid ).FirstOrDefault();
+                if ( groupLocation == null )
                 {
                     groupLocation = new GroupLocation();
-                    group.GroupLocations.Add(groupLocation);
+                    group.GroupLocations.Add( groupLocation );
                 }
                 else
                 {
                     groupLocationState.Id = groupLocation.Id;
                     groupLocationState.Guid = groupLocation.Guid;
 
-                    var selectedSchedules = groupLocationState.Schedules.Select(s => s.Guid).ToList();
-                    foreach (var schedule in groupLocation.Schedules.Where(s => !selectedSchedules.Contains(s.Guid)).ToList())
+                    var selectedSchedules = groupLocationState.Schedules.Select( s => s.Guid ).ToList();
+                    foreach ( var schedule in groupLocation.Schedules.Where( s => !selectedSchedules.Contains( s.Guid ) ).ToList() )
                     {
-                        groupLocation.Schedules.Remove(schedule);
+                        groupLocation.Schedules.Remove( schedule );
                     }
                 }
 
-                groupLocation.CopyPropertiesFrom(groupLocationState);
+                groupLocation.CopyPropertiesFrom( groupLocationState );
 
-                var existingSchedules = groupLocation.Schedules.Select(s => s.Guid).ToList();
-                foreach (var scheduleState in groupLocationState.Schedules.Where(s => !existingSchedules.Contains(s.Guid)).ToList())
+                var existingSchedules = groupLocation.Schedules.Select( s => s.Guid ).ToList();
+                foreach ( var scheduleState in groupLocationState.Schedules.Where( s => !existingSchedules.Contains( s.Guid ) ).ToList() )
                 {
-                    var schedule = scheduleService.Get(scheduleState.Guid);
-                    if (schedule != null)
+                    var schedule = scheduleService.Get( scheduleState.Guid );
+                    if ( schedule != null )
                     {
-                        groupLocation.Schedules.Add(schedule);
+                        groupLocation.Schedules.Add( schedule );
                     }
                 }
             }
 
-            group.Name = tbName.Text;
-            group.Description = tbDescription.Text;
+            group.Name = dtbName.Text;
+            group.Description = dtbDescription.Text;
             group.IsActive = cbIsActive.Checked;
+            group.GroupTypeId = int.Parse( ddlGroupType.SelectedValue );
 
             group.LoadAttributes();
 
-            Rock.Attribute.Helper.GetEditValues(phGroupAttributes, group);
+            Rock.Attribute.Helper.GetEditValues( phGroupAttributes, group );
 
-            if (!Page.IsValid)
+            if ( !Page.IsValid )
             {
                 return;
             }
 
-            if (!group.IsValid)
+            if ( !group.IsValid )
             {
                 // Controls will render the error messages                    
                 return;
             }
 
             // use WrapTransaction since SaveAttributeValues does it's own RockContext.SaveChanges()
-            rockContext.WrapTransaction(() =>
+            rockContext.WrapTransaction( () =>
             {
-                if (group.Id.Equals(0))
+                if ( group.Id.Equals( 0 ) )
                 {
-                    groupService.Add(group);
+                    groupService.Add( group );
                 }
                 rockContext.SaveChanges();
 
-                group.SaveAttributeValues(rockContext);
+                group.SaveAttributeValues( rockContext );
 
                 /* Take care of Group Member Attributes */
-                var entityTypeId = EntityTypeCache.Read(typeof(GroupMember)).Id;
+                var entityTypeId = EntityTypeCache.Read( typeof( GroupMember ) ).Id;
                 string qualifierColumn = "GroupId";
                 string qualifierValue = group.Id.ToString();
 
                 // Get the existing attributes for this entity type and qualifier value
-                var attributes = attributeService.Get(entityTypeId, qualifierColumn, qualifierValue);
+                var attributes = attributeService.Get( entityTypeId, qualifierColumn, qualifierValue );
 
                 // Delete any of those attributes that were removed in the UI
-                var selectedAttributeGuids = GroupMemberAttributesState.Select(a => a.Guid);
-                foreach (var attr in attributes.Where(a => !selectedAttributeGuids.Contains(a.Guid)))
+                var selectedAttributeGuids = GroupMemberAttributesState.Select( a => a.Guid );
+                foreach ( var attr in attributes.Where( a => !selectedAttributeGuids.Contains( a.Guid ) ) )
                 {
-                    Rock.Web.Cache.AttributeCache.Flush(attr.Id);
+                    Rock.Web.Cache.AttributeCache.Flush( attr.Id );
 
-                    attributeService.Delete(attr);
+                    attributeService.Delete( attr );
                 }
 
                 // Update the Attributes that were assigned in the UI
-                foreach (var attributeState in GroupMemberAttributesState)
+                foreach ( var attributeState in GroupMemberAttributesState )
                 {
-                    Rock.Attribute.Helper.SaveAttributeEdits(attributeState, entityTypeId, qualifierColumn, qualifierValue, rockContext);
+                    Rock.Attribute.Helper.SaveAttributeEdits( attributeState, entityTypeId, qualifierColumn, qualifierValue, rockContext );
                 }
 
                 rockContext.SaveChanges();
-            });
+            } );
 
-            if (group != null && wasSecurityRole)
+            if ( group != null && wasSecurityRole )
             {
-                if (!group.IsSecurityRole)
+                if ( !group.IsSecurityRole )
                 {
                     // if this group was a SecurityRole, but no longer is, flush
-                    Rock.Security.Role.Flush(group.Id);
+                    Rock.Security.Role.Flush( group.Id );
                     Rock.Security.Authorization.Flush();
                 }
             }
             else
             {
-                if (group.IsSecurityRole)
+                if ( group.IsSecurityRole )
                 {
                     // new security role, flush
                     Rock.Security.Authorization.Flush();
@@ -448,28 +453,28 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             var qryParams = new Dictionary<string, string>();
             qryParams["GroupId"] = group.Id.ToString();
 
-            NavigateToPage(RockPage.Guid, qryParams);
+            NavigateToPage( RockPage.Guid, qryParams );
         }
 
         /// <summary>
-        /// Handles the Click event of the btnCancel control.
+        /// Handles the Click event of the lbCancel control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        protected void btnCancel_Click(object sender, EventArgs e)
+        protected void lbCancel_Click( object sender, EventArgs e )
         {
-            if (hfGroupId.Value.Equals("0"))
+            if ( hfGroupId.Value.Equals( "0" ) )
             {
-                int? parentGroupId = PageParameter("ParentGroupId").AsIntegerOrNull();
-                if (parentGroupId.HasValue)
+                int? parentGroupId = PageParameter( "ParentGroupId" ).AsIntegerOrNull();
+                if ( parentGroupId.HasValue )
                 {
                     // Cancelling on Add, and we know the parentGroupID, so we are probably in treeview mode, so navigate to the current page
                     var qryParams = new Dictionary<string, string>();
-                    if (parentGroupId != 0)
+                    if ( parentGroupId != 0 )
                     {
                         qryParams["GroupId"] = parentGroupId.ToString();
                     }
-                    NavigateToPage(RockPage.Guid, qryParams);
+                    NavigateToPage( RockPage.Guid, qryParams );
                 }
                 else
                 {
@@ -480,7 +485,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             else
             {
                 // Cancelling on Edit.  Return to Details
-                ShowReadonlyDetails(GetGroup(hfGroupId.Value.AsInteger()));
+                ShowReadonlyDetails( GetGroup( hfGroupId.Value.AsInteger() ) );
             }
         }
 
@@ -494,11 +499,25 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        protected void Block_BlockUpdated(object sender, EventArgs e)
+        protected void Block_BlockUpdated( object sender, EventArgs e )
         {
-            ShowReadonlyDetails(GetGroup(hfGroupId.Value.AsInteger()));
+            ShowReadonlyDetails( GetGroup( hfGroupId.Value.AsInteger() ) );
         }
 
+        /// <summary>
+        /// Handles the SelectedIndexChanged event of the ddlGroupType control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected void ddlGroupType_SelectedIndexChanged( object sender, EventArgs e )
+        {
+            // grouptype changed, so load up the new attributes and set controls to the default attribute values
+            var group = new Group { GroupTypeId = ddlGroupType.SelectedValueAsInt() ?? 0 };
+            if ( group.GroupTypeId > 0 )
+            {
+                ShowGroupTypeEditDetails( GroupTypeCache.Read( group.GroupTypeId ), group, true );
+            }
+        }
         #endregion
 
         #region Internal Methods
@@ -507,9 +526,9 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Shows the detail.
         /// </summary>
         /// <param name="groupId">The group identifier.</param>
-        public void ShowDetail(int groupId)
+        public void ShowDetail( int groupId )
         {
-            ShowDetail(groupId, null);
+            ShowDetail( groupId, null );
         }
 
         /// <summary>
@@ -517,22 +536,22 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="groupId">The group identifier.</param>
         /// <param name="parentGroupId">The parent group identifier.</param>
-        public void ShowDetail(int groupId, int? parentGroupId)
+        public void ShowDetail( int groupId, int? parentGroupId )
         {
             Group group = null;
 
             bool editAllowed = true;
 
-            if (!groupId.Equals(0))
+            if ( !groupId.Equals( 0 ) )
             {
-                group = GetGroup(groupId);
-                if (group != null)
+                group = GetGroup( groupId );
+                if ( group != null )
                 {
-                    editAllowed = group.IsAuthorized(Authorization.EDIT, CurrentPerson);
+                    editAllowed = group.IsAuthorized( Authorization.EDIT, CurrentPerson );
                 }
             }
 
-            if (group == null)
+            if ( group == null )
             {
                 group = new Group { Id = 0, IsActive = true, ParentGroupId = parentGroupId, Name = "" };
 
@@ -546,41 +565,41 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             bool readOnly = false;
 
             nbEditModeMessage.Text = string.Empty;
-            if (!editAllowed || !IsUserAuthorized(Authorization.EDIT))
+            if ( !editAllowed || !IsUserAuthorized( Authorization.EDIT ) )
             {
                 readOnly = true;
-                nbEditModeMessage.Text = EditModeMessage.ReadOnlyEditActionNotAllowed(Group.FriendlyTypeName);
+                nbEditModeMessage.Text = EditModeMessage.ReadOnlyEditActionNotAllowed( Group.FriendlyTypeName );
             }
 
-            if (group.IsSystem)
+            if ( group.IsSystem )
             {
-                nbEditModeMessage.Text = EditModeMessage.System(Group.FriendlyTypeName);
+                nbEditModeMessage.Text = EditModeMessage.System( Group.FriendlyTypeName );
             }
 
             var roleLimitWarnings = new StringBuilder();
 
-            if (group.GroupType != null && group.GroupType.Roles != null && group.GroupType.Roles.Any())
+            if ( group.GroupType != null && group.GroupType.Roles != null && group.GroupType.Roles.Any() )
             {
-                foreach (var role in group.GroupType.Roles)
+                foreach ( var role in group.GroupType.Roles )
                 {
                     int curCount = 0;
-                    if (group.Members != null)
+                    if ( group.Members != null )
                     {
                         curCount = group.Members
-                            .Where(m => m.GroupRoleId == role.Id && m.GroupMemberStatus == GroupMemberStatus.Active)
+                            .Where( m => m.GroupRoleId == role.Id && m.GroupMemberStatus == GroupMemberStatus.Active )
                             .Count();
                     }
 
-                    if (role.MinCount.HasValue && role.MinCount.Value > curCount)
+                    if ( role.MinCount.HasValue && role.MinCount.Value > curCount )
                     {
                         string format = "The <strong>{1}</strong> role is currently below its minimum requirement of {2:N0} active {3}.<br/>";
-                        roleLimitWarnings.AppendFormat(format, role.Name.Pluralize(), role.Name, role.MinCount, role.MinCount == 1 ? group.GroupType.GroupMemberTerm : group.GroupType.GroupMemberTerm.Pluralize());
+                        roleLimitWarnings.AppendFormat( format, role.Name.Pluralize(), role.Name, role.MinCount, role.MinCount == 1 ? group.GroupType.GroupMemberTerm : group.GroupType.GroupMemberTerm.Pluralize() );
                     }
 
-                    if (role.MaxCount.HasValue && role.MaxCount.Value < curCount)
+                    if ( role.MaxCount.HasValue && role.MaxCount.Value < curCount )
                     {
                         string format = "The <strong>{1}</strong> role is currently above its maximum limit of {2:N0} active {3}.<br/>";
-                        roleLimitWarnings.AppendFormat(format, role.Name.Pluralize(), role.Name, role.MaxCount, role.MaxCount == 1 ? group.GroupType.GroupMemberTerm : group.GroupType.GroupMemberTerm.Pluralize());
+                        roleLimitWarnings.AppendFormat( format, role.Name.Pluralize(), role.Name, role.MaxCount, role.MaxCount == 1 ? group.GroupType.GroupMemberTerm : group.GroupType.GroupMemberTerm.Pluralize() );
                     }
                 }
             }
@@ -588,22 +607,22 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             nbRoleLimitWarning.Text = roleLimitWarnings.ToString();
             nbRoleLimitWarning.Visible = roleLimitWarnings.Length > 0;
 
-            if (readOnly)
+            if ( readOnly )
             {
                 pnlDetails.Visible = false;
-                ShowReadonlyDetails(group);
+                ShowReadonlyDetails( group );
             }
             else
             {
-                btnEdit.Visible = true;
-                btnDelete.Visible = !group.IsSystem;
-                if (group.Id > 0)
+                lbEdit.Visible = true;
+                lbDelete.Visible = !group.IsSystem;
+                if ( group.Id > 0 )
                 {
-                    ShowReadonlyDetails(group);
+                    ShowReadonlyDetails( group );
                 }
                 else
                 {
-                    ShowEditDetails(group);
+                    ShowEditDetails( group );
                 }
             }
         }
@@ -612,52 +631,72 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Shows the edit details.
         /// </summary>
         /// <param name="group">The group.</param>
-        private void ShowEditDetails(Group group)
+        private void ShowEditDetails( Group group )
         {
-            if (group.Id == 0)
+            if ( group.Id == 0 )
             {
-                lReadOnlyTitle.Text = ActionTitle.Add(Group.FriendlyTypeName).FormatAsHtmlTitle();
-                hlInactive.Visible = false;
+                lReadOnlyTitle.Text = ActionTitle.Add( Group.FriendlyTypeName ).FormatAsHtmlTitle();
+                hlblInactive.Visible = false;
             }
             else
             {
                 lReadOnlyTitle.Text = group.Name.FormatAsHtmlTitle();
             }
 
-            SetEditMode(true);
+            SetEditMode( true );
 
-            tbName.Text = group.Name;
-            tbDescription.Text = group.Description;
+            dtbName.Text = group.Name;
+            dtbDescription.Text = group.Description;
             cbIsActive.Checked = group.IsActive;
 
             var rockContext = new RockContext();
 
-            var groupService = new GroupService(rockContext);
-            var attributeService = new AttributeService(rockContext);
+            var groupService = new GroupService( rockContext );
+            var attributeService = new AttributeService( rockContext );
 
+            LoadDropDowns();
 
-
-
-           
+            if ( group.Id == 0 && ddlGroupType.Items.Count > 1 )
+            {
+                if ( GetAttributeValue( "LimittoSecurityRoleGroups" ).AsBoolean() )
+                {
+                    // default GroupType for new Group to "Security Roles"  if LimittoSecurityRoleGroups
+                    var securityRoleGroupType = GroupTypeCache.GetSecurityRoleGroupType();
+                    if ( securityRoleGroupType != null )
+                    {
+                        ddlGroupType.SetValue( securityRoleGroupType.Id );
+                    }
+                    else
+                    {
+                        ddlGroupType.SelectedIndex = 0;
+                    }
+                }
+                else
+                {
+                    // if this is a new group (and not "LimitToSecurityRoleGroups", and there is more than one choice for GroupType, default to no selection so they are forced to choose (vs unintentionallly choosing the default one)
+                    ddlGroupType.SelectedIndex = 0;
+                }
+            }
+            else
+            {
+                ddlGroupType.SetValue( group.GroupTypeId );
+            }
 
             //GroupLocationsState = groupLocations;
             GroupLocationsState = group.GroupLocations.ToList();
 
-            ShowGroupTypeEditDetails(GroupTypeCache.Read(group.GroupTypeId), group, true);
-
-            
+            ShowGroupTypeEditDetails( GroupTypeCache.Read( group.GroupTypeId ), group, true );
 
             string qualifierValue = group.Id.ToString();
-            GroupMemberAttributesState = attributeService.GetByEntityTypeId(new GroupMember().TypeId).AsQueryable()
-                    .Where(a =>
-                        a.EntityTypeQualifierColumn.Equals("GroupId", StringComparison.OrdinalIgnoreCase) &&
-                        a.EntityTypeQualifierValue.Equals(qualifierValue))
-                    .OrderBy(a => a.Order)
-                    .ThenBy(a => a.Name)
+            GroupMemberAttributesState = attributeService.GetByEntityTypeId( new GroupMember().TypeId ).AsQueryable()
+                    .Where( a =>
+                        a.EntityTypeQualifierColumn.Equals( "GroupId", StringComparison.OrdinalIgnoreCase ) &&
+                        a.EntityTypeQualifierValue.Equals( qualifierValue ) )
+                    .OrderBy( a => a.Order )
+                    .ThenBy( a => a.Name )
                     .ToList();
 
-
-            BindInheritedAttributes(group.GroupTypeId, attributeService);
+            BindInheritedAttributes( group.GroupTypeId, attributeService );
         }
 
         /// <summary>
@@ -666,18 +705,18 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="groupType">Type of the group.</param>
         /// <param name="group">The group.</param>
         /// <param name="setValues">if set to <c>true</c> [set values].</param>
-        private void ShowGroupTypeEditDetails(GroupTypeCache groupType, Group group, bool setValues)
+        private void ShowGroupTypeEditDetails( GroupTypeCache groupType, Group group, bool setValues )
         {
-            if (group != null)
+            if ( group != null )
             {
                 // Save value to viewstate for use later when binding location grid
                 AllowMultipleLocations = groupType != null && groupType.AllowMultipleLocations;
                 phGroupAttributes.Controls.Clear();
                 group.LoadAttributes();
 
-                if (group.Attributes != null && group.Attributes.Any())
+                if ( group.Attributes != null && group.Attributes.Any() )
                 {
-                    Rock.Attribute.Helper.AddEditControls(group, phGroupAttributes, setValues, BlockValidationGroup);
+                    Rock.Attribute.Helper.AddEditControls( group, phGroupAttributes, setValues, BlockValidationGroup );
                 }
             }
         }
@@ -686,134 +725,134 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Shows the readonly details.
         /// </summary>
         /// <param name="group">The group.</param>
-        private void ShowReadonlyDetails(Group group)
+        private void ShowReadonlyDetails( Group group )
         {
-            SetEditMode(false);
+            SetEditMode( false );
             var rockContext = new RockContext();
 
             string groupIconHtml = string.Empty;
-            if (group.GroupType != null)
+            if ( group.GroupType != null )
             {
-                groupIconHtml = !string.IsNullOrWhiteSpace(group.GroupType.IconCssClass) ?
-                    groupIconHtml = string.Format("<i class='{0}' ></i>", group.GroupType.IconCssClass) : string.Empty;
+                groupIconHtml = !string.IsNullOrWhiteSpace( group.GroupType.IconCssClass ) ?
+                    groupIconHtml = string.Format( "<i class='{0}' ></i>", group.GroupType.IconCssClass ) : string.Empty;
             }
 
-            hfGroupId.SetValue(group.Id);
+            hfGroupId.SetValue( group.Id );
             lGroupIconHtml.Text = groupIconHtml;
             lReadOnlyTitle.Text = group.Name.FormatAsHtmlTitle();
 
-            hlInactive.Visible = !group.IsActive;
-            hlType.Text = group.GroupType.Name;
+            hlblInactive.Visible = !group.IsActive;
+            hlblType.Text = group.GroupType.Name;
 
             lGroupDescription.Text = group.Description;
 
             DescriptionList descriptionList = new DescriptionList();
 
-            if (group.ParentGroup != null)
+            if ( group.ParentGroup != null )
             {
-                descriptionList.Add("Parent Group", group.ParentGroup.Name);
+                descriptionList.Add( "Parent Group", group.ParentGroup.Name );
             }
 
-            if (group.Campus != null)
+            if ( group.Campus != null )
             {
-                hlCampus.Visible = true;
-                hlCampus.Text = group.Campus.Name;
+                hlblCampus.Visible = true;
+                hlblCampus.Text = group.Campus.Name;
             }
             else
             {
-                hlCampus.Visible = false;
+                hlblCampus.Visible = false;
             }
 
-            lblMainDetails.Text = descriptionList.Html;
+            lMainDetails.Text = descriptionList.Html;
 
             var attributes = new List<Rock.Web.Cache.AttributeCache>();
 
             // Get the attributes inherited from group type
-            GroupType groupType = new GroupTypeService(rockContext).Get(group.GroupTypeId);
+            GroupType groupType = new GroupTypeService( rockContext ).Get( group.GroupTypeId );
             groupType.LoadAttributes();
-            attributes = groupType.Attributes.Select(a => a.Value).OrderBy(a => a.Order).ThenBy(a => a.Name).ToList();
+            attributes = groupType.Attributes.Select( a => a.Value ).OrderBy( a => a.Order ).ThenBy( a => a.Name ).ToList();
 
             // Combine with the group attributes
             group.LoadAttributes();
-            attributes.AddRange(group.Attributes.Select(a => a.Value).OrderBy(a => a.Order).ThenBy(a => a.Name));
+            attributes.AddRange( group.Attributes.Select( a => a.Value ).OrderBy( a => a.Order ).ThenBy( a => a.Name ) );
 
             // display attribute values
-            var attributeCategories = Helper.GetAttributeCategories(attributes);
-            Rock.Attribute.Helper.AddDisplayControls(group, attributeCategories, phAttributes, null, false);
+            var attributeCategories = Helper.GetAttributeCategories( attributes );
+            Rock.Attribute.Helper.AddDisplayControls( group, attributeCategories, phAttributes, null, false );
 
             var pageParams = new Dictionary<string, string>();
-            pageParams.Add("GroupId", group.Id.ToString());
-            string groupMapUrl = LinkedPageUrl("GroupMapPage", pageParams);
+            pageParams.Add( "GroupId", group.Id.ToString() );
+            string groupMapUrl = LinkedPageUrl( "GroupMapPage", pageParams );
 
             // Get Map Style
             phMaps.Controls.Clear();
-            var mapStyleValue = DefinedValueCache.Read(GetAttributeValue("MapStyle"));
-            if (mapStyleValue == null)
+            var mapStyleValue = DefinedValueCache.Read( GetAttributeValue( "MapStyle" ) );
+            if ( mapStyleValue == null )
             {
-                mapStyleValue = DefinedValueCache.Read(Rock.SystemGuid.DefinedValue.MAP_STYLE_ROCK);
+                mapStyleValue = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.MAP_STYLE_ROCK );
             }
 
-            if (mapStyleValue != null)
+            if ( mapStyleValue != null )
             {
-                string mapStyle = mapStyleValue.GetAttributeValue("StaticMapStyle");
-                if (!string.IsNullOrWhiteSpace(mapStyle))
+                string mapStyle = mapStyleValue.GetAttributeValue( "StaticMapStyle" );
+                if ( !string.IsNullOrWhiteSpace( mapStyle ) )
                 {
-                    foreach (GroupLocation groupLocation in group.GroupLocations.OrderBy(gl => (gl.GroupLocationTypeValue != null) ? gl.GroupLocationTypeValue.Order : int.MaxValue))
+                    foreach ( GroupLocation groupLocation in group.GroupLocations.OrderBy( gl => ( gl.GroupLocationTypeValue != null ) ? gl.GroupLocationTypeValue.Order : int.MaxValue ) )
                     {
-                        if (groupLocation.Location != null)
+                        if ( groupLocation.Location != null )
                         {
-                            if (groupLocation.Location.GeoPoint != null)
+                            if ( groupLocation.Location.GeoPoint != null )
                             {
-                                string markerPoints = string.Format("{0},{1}", groupLocation.Location.GeoPoint.Latitude, groupLocation.Location.GeoPoint.Longitude);
-                                string mapLink = System.Text.RegularExpressions.Regex.Replace(mapStyle, @"\{\s*MarkerPoints\s*\}", markerPoints);
-                                mapLink = System.Text.RegularExpressions.Regex.Replace(mapLink, @"\{\s*PolygonPoints\s*\}", string.Empty);
+                                string markerPoints = string.Format( "{0},{1}", groupLocation.Location.GeoPoint.Latitude, groupLocation.Location.GeoPoint.Longitude );
+                                string mapLink = System.Text.RegularExpressions.Regex.Replace( mapStyle, @"\{\s*MarkerPoints\s*\}", markerPoints );
+                                mapLink = System.Text.RegularExpressions.Regex.Replace( mapLink, @"\{\s*PolygonPoints\s*\}", string.Empty );
                                 mapLink += "&sensor=false&size=350x200&zoom=13&format=png";
                                 var literalcontrol = new Literal()
                                 {
                                     Text = string.Format(
                                     "<div class='group-location-map'>{0}<a href='{1}'><img src='{2}'/></a></div>",
-                                    groupLocation.GroupLocationTypeValue != null ? ("<h4>" + groupLocation.GroupLocationTypeValue.Value + "</h4>") : string.Empty,
+                                    groupLocation.GroupLocationTypeValue != null ? ( "<h4>" + groupLocation.GroupLocationTypeValue.Value + "</h4>" ) : string.Empty,
                                     groupMapUrl,
-                                    mapLink),
+                                    mapLink ),
                                     Mode = LiteralMode.PassThrough
                                 };
-                                phMaps.Controls.Add(literalcontrol);
+                                phMaps.Controls.Add( literalcontrol );
                             }
-                            else if (groupLocation.Location.GeoFence != null)
+                            else if ( groupLocation.Location.GeoFence != null )
                             {
                                 string polygonPoints = "enc:" + groupLocation.Location.EncodeGooglePolygon();
-                                string mapLink = System.Text.RegularExpressions.Regex.Replace(mapStyle, @"\{\s*MarkerPoints\s*\}", string.Empty);
-                                mapLink = System.Text.RegularExpressions.Regex.Replace(mapLink, @"\{\s*PolygonPoints\s*\}", polygonPoints);
+                                string mapLink = System.Text.RegularExpressions.Regex.Replace( mapStyle, @"\{\s*MarkerPoints\s*\}", string.Empty );
+                                mapLink = System.Text.RegularExpressions.Regex.Replace( mapLink, @"\{\s*PolygonPoints\s*\}", polygonPoints );
                                 mapLink += "&sensor=false&size=350x200&format=png";
                                 phMaps.Controls.Add(
-                                    new LiteralControl(string.Format(
+                                    new LiteralControl( string.Format(
                                         "<div class='group-location-map'>{0}<a href='{1}'><img src='{2}'/></a></div>",
-                                        groupLocation.GroupLocationTypeValue != null ? ("<h4>" + groupLocation.GroupLocationTypeValue.Value + "</h4>") : string.Empty,
+                                        groupLocation.GroupLocationTypeValue != null ? ( "<h4>" + groupLocation.GroupLocationTypeValue.Value + "</h4>" ) : string.Empty,
                                         groupMapUrl,
-                                        mapLink)));
+                                        mapLink ) ) );
                             }
                         }
                     }
                 }
             }
 
-            hlMap.Visible = !string.IsNullOrWhiteSpace(groupMapUrl);
+            hlMap.Visible = !string.IsNullOrWhiteSpace( groupMapUrl );
             hlMap.NavigateUrl = groupMapUrl;
 
-            btnSecurity.Visible = group.IsAuthorized(Authorization.ADMINISTRATE, CurrentPerson);
-            btnSecurity.EntityId = group.Id;
+            sbtnSecurity.Visible = group.IsAuthorized( Authorization.ADMINISTRATE, CurrentPerson );
+            sbtnSecurity.EntityId = group.Id;
         }
 
         /// <summary>
         /// Sets the edit mode.
         /// </summary>
         /// <param name="editable">if set to <c>true</c> [editable].</param>
-        private void SetEditMode(bool editable)
+        private void SetEditMode( bool editable )
         {
             pnlEditDetails.Visible = editable;
             fieldsetViewDetails.Visible = !editable;
 
-            this.HideSecondaryBlocks(editable);
+            this.HideSecondaryBlocks( editable );
         }
 
         /// <summary>
@@ -821,16 +860,16 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="groupId">The group identifier.</param>
         /// <returns></returns>
-        private Group GetGroup(int groupId)
+        private Group GetGroup( int groupId )
         {
-            string key = string.Format("Group:{0}", groupId);
-            Group group = RockPage.GetSharedItem(key) as Group;
-            if (group == null)
+            string key = string.Format( "Group:{0}", groupId );
+            Group group = RockPage.GetSharedItem( key ) as Group;
+            if ( group == null )
             {
-                group = new GroupService(new RockContext()).Queryable("GroupType,GroupLocations.Schedules")
-                    .Where(g => g.Id == groupId)
+                group = new GroupService( new RockContext() ).Queryable( "GroupType,GroupLocations.Schedules" )
+                    .Where( g => g.Id == groupId )
                     .FirstOrDefault();
-                RockPage.SaveSharedItem(key, group);
+                RockPage.SaveSharedItem( key, group );
             }
 
             return group;
@@ -841,9 +880,9 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="property">The property.</param>
         /// <returns></returns>
-        protected string GetTabClass(object property)
+        protected string GetTabClass( object property )
         {
-            if (property.ToString() == LocationTypeTab)
+            if ( property.ToString() == LocationTypeTab )
             {
                 return "active";
             }
@@ -852,35 +891,48 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         }
 
         /// <summary>
+        /// Loads the drop downs.
+        /// </summary>
+        private void LoadDropDowns()
+        {
+            GroupTypeService groupTypeService = new GroupTypeService( new RockContext() );
+            var purpose = new DefinedValueService( new RockContext() ).GetByDefinedTypeGuid( Rock.SystemGuid.DefinedType.GROUPTYPE_PURPOSE.AsGuid() ).Where( a => a.Value == "Accountability Group" ).FirstOrDefault();
+            List<GroupType> groupTypes = groupTypeService.Queryable().Where( a => a.GroupTypePurposeValueId == purpose.Id ).OrderBy( a => a.Name ).ToList();
+            groupTypes.Insert( 0, new GroupType { Id = None.Id, Name = None.Text } );
+            ddlGroupType.DataSource = groupTypes;
+            ddlGroupType.DataBind();
+        }
+
+        /// <summary>
         /// Binds the inherited attributes.
         /// </summary>
         /// <param name="inheritedGroupTypeId">The inherited group type identifier.</param>
         /// <param name="attributeService">The attribute service.</param>
-        private void BindInheritedAttributes(int? inheritedGroupTypeId, AttributeService attributeService)
+        private void BindInheritedAttributes( int? inheritedGroupTypeId, AttributeService attributeService )
         {
             GroupMemberAttributesInheritedState = new List<InheritedAttribute>();
 
-            while (inheritedGroupTypeId.HasValue)
+            while ( inheritedGroupTypeId.HasValue )
             {
-                var inheritedGroupType = GroupTypeCache.Read(inheritedGroupTypeId.Value);
-                if (inheritedGroupType != null)
+                var inheritedGroupType = GroupTypeCache.Read( inheritedGroupTypeId.Value );
+                if ( inheritedGroupType != null )
                 {
                     string qualifierValue = inheritedGroupType.Id.ToString();
 
-                    foreach (var attribute in attributeService.GetByEntityTypeId(new GroupMember().TypeId).AsQueryable()
-                        .Where(a =>
-                            a.EntityTypeQualifierColumn.Equals("GroupTypeId", StringComparison.OrdinalIgnoreCase) &&
-                            a.EntityTypeQualifierValue.Equals(qualifierValue))
-                        .OrderBy(a => a.Order)
-                        .ThenBy(a => a.Name)
-                        .ToList())
+                    foreach ( var attribute in attributeService.GetByEntityTypeId( new GroupMember().TypeId ).AsQueryable()
+                        .Where( a =>
+                            a.EntityTypeQualifierColumn.Equals( "GroupTypeId", StringComparison.OrdinalIgnoreCase ) &&
+                            a.EntityTypeQualifierValue.Equals( qualifierValue ) )
+                        .OrderBy( a => a.Order )
+                        .ThenBy( a => a.Name )
+                        .ToList() )
                     {
-                        GroupMemberAttributesInheritedState.Add(new InheritedAttribute(
+                        GroupMemberAttributesInheritedState.Add( new InheritedAttribute(
                             attribute.Name,
                             attribute.Key,
                             attribute.Description,
-                            Page.ResolveUrl("~/GroupType/" + attribute.EntityTypeQualifierValue),
-                            inheritedGroupType.Name));
+                            Page.ResolveUrl( "~/GroupType/" + attribute.EntityTypeQualifierValue ),
+                            inheritedGroupType.Name ) );
                     }
 
                     inheritedGroupTypeId = inheritedGroupType.InheritedGroupTypeId;
@@ -898,10 +950,10 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Sets the attribute list order.
         /// </summary>
         /// <param name="attributeList">The attribute list.</param>
-        private void SetAttributeListOrder(List<Attribute> attributeList)
+        private void SetAttributeListOrder( List<Attribute> attributeList )
         {
             int order = 0;
-            attributeList.OrderBy(a => a.Order).ThenBy(a => a.Name).ToList().ForEach(a => a.Order = order++);
+            attributeList.OrderBy( a => a.Order ).ThenBy( a => a.Name ).ToList().ForEach( a => a.Order = order++ );
         }
 
         /// <summary>
@@ -910,15 +962,15 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="itemList">The item list.</param>
         /// <param name="oldIndex">The old index.</param>
         /// <param name="newIndex">The new index.</param>
-        private void ReorderAttributeList(List<Attribute> itemList, int oldIndex, int newIndex)
+        private void ReorderAttributeList( List<Attribute> itemList, int oldIndex, int newIndex )
         {
-            var movedItem = itemList.Where(a => a.Order == oldIndex).FirstOrDefault();
-            if (movedItem != null)
+            var movedItem = itemList.Where( a => a.Order == oldIndex ).FirstOrDefault();
+            if ( movedItem != null )
             {
-                if (newIndex < oldIndex)
+                if ( newIndex < oldIndex )
                 {
                     // Moved up
-                    foreach (var otherItem in itemList.Where(a => a.Order < oldIndex && a.Order >= newIndex))
+                    foreach ( var otherItem in itemList.Where( a => a.Order < oldIndex && a.Order >= newIndex ) )
                     {
                         otherItem.Order = otherItem.Order + 1;
                     }
@@ -926,7 +978,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 else
                 {
                     // Moved Down
-                    foreach (var otherItem in itemList.Where(a => a.Order > oldIndex && a.Order <= newIndex))
+                    foreach ( var otherItem in itemList.Where( a => a.Order > oldIndex && a.Order <= newIndex ) )
                     {
                         otherItem.Order = otherItem.Order - 1;
                     }
@@ -938,8 +990,5 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
         #endregion
 
-
-
- 
     }
 }

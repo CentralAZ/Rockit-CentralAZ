@@ -19,11 +19,11 @@ using Rock.Web.UI.Controls;
 
 namespace RockWeb.Plugins.com_centralaz.Accountability
 {
-    [DisplayName("Accountability Question Score")]
-    [Category("com_centralaz > Accountability")]
-    [Description("Shows the score for each question")]
+    [DisplayName( "Accountability Question Score" )]
+    [Category( "com_centralaz > Accountability" )]
+    [Description( "Shows the score for each question" )]
 
-    public partial class QuestionScore : Rock.Web.UI.RockBlock
+    public partial class QuestionScore : Rock.Web.UI.RockBlock, Rock.Web.UI.ISecondaryBlock
     {
 
         #region Control Methods
@@ -32,9 +32,9 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Raises the <see cref="E:System.Web.UI.Control.Init" /> event.
         /// </summary>
         /// <param name="e">An <see cref="T:System.EventArgs" /> object that contains the event data.</param>
-        protected override void OnInit(EventArgs e)
+        protected override void OnInit( EventArgs e )
         {
-            base.OnInit(e);
+            base.OnInit( e );
 
         }
 
@@ -42,13 +42,21 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
         /// </summary>
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
-        protected override void OnLoad(EventArgs e)
+        protected override void OnLoad( EventArgs e )
         {
-            if (!Page.IsPostBack)
+            if ( !Page.IsPostBack )
             {
             }
-            LoadScores();
-            base.OnLoad(e);
+            if ( int.Parse( PageParameter( "GroupMemberId" ) ) == 0 )
+            {
+                pnlContent.Visible = false;
+            }
+            else
+            {
+                LoadScores();
+            }
+
+            base.OnLoad( e );
         }
 
         #endregion
@@ -56,50 +64,60 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
         #region Internal Methods
 
+        /// <summary>
+        /// Populates the various literals with their values.
+        /// </summary>
         protected void LoadScores()
         {
-            GroupMember groupMember = new GroupMemberService(new RockContext()).Get(int.Parse(PageParameter("GroupMemberId")));
+            GroupMember groupMember = new GroupMemberService( new RockContext() ).Get( int.Parse( PageParameter( "GroupMemberId" ) ) );
             int groupId = groupMember.GroupId;
             int personId = groupMember.PersonId;
-            ResponseSetService responseSetService = new ResponseSetService(new AccountabilityContext());
-            QuestionService questionService = new QuestionService(new AccountabilityContext());
+            ResponseSetService responseSetService = new ResponseSetService( new AccountabilityContext() );
+            QuestionService questionService = new QuestionService( new AccountabilityContext() );
 
-            double overallScore = responseSetService.GetOverallScore(personId, groupId);
-            double[] weakScore = responseSetService.GetWeakScore(personId, groupId);
-            double[] strongScore = responseSetService.GetStrongScore(personId, groupId);
+            double overallScore = responseSetService.GetOverallScore( personId, groupId );
+            double[] weakScore = responseSetService.GetWeakScore( personId, groupId );
+            double[] strongScore = responseSetService.GetStrongScore( personId, groupId );
 
 
-            if (overallScore == null || overallScore == -1)
+            if ( overallScore == null || overallScore == -1 )
             {
-                lblOverallScore.Text = "N/A";
+                lOverallScore.Text = "N/A";
             }
             else
             {
-                lblOverallScore.Text = overallScore.ToString();
+                lOverallScore.Text = overallScore.ToString( "0.0%" );
             }
 
-            if (weakScore[0] == -1)
+            if ( weakScore[0] == -1 )
             {
-                lblWeakScore.Text = "N/A";
+                lWeakScore.Text = "N/A";
             }
             else
             {
-                lblWeakScore.Text = weakScore[0].ToString();
-                lblWeakScoreQuestion.Text = questionService.GetShortForm(weakScore[1]);
+                lWeakScore.Text = weakScore[0].ToString( "0.0%" );
+                lWeakScoreQuestion.Text = questionService.GetShortForm( weakScore[1] );
             }
 
-            if (strongScore[0] == -1)
+            if ( strongScore[0] == -1 )
             {
-                lblStrongScore.Text = "N/A";
+                lStrongScore.Text = "N/A";
             }
             else
             {
-                lblStrongScore.Text = strongScore[0].ToString();
-                lblStrongScoreQuestion.Text = questionService.GetShortForm(strongScore[1]);
+                lStrongScore.Text = strongScore[0].ToString( "0.0%" );
+                lStrongScoreQuestion.Text = questionService.GetShortForm( strongScore[1] );
             }
-
-
         }
         #endregion
+
+        /// <summary>
+        /// Determines the visibility of the block.
+        /// </summary>
+        /// <param name="visible">The boolean that determines whether the block is visible or not</param>
+        public void SetVisible( bool visible )
+        {
+            pnlContent.Visible = visible;
+        }
     }
 }
