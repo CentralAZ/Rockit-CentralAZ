@@ -38,7 +38,7 @@ namespace com.centralaz.Accountability.Model
         /// <value>
         /// The comment of the response.
         /// </value>
-        [MaxLength(100)]
+        [MaxLength(300)]
         [DataMember]
         public string Comment { get; set; }
 

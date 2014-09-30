@@ -112,7 +112,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         {
             var dataContext = new AccountabilityContext();
             var questionService = new QuestionService( dataContext );
-            var responseService = new ResponseService(new AccountabilityContext());
+            var responseService = new ResponseService( new AccountabilityContext() );
             var accountabilityQuestion = questionService.Get( (int)e.RowKeyValue );
             if ( accountabilityQuestion != null )
             {
@@ -122,9 +122,10 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     maGridWarning.Show( errorMessage, ModalAlertType.Information );
                     return;
                 }
-                List<Response> responseList=responseService.GetResponsesForQuestion((int)e.RowKeyValue);
-                foreach(Response i in responseList){
-                    responseService.Delete(i);
+                List<Response> responseList = responseService.GetResponsesForQuestion( (int)e.RowKeyValue );
+                foreach ( Response i in responseList )
+                {
+                    responseService.Delete( i );
                 }
                 questionService.Delete( accountabilityQuestion );
                 dataContext.SaveChanges();

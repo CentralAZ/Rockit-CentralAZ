@@ -99,7 +99,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 HtmlGenericControl questionRow = new HtmlGenericControl();
                 Literal questionScore = new Literal();
                 HtmlGenericControl gridCell = new HtmlGenericControl( "div" );
-                int[] responsePercent = new int[2];
+                double[] responsePercent = new double[2];
 
                 //For each row of two questions
                 for ( int i = 0; i < questions.Count; i++ )

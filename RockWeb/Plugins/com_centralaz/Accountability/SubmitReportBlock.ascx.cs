@@ -96,7 +96,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 }
                 DateTime nextDueDate = NextReportDate( reportStartDate );
 
-                WriteDueDateMessage( nextDueDate, recentReportDate );
+                WriteDueDateMessage( nextDueDate, recentReportDate, groupId );
             }
         }
 
@@ -105,20 +105,26 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         /// <param name="nextDueDate">The next due date</param>
         /// <param name="lastReportDate">The last report date</param>
-        protected void WriteDueDateMessage( DateTime nextDueDate, DateTime lastReportDate )
+        protected void WriteDueDateMessage( DateTime nextDueDate, DateTime lastReportDate, int groupId )
         {
+            DateTime lastDueDate = nextDueDate.AddDays( -7 );
             int daysElapsed = ( nextDueDate - lastReportDate ).Days;
             int daysUntilDueDate = ( nextDueDate - DateTime.Today ).Days;
+            ResponseSetService responseSetService = new ResponseSetService( new AccountabilityContext() );
             //All caught up case
-            if ( daysElapsed <= 7 && daysUntilDueDate >= 6 )
+            if ( daysUntilDueDate >= 6 || responseSetService.DoesResponseSetExistWithSubmitDate( nextDueDate, CurrentPersonId, groupId ) )
             {
                 lStatusMessage.Text = "Report Submitted";
                 lbSubmitReport.Enabled = false;
             }
             //Submit report for this week case
-            if ( daysElapsed <= 7 && daysUntilDueDate < 6 )
+            if ( daysUntilDueDate < 6 && !responseSetService.DoesResponseSetExistWithSubmitDate( nextDueDate, CurrentPersonId, groupId ) )
             {
-                if ( daysUntilDueDate == 1 )
+                if ( daysUntilDueDate == 0 )
+                {
+                    lStatusMessage.Text = "Report due today";
+                }
+                else if ( daysUntilDueDate == 1 )
                 {
                     lStatusMessage.Text = "Report due in 1 day";
                 }
@@ -126,11 +132,13 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 {
                     lStatusMessage.Text = "Report due in " + daysUntilDueDate + " days";
                 }
+                lbSubmitReport.Enabled = true;
             }
             //Report overdue case
-            if ( daysElapsed > 7 )
+            if ( !responseSetService.DoesResponseSetExistWithSubmitDate( lastDueDate, CurrentPersonId, groupId ) )
             {
-                lStatusMessage.Text = "Report Overdue for week of " + nextDueDate.AddDays( -7 ).ToShortDateString();
+                lStatusMessage.Text = "Report overdue for week of " + lastDueDate.ToShortDateString();
+                lbSubmitReport.Enabled = true;
             }
         }
 
@@ -142,13 +150,15 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         protected DateTime NextReportDate( DateTime reportStartDate )
         {
             DateTime today = DateTime.Now;
+            DateTime reportDue = today;
 
             int daysElapsed = ( today - reportStartDate ).Days;
             int remainder = daysElapsed % 7;
-            int daysUntil = 7 - remainder;
-
-            DateTime reportDue = today.AddDays( daysUntil );
-
+            if ( remainder != 0 )
+            {
+                int daysUntil = 7 - remainder;
+                reportDue = today.AddDays( daysUntil );
+            }
             return reportDue;
         }
 

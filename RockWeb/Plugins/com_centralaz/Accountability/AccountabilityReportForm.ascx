@@ -9,6 +9,7 @@
             </div>
 
             <div class="panel-body">
+                <Rock:NotificationBox ID="nbErrorMessage" runat="server" NotificationBoxType="Danger" />
 
                 <div class="row">
                     <div class="col-md-10">
@@ -31,7 +32,7 @@
 
                 <div class="row">
                     <div class="col-md-12">
-                        <Rock:RockTextBox ID="tbComments" Label="Comments (4000 chars max)" TextMode="MultiLine" Rows="5" runat="server" />
+                        <Rock:RockTextBox ID="tbComments" Label="Comments (4000 chars max)" SourceTypeName="com.centralaz.Accountability.Model.ResponseSet, com.centralaz.Accountability" PropertyName="Comments" TextMode="MultiLine" Rows="5" runat="server" />
                     </div>
                 </div>
 

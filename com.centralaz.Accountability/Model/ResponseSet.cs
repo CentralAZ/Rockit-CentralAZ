@@ -29,7 +29,7 @@ namespace com.centralaz.Accountability.Model
         /// <value>
         /// The response set comment.
         /// </value>
-        [MaxLength(100)]
+        [MaxLength(4000)]
         [DataMember]
         public string Comment { get; set; }
 
@@ -89,6 +89,17 @@ namespace com.centralaz.Accountability.Model
         /// </value>
         public virtual Person Person { get; set; }
 
+        /// <summary>
+        /// Gets or sets a collection containing the responseset's responses
+        /// </summary>
+        [DataMember]
+        public virtual ICollection<Response> Responses
+        {
+            get { return _responses ?? ( _responses = new Collection<Response>() ); }
+            set { _responses = value; }
+        }
+        private ICollection<Response> _responses;
+
         #endregion
 
     }
@@ -107,6 +118,7 @@ namespace com.centralaz.Accountability.Model
         {
             this.HasRequired(r => r.Group).WithMany().HasForeignKey(r => r.GroupId).WillCascadeOnDelete(false);
             this.HasRequired(r => r.Person).WithMany().HasForeignKey(r => r.PersonId).WillCascadeOnDelete(false);
+            this.HasMany( r => r.Responses ).WithRequired( r => r.ResponseSet ).HasForeignKey( r => r.ResponseSetId );
         }
     }
 

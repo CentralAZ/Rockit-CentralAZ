@@ -89,7 +89,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 lOverallScore.Text = overallScore.ToString( "0.0%" );
             }
 
-            if ( weakScore[0] == -1 )
+            if ( weakScore[0] == -1 || weakScore[0]==1)
             {
                 lWeakScore.Text = "N/A";
             }

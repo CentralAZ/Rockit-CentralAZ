@@ -83,7 +83,6 @@
                         <div class="actions">
                             <asp:LinkButton ID="lbEdit" runat="server" Text="Edit" CssClass="btn btn-primary" OnClick="lbEdit_Click" CausesValidation="false" />
                             <Rock:ModalAlert ID="maDeleteWarning" runat="server" />
-                            <asp:LinkButton ID="lbDelete" runat="server" Text="Delete" CssClass="btn btn-link" OnClick="lbDelete_Click" CausesValidation="false" />
                             <span class="pull-right">
                                 <asp:HyperLink ID="hlMap" runat="server" CssClass="btn btn-sm btn-default" ToolTip="Interactive Map"><i class="fa fa-map-marker"></i></asp:HyperLink>
                                 <Rock:SecurityButton ID="sbtnSecurity" runat="server" class="btn btn-sm btn-security" Title="Secure Group" />

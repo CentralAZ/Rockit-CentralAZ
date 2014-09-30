@@ -57,6 +57,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlContent );
+            ShowQuestions();
         }
 
         /// <summary>
@@ -70,7 +71,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             if ( !Page.IsPostBack )
             {
                 AssignReportDateOptions();
-                ShowQuestions();
+
             }
         }
 
@@ -97,8 +98,8 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void lbSubmit_OnClick( object sender, EventArgs e )
         {
+            ClearErrorMessage();
             SaveReport();
-            SendEmail();
         }
 
         /// <summary>
@@ -136,18 +137,17 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 recentReportDate = reportStartDate;
             }
             DateTime nextDueDate = NextReportDate( reportStartDate );
-
-            int daysElapsed = ( nextDueDate - recentReportDate ).Days;
-            int daysUntilDueDate = ( nextDueDate - DateTime.Today ).Days;
+            DateTime lastDueDate = nextDueDate.AddDays( -7 );
+            ResponseSetService responseSetService = new ResponseSetService( new AccountabilityContext() );
             //Submit report for this week case
-            if ( daysUntilDueDate < 6 )
+            if ( !responseSetService.DoesResponseSetExistWithSubmitDate( nextDueDate, CurrentPersonId, groupId ) )
             {
                 ddlSubmitForDate.Items.Add( nextDueDate.ToShortDateString() );
             }
             //Report overdue case
-            if ( daysElapsed > 7 )
+            if ( !responseSetService.DoesResponseSetExistWithSubmitDate( lastDueDate, CurrentPersonId, groupId ) )
             {
-                ddlSubmitForDate.Items.Add( nextDueDate.AddDays( -7 ).ToShortDateString() );
+                ddlSubmitForDate.Items.Add( lastDueDate.ToShortDateString() );
             }
         }
 
@@ -215,6 +215,11 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// </summary>
         protected void SaveReport()
         {
+            if ( !Page.IsValid )
+            {
+                return;
+
+            }
             AccountabilityContext dataContext = new AccountabilityContext();
             ResponseSetService responseSetService = new ResponseSetService( dataContext );
             ResponseSet myResponseSet = new ResponseSet();
@@ -222,7 +227,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             myResponseSet.GroupId = int.Parse( PageParameter( "GroupId" ) );
             myResponseSet.Comment = tbComments.Text;
             myResponseSet.SubmitForDate = DateTime.Parse( ddlSubmitForDate.SelectedValue );
-            int correct = 0;
+            double correct = 0;
 
             int groupId = int.Parse( PageParameter( "GroupId" ) );
             int personId = (int)CurrentPersonId;
@@ -236,7 +241,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             for ( int i = 0; i < questions.Count; i++ )
             {
                 myResponse = new Response();
-                myResponse.ResponseSetId = myResponseSet.Id;
+                //myResponse.ResponseSetId = myResponseSet.Id;
                 myResponse.QuestionId = questions[i].Id;
                 String answerName = "ddlResponseAnswer" + i.ToString();
                 Control control = this.FindControl( answerName );
@@ -250,12 +255,34 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 {
                     myResponse.IsResponseYes = false;
                 }
-                myResponse.Comment = ( (RockTextBox)this.FindControl( "txtResponseComment" + i.ToString() ) ).Text;
-                responseService.Add( myResponse );
+                String commentText = ( (RockTextBox)this.FindControl( "txtResponseComment" + i.ToString() ) ).Text;
+                if ( commentText.Length > 300 )
+                {
+                    nbErrorMessage.Title = String.Format( "Your comment to '{0}' has exceeded the character limit of 300.", questions[i].ShortForm );
+                }
+                myResponse.Comment = commentText;
+                myResponseSet.Responses.Add( myResponse );
+                
             }
-            myResponseSet.Score = correct / questions.Count;
+            dataContext = new AccountabilityContext();
+            responseSetService = new ResponseSetService( dataContext );
+            double score = correct / questions.Count;
+            myResponseSet.Score = score;
             responseSetService.Add( myResponseSet );
-            dataContext.SaveChanges();
+            if ( !myResponseSet.IsValid )
+            {
+                nbErrorMessage.Title = "You have exceeded the 4000 character limit on your comment.";
+                return;
+            }
+            else
+            {
+                dataContext.SaveChanges();
+                SendEmail();
+                Dictionary<string, string> qryString = new Dictionary<string, string>();
+                qryString["GroupId"] = PageParameter( "GroupId" );
+                NavigateToParentPage( qryString );
+            }
+
 
         }
 
@@ -324,44 +351,46 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             StringBuilder body = new StringBuilder();
             body.Append( emailReportIntroduction );
 
+            // Start the HTML table...
+            body.Append( "<table  width='75%' RULES='NONE'  cellpadding='1' cellspacing='3' style='font-family: Tahoma, Arial, Helvetica; font-size: 12px;'>" );
+
             //Get the  group type's questions
             List<Question> questions = new QuestionService( new AccountabilityContext() ).GetQuestionsFromGroupTypeID( _groupMember.Group.GroupTypeId );
-            body.Append( string.Format( "<h2>{0} - {1} {2}</h2>", group.Name, CurrentPerson.FirstName, CurrentPerson.LastName ) );
+            body.Append( string.Format( "<tr bgcolor='#eeeeee'><th valign='top' align='left' nowrap='nowrap' colspan='5' style='font-size: 14px;'>{0} - {1} {2}<br /></th></tr>", group.Name, CurrentPerson.FirstName, CurrentPerson.LastName ) );
+
 
             //Report week
-            body.Append( string.Format( "<div class='row'><div class='col-md-4'><b>Report for week:</b><div><div class='col-md-4'>{0}</div></div>", ddlSubmitForDate.SelectedValue ) );
+            body.Append( string.Format( "<tr><td><b>Report for date:</b></td><td>{0}</td></tr>", ddlSubmitForDate.SelectedValue ) );
 
             //Question rows
             for ( int i = 0; i < questions.Count; i++ )
             {
                 RockDropDownList dropDown = (RockDropDownList)this.FindControl( "ddlResponseAnswer" + i.ToString() );
                 RockTextBox textBox = ( (RockTextBox)this.FindControl( "txtResponseComment" + i.ToString() ) );
-                body.Append( "<div class='row'>" );
-                body.Append( string.Format( "<div class='col-md-4'><b>{0}:</b></div>", questions[i].ShortForm ) );
+                body.Append( string.Format( "<tr><td width='40%'><b>{0}</b></td>", questions[i].ShortForm ) );
+
                 if ( dropDown.SelectedValue == "yes" )
                 {
-                    body.Append( "<div class='col-md-4'>yes" );
-
+                    body.Append( "<td width='60%'>yes" );
                 }
                 else
                 {
-                    body.Append( "<div class='col-md-4'><b>no</b>" );
+                    body.Append( "<td width='60%'><b>no</b>" );
                 }
                 if ( textBox.Text.Trim().Length == 0 )
                 {
-                    body.Append( "</div>" );
+                    body.Append( "</td>" );
                 }
                 else
                 {
-                    body.Append( string.Format( " - {0}</div>", textBox.Text ) );
+                    body.Append( string.Format( " - {0}</td>", textBox.Text ) );
                 }
-                body.Append( "</div>" );
+                body.Append( "</tr>" );
             }
 
             //ResponseSet Comment
-            body.Append( "<div class='row'>" );
-            body.Append( string.Format( "div class='col-md-12'>{0}</div>", tbComments.Text ) );
-            body.Append( "</div>" );
+            body.Append( string.Format( "<tr>{0}</tr>", tbComments.Text ) );
+            body.Append( "</table>" );
             return body.ToString();
         }
 
@@ -373,14 +402,25 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         protected DateTime NextReportDate( DateTime reportStartDate )
         {
             DateTime today = DateTime.Now;
+            DateTime reportDue = today;
 
             int daysElapsed = ( today - reportStartDate ).Days;
             int remainder = daysElapsed % 7;
-            int daysUntil = 7 - remainder;
-
-            DateTime reportDue = today.AddDays( daysUntil );
-
+            if ( remainder != 0 )
+            {
+                int daysUntil = 7 - remainder;
+                reportDue = today.AddDays( daysUntil );
+            }
             return reportDue;
+        }
+
+        /// <summary>
+        /// Clears the error message title and text.
+        /// </summary>
+        private void ClearErrorMessage()
+        {
+            nbErrorMessage.Title = string.Empty;
+            nbErrorMessage.Text = string.Empty;
         }
 
         /// <summary>

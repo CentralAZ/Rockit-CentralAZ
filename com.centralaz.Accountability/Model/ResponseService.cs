@@ -37,9 +37,9 @@ namespace com.centralaz.Accountability.Model
         /// <param name="groupId">The group</param>
         /// <param name="questionId">The question that we're getting the percentage for</param>
         /// <returns>percentage[0] is the amount correct, and percentage[1] is the amount total</returns>
-        public int[] ResponsePercentage(int personId, int groupId, int questionId)
+        public double[] ResponsePercentage(int personId, int groupId, int questionId)
         {
-            int[] percentage = new int[2];
+            double[] percentage = new double[2];
             var qry = Queryable("ResponseSet")
                 .Where(r => (r.ResponseSet.PersonId == personId) && (r.ResponseSet.GroupId == groupId) && (r.QuestionId == questionId));
             percentage[1] = qry.Count();

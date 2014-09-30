@@ -91,7 +91,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     Literal lScore = e.Row.FindControl( "lScore" ) as Literal;
                     if ( lScore != null )
                     {
-                        lScore.Text = responseSet.Score.ToString( "0.0" );
+                        lScore.Text = responseSet.Score.ToString( "0.00" );
                     }
 
                     Literal lPercent = e.Row.FindControl( "lPercent" ) as Literal;
@@ -148,10 +148,10 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             AccountabilityContext accountabilityContext = new AccountabilityContext();
             ResponseSetService responseSetService = new ResponseSetService( accountabilityContext );
             GroupMember groupMember = new GroupMemberService( new RockContext() ).Get( PageParameter( "GroupMemberId" ).AsInteger() );
-            int personId = groupMember.PersonId;
             // sample query to display a few people
             var qry = responseSetService.Queryable()
-                        .Where( p => p.PersonId == personId )
+                        .Where( p => p.PersonId == groupMember.PersonId &&
+                            p.GroupId == groupMember.GroupId )
                         .OrderByDescending( p => p.SubmitForDate )
                         .Take( 100 );
 

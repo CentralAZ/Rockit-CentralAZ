@@ -122,7 +122,6 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             base.OnInit( e );
 
 
-            lbDelete.Attributes["onclick"] = string.Format( "javascript: return Rock.dialogs.confirmDelete(event, '{0}');", Group.FriendlyTypeName );
             sbtnSecurity.EntityTypeId = EntityTypeCache.Read( typeof( Rock.Model.Group ) ).Id;
 
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
@@ -136,34 +135,43 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
         protected override void OnLoad( EventArgs e )
         {
-            base.OnLoad( e );
-
-            if ( !Page.IsPostBack )
+            if ( IsPersonMember( PageParameter( "GroupId" ).AsInteger() ) || IsUserAuthorized( Authorization.EDIT ) )
             {
-                string groupId = PageParameter( "GroupId" );
-                if ( !string.IsNullOrWhiteSpace( groupId ) )
+                base.OnLoad( e );
+
+                if ( !Page.IsPostBack )
                 {
-                    ShowDetail( groupId.AsInteger(), PageParameter( "ParentGroupId" ).AsIntegerOrNull() );
+                    string groupId = PageParameter( "GroupId" );
+
+                    if ( !string.IsNullOrWhiteSpace( groupId ) )
+                    {
+                        ShowDetail( groupId.AsInteger(), PageParameter( "ParentGroupId" ).AsIntegerOrNull() );
+                    }
+                    else
+                    {
+                        pnlDetails.Visible = false;
+                    }
                 }
                 else
                 {
-                    pnlDetails.Visible = false;
+
+                }
+
+                // Rebuild the attribute controls on postback based on group type
+                if ( pnlDetails.Visible )
+                {
+                    var group = new Group { GroupTypeId = ddlGroupType.SelectedValueAsInt() ?? 0 };
+                    if ( group.GroupTypeId > 0 )
+                    {
+                        ShowGroupTypeEditDetails( GroupTypeCache.Read( group.GroupTypeId ), group, false );
+                    }
                 }
             }
             else
             {
-
+                RockPage.Layout.Site.RedirectToPageNotFoundPage();
             }
 
-            // Rebuild the attribute controls on postback based on group type
-            if ( pnlDetails.Visible )
-            {
-                var group = new Group { GroupTypeId = ddlGroupType.SelectedValueAsInt() ?? 0 };
-                if ( group.GroupTypeId > 0 )
-                {
-                    ShowGroupTypeEditDetails( GroupTypeCache.Read( group.GroupTypeId ), group, false );
-                }
-            }
         }
 
         /// <summary>
@@ -236,66 +244,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             ShowEditDetails( GetGroup( hfGroupId.Value.AsInteger() ) );
         }
 
-        /// <summary>
-        /// Handles the Click event of the lbDelete control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
-        protected void lbDelete_Click( object sender, EventArgs e )
-        {
-            int? parentGroupId = null;
-            RockContext rockContext = new RockContext();
-
-            GroupService groupService = new GroupService( rockContext );
-            AuthService authService = new AuthService( rockContext );
-            Group group = groupService.Get( int.Parse( hfGroupId.Value ) );
-
-            if ( group != null )
-            {
-                if ( !group.IsAuthorized( Authorization.EDIT, this.CurrentPerson ) )
-                {
-                    maDeleteWarning.Show( "You are not authorized to delete this group.", ModalAlertType.Information );
-                    return;
-                }
-
-                parentGroupId = group.ParentGroupId;
-                string errorMessage;
-                if ( !groupService.CanDelete( group, out errorMessage ) )
-                {
-                    maDeleteWarning.Show( errorMessage, ModalAlertType.Information );
-                    return;
-                }
-
-                bool isSecurityRoleGroup = group.IsSecurityRole || group.GroupType.Guid.Equals( Rock.SystemGuid.GroupType.GROUPTYPE_SECURITY_ROLE.AsGuid() );
-                if ( isSecurityRoleGroup )
-                {
-                    Rock.Security.Role.Flush( group.Id );
-                    foreach ( var auth in authService.Queryable().Where( a => a.GroupId == group.Id ).ToList() )
-                    {
-                        authService.Delete( auth );
-                    }
-                }
-
-                groupService.Delete( group );
-
-                rockContext.SaveChanges();
-
-                if ( isSecurityRoleGroup )
-                {
-                    Rock.Security.Authorization.Flush();
-                }
-            }
-
-            // reload page, selecting the deleted group's parent
-            var qryParams = new Dictionary<string, string>();
-            if ( parentGroupId != null )
-            {
-                qryParams["GroupId"] = parentGroupId.ToString();
-            }
-
-            NavigateToPage( RockPage.Guid, qryParams );
-        }
-
+        
         /// <summary>
         /// Handles the Click event of the lbSave control.
         /// </summary>
@@ -547,7 +496,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 group = GetGroup( groupId );
                 if ( group != null )
                 {
-                    editAllowed = group.IsAuthorized( Authorization.EDIT, CurrentPerson );
+                    editAllowed = group.IsAuthorized( Authorization.EDIT, CurrentPerson ) || IsPersonLeader( groupId );
                 }
             }
 
@@ -565,7 +514,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             bool readOnly = false;
 
             nbEditModeMessage.Text = string.Empty;
-            if ( !editAllowed || !IsUserAuthorized( Authorization.EDIT ) )
+            if ( !editAllowed && !IsUserAuthorized( Authorization.EDIT ) )
             {
                 readOnly = true;
                 nbEditModeMessage.Text = EditModeMessage.ReadOnlyEditActionNotAllowed( Group.FriendlyTypeName );
@@ -615,7 +564,6 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             else
             {
                 lbEdit.Visible = true;
-                lbDelete.Visible = !group.IsSystem;
                 if ( group.Id > 0 )
                 {
                     ShowReadonlyDetails( group );
@@ -985,6 +933,53 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 }
 
                 movedItem.Order = newIndex;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the current person is a group leader.
+        /// </summary>
+        /// <param name="groupId">The group Id</param>
+        /// <returns>A boolean: true if the person is a leader, false if not.</returns>
+        protected bool IsPersonLeader( int groupId )
+        {
+            int count = new GroupMemberService( new RockContext() ).Queryable( "GroupTypeRole" )
+                .Where( m =>
+                    m.PersonId == CurrentPersonId &&
+                    m.GroupId == groupId &&
+                    m.GroupRole.Name == "Leader"
+                    )
+                 .Count();
+            if ( count == 1 )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the current person is a group member.
+        /// </summary>
+        /// <param name="groupId">The group Id</param>
+        /// <returns>A boolean: true if the person is a member, false if not.</returns>
+        protected bool IsPersonMember( int groupId )
+        {
+            int count = new GroupMemberService( new RockContext() ).Queryable( "GroupTypeRole" )
+                .Where( m =>
+                    m.PersonId == CurrentPersonId &&
+                    m.GroupId == groupId
+                    )
+                 .Count();
+            if ( count == 1 )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 

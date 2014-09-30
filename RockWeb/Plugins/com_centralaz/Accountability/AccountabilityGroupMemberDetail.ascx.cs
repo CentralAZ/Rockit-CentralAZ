@@ -25,6 +25,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
     [Category( "com_centralaz > Accountability" )]
     [Description( "Shows the detail for a group Member" )]
     [LinkedPage( "Detail Page" )]
+    [BooleanField( "Able to choose leader" )]
 
     public partial class AccountabilityGroupMemberDetail : Rock.Web.UI.RockBlock
     {
@@ -47,22 +48,30 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
         protected override void OnLoad( EventArgs e )
         {
-            if ( !Page.IsPostBack )
+            int theThing = PageParameter( "GroupId" ).AsInteger();
+            if ( IsPersonMember( PageParameter("GroupId").AsInteger() ) || IsUserAuthorized( Authorization.EDIT ) )
             {
-                ShowDetail( PageParameter( "GroupMemberId" ).AsInteger(), PageParameter( "GroupId" ).AsIntegerOrNull() );
+                if ( !Page.IsPostBack )
+                {
+                    ShowDetail( PageParameter( "GroupMemberId" ).AsInteger(), PageParameter( "GroupId" ).AsIntegerOrNull() );
+                }
+                else
+                {
+                    var groupMember = new GroupMember { GroupId = hfGroupId.ValueAsInt() };
+                    if ( groupMember != null )
+                    {
+                        groupMember.LoadAttributes();
+                        phAttributes.Controls.Clear();
+                        Rock.Attribute.Helper.AddEditControls( groupMember, phAttributes, false );
+                    }
+                }
+
+                base.OnLoad( e );
             }
             else
             {
-                var groupMember = new GroupMember { GroupId = hfGroupId.ValueAsInt() };
-                if ( groupMember != null )
-                {
-                    groupMember.LoadAttributes();
-                    phAttributes.Controls.Clear();
-                    Rock.Attribute.Helper.AddEditControls( groupMember, phAttributes, false );
-                }
+                RockPage.Layout.Site.RedirectToPageNotFoundPage();
             }
-
-            base.OnLoad( e );
         }
 
         /// <summary>
@@ -294,8 +303,9 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 GroupMember groupMember = groupMemberService.Get( int.Parse( hfGroupMemberId.Value ) );
 
                 Dictionary<string, string> qryString = new Dictionary<string, string>();
-                qryString["GroupId"] = groupMember.GroupId.ToString();
-                NavigateToParentPage( qryString );
+                qryString["GroupId"] = hfGroupId.Value;
+                qryString["GroupMemberId"] = hfGroupMemberId.Value;
+                ShowReadonlyDetail( PageParameter( "GroupMemberId" ).AsInteger(), PageParameter( "GroupId" ).AsIntegerOrNull() );
             }
         }
 
@@ -327,7 +337,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 groupMember = GetGroupMember( groupMemberId );
                 if ( groupMember != null )
                 {
-                    editAllowed = groupMember.IsAuthorized( Authorization.EDIT, CurrentPerson );
+                    editAllowed = groupMember.IsAuthorized( Authorization.EDIT, CurrentPerson ) || IsPersonLeader( groupMember.GroupId );
                 }
             }
 
@@ -345,7 +355,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             bool readOnly = false;
 
             nbEditModeMessage.Text = string.Empty;
-            if ( !editAllowed || !IsUserAuthorized( Authorization.EDIT ) )
+            if ( !editAllowed && !IsUserAuthorized( Authorization.EDIT ) )
             {
                 readOnly = true;
                 nbEditModeMessage.Text = EditModeMessage.ReadOnlyEditActionNotAllowed( Group.FriendlyTypeName );
@@ -440,7 +450,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
             //Determines visibility of the edit button
             bool readOnly = false;
-            if ( !IsUserAuthorized( Authorization.EDIT ) || !group.IsAuthorized( Authorization.EDIT, this.CurrentPerson ) )
+            if ( ( !IsUserAuthorized( Authorization.EDIT ) || !group.IsAuthorized( Authorization.EDIT, this.CurrentPerson ) ) && !IsPersonLeader( group.Id ) )
             {
                 readOnly = true;
             }
@@ -524,7 +534,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
             // user has to have EDIT Auth to both the Block and the group
             nbEditModeMessage.Text = string.Empty;
-            if ( !IsUserAuthorized( Authorization.EDIT ) || !group.IsAuthorized( Authorization.EDIT, this.CurrentPerson ) )
+            if ( ( !IsUserAuthorized( Authorization.EDIT ) || !group.IsAuthorized( Authorization.EDIT, this.CurrentPerson ) ) && !IsPersonLeader( group.Id ) )
             {
                 readOnly = true;
                 nbEditModeMessage.Text = EditModeMessage.ReadOnlyEditActionNotAllowed( Group.FriendlyTypeName );
@@ -586,15 +596,69 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         {
             int groupId = hfGroupId.ValueAsInt();
             Group group = new GroupService( new RockContext() ).Get( groupId );
-            
+            bool isAbleToSelectLeader = bool.Parse( GetAttributeValue( "Abletochooseleader" ) );
             if ( group != null )
             {
-                ddlGroupRole.DataSource = group.GroupType.Roles.OrderBy( a => a.Order ).ToList();
+                if ( isAbleToSelectLeader )
+                {
+                    ddlGroupRole.DataSource = group.GroupType.Roles.OrderBy( a => a.Order ).ToList();
+                }
+                else
+                {
+                    ddlGroupRole.DataSource = group.GroupType.Roles.Where( a => a.Name != "Leader" ).OrderBy( a => a.Order ).ToList();
+                }
                 ddlGroupRole.DataBind();
             }
 
             rblStatus.BindToEnum( typeof( GroupMemberStatus ) );
             rblEditStatus.BindToEnum( typeof( GroupMemberStatus ) );
+        }
+
+        /// <summary>
+        /// Returns true if the current person is a group leader.
+        /// </summary>
+        /// <param name="groupId">The group Id</param>
+        /// <returns>A boolean: true if the person is a leader, false if not.</returns>
+        protected bool IsPersonLeader( int groupId )
+        {
+            int count = new GroupMemberService( new RockContext() ).Queryable( "GroupTypeRole" )
+                .Where( m =>
+                    m.PersonId == CurrentPersonId &&
+                    m.GroupId == groupId &&
+                    m.GroupRole.Name == "Leader"
+                    )
+                 .Count();
+            if ( count == 1 )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the current person is a group member.
+        /// </summary>
+        /// <param name="groupId">The group Id</param>
+        /// <returns>A boolean: true if the person is a member, false if not.</returns>
+        protected bool IsPersonMember( int groupId )
+        {
+            int count = new GroupMemberService( new RockContext() ).Queryable( "GroupTypeRole" )
+                .Where( m =>
+                    m.PersonId == CurrentPersonId &&
+                    m.GroupId == groupId
+                    )
+                 .Count();
+            if ( count == 1 )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         #endregion
 

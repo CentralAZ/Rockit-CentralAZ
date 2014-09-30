@@ -78,21 +78,17 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     gGroupMembers.ExportFilename = _group.Name;
 
                     // make sure they have Auth to the block AND Edit to the Group
-                    bool canEditBlock = /*IsUserAuthorized( Authorization.EDIT ) &&*/ _group.IsAuthorized( Authorization.EDIT, this.CurrentPerson );
+                    bool canEditBlock = ( IsUserAuthorized( Authorization.EDIT ) && _group.IsAuthorized( Authorization.EDIT, this.CurrentPerson ) ) || IsPersonLeader( groupId );
                     gGroupMembers.Actions.ShowAdd = canEditBlock;
                     gGroupMembers.IsDeleteEnabled = canEditBlock;
 
                     // Add attribute columns
                     AddAttributeColumns();
 
-                    if ( canEditBlock )
-                    {
-                        // Add delete column
-                        var deleteField = new DeleteField();
-                        gGroupMembers.Columns.Add( deleteField );
-                        deleteField.Click += DeleteGroupMember_Click;
-                    }
-                    
+                    // Add delete column
+                    var deleteField = new DeleteField();
+                    gGroupMembers.Columns.Add( deleteField );
+                    deleteField.Click += DeleteGroupMember_Click;
                 }
             }
         }
@@ -120,7 +116,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     _reportStartDate = DateTime.Parse( group.GetAttributeValue( "ReportStartDate" ) );
                     BindGroupMembersGrid();
                 }
-                
+
             }
         }
 
@@ -135,6 +131,8 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="e">The <see cref="System.Web.UI.WebControls.GridViewRowEventArgs"/> instance containing the event data.</param>
         public void gGroupMembers_RowDataBound( object sender, System.Web.UI.WebControls.GridViewRowEventArgs e )
         {
+
+
             if ( e.Row.RowType == DataControlRowType.DataRow )
             {
                 var groupMember = e.Row.DataItem as GroupMember;
@@ -152,7 +150,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                         e.Row.AddCssClass( "deceased" );
                     }
 
-                    String[] personInfo = GetPersonInfo( _responseSets, groupMember.PersonId );
+                    String[] personInfo = GetPersonInfo( _responseSets, groupMember );
 
                     Literal lFirstReport = e.Row.FindControl( "lFirstReport" ) as Literal;
                     if ( lFirstReport != null )
@@ -224,7 +222,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     Rock.Security.Authorization.Flush();
                 }
             }
-
+            _responseSets = new ResponseSetService( new AccountabilityContext() ).GetResponseSetsForGroup( PageParameter( "GroupId" ).AsInteger() );
             BindGroupMembersGrid();
         }
 
@@ -246,7 +244,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="e">The <see cref="RowEventArgs" /> instance containing the event data.</param>
         protected void gGroupMembers_View( object sender, RowEventArgs e )
         {
-            NavigateToLinkedPage( "DetailPage", "GroupMemberId", e.RowKeyId );
+            NavigateToLinkedPage( "DetailPage", "GroupMemberId", e.RowKeyId, "GroupId", _group.Id );
         }
 
         /// <summary>
@@ -362,6 +360,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             {
                 pnlGroupMembers.Visible = false;
             }
+
         }
 
         /// <summary>
@@ -376,21 +375,23 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// personInfo[3] holds the reports / opportunities
         /// personInfo[4] holds the reports/opportunites percentage
         /// personInfo[5] holds the person's score</returns>
-        private String[] GetPersonInfo( List<ResponseSet> responseSets, int personId )
+        private String[] GetPersonInfo( List<ResponseSet> responseSets, GroupMember groupMember )
         {
             DateTime firstReport = new DateTime();
             DateTime lastReport = new DateTime();
             DateTime defaultDate = new DateTime();
-            int? weeksSinceLast = null;
-            int reports = 0;
-            int opportunities = 0;
+            double? weeksSinceLast = null;
+            double reports = 0;
+            double opportunities = 0;
             double? percentSubmitted = null;
             double score = 0;
+            groupMember.LoadAttributes();
+            DateTime memberStartDate = DateTime.Parse( groupMember.GetAttributeValue( "MemberStartDate" ) );
 
             //Iterate through the responseSets
             for ( int i = 0; i < responseSets.Count; i++ )
             {
-                if ( responseSets[i].PersonId == personId )
+                if ( responseSets[i].PersonId == groupMember.PersonId )
                 {
                     reports++;
                     score += responseSets[i].Score;
@@ -410,7 +411,17 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             }
             if ( _reportStartDate != null )
             {
-                opportunities = ( ( ( NextReportDate( _reportStartDate ) - _reportStartDate ).Days ) / 7 ) + 1;
+                opportunities = ( ( NextReportDate( _reportStartDate ) - memberStartDate ).Days / 7 );
+                if ( lastReport != defaultDate )
+                {
+                    DateTime x1 = lastReport.Date;
+                    DateTime x2 = NextReportDate( _reportStartDate ).Date;
+                    if ( lastReport.Date == NextReportDate( _reportStartDate ).Date )
+                    {
+                        opportunities++;
+                    }
+                }
+
                 score = score / opportunities;
                 percentSubmitted = reports / opportunities;
             }
@@ -455,7 +466,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 personInfo[3] = "-";
                 personInfo[4] = "-";
             }
-            personInfo[5] = score.ToString();
+            personInfo[5] = score.ToString( "0.00" );
             return personInfo;
         }
 
@@ -467,15 +478,65 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         protected DateTime NextReportDate( DateTime reportStartDate )
         {
             DateTime today = DateTime.Now;
+            DateTime reportDue = today;
 
             int daysElapsed = ( today - reportStartDate ).Days;
             int remainder = daysElapsed % 7;
-            int daysUntil = 7 - remainder;
-
-            DateTime reportDue = today.AddDays( daysUntil );
-
+            if ( remainder != 0 )
+            {
+                int daysUntil = 7 - remainder;
+                reportDue = today.AddDays( daysUntil );
+            }
             return reportDue;
         }
+
+        /// <summary>
+        /// Returns true if the current person is a group leader.
+        /// </summary>
+        /// <param name="groupId">The group Id</param>
+        /// <returns>A boolean: true if the person is a leader, false if not.</returns>
+        protected bool IsPersonLeader( int groupId )
+        {
+            int count = new GroupMemberService( new RockContext() ).Queryable( "GroupTypeRole" )
+                .Where( m =>
+                    m.PersonId == CurrentPersonId &&
+                    m.GroupId == groupId &&
+                    m.GroupRole.Name == "Leader"
+                    )
+                 .Count();
+            if ( count == 1 )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the current person is a group member.
+        /// </summary>
+        /// <param name="groupId">The group Id</param>
+        /// <returns>A boolean: true if the person is a member, false if not.</returns>
+        protected bool IsPersonMember( int groupId )
+        {
+            int count = new GroupMemberService( new RockContext() ).Queryable( "GroupTypeRole" )
+                .Where( m =>
+                    m.PersonId == CurrentPersonId &&
+                    m.GroupId == groupId
+                    )
+                 .Count();
+            if ( count == 1 )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         #endregion
 
         #region ISecondaryBlock
