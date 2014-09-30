@@ -49,21 +49,11 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         protected override void OnLoad( EventArgs e )
         {
             int theThing = PageParameter( "GroupId" ).AsInteger();
-            if ( IsPersonMember( PageParameter("GroupId").AsInteger() ) || IsUserAuthorized( Authorization.EDIT ) )
+            if ( IsPersonMember( PageParameter( "GroupId" ).AsInteger() ) || IsUserAuthorized( Authorization.EDIT ) )
             {
                 if ( !Page.IsPostBack )
                 {
                     ShowDetail( PageParameter( "GroupMemberId" ).AsInteger(), PageParameter( "GroupId" ).AsIntegerOrNull() );
-                }
-                else
-                {
-                    var groupMember = new GroupMember { GroupId = hfGroupId.ValueAsInt() };
-                    if ( groupMember != null )
-                    {
-                        groupMember.LoadAttributes();
-                        phAttributes.Controls.Clear();
-                        Rock.Attribute.Helper.AddEditControls( groupMember, phAttributes, false );
-                    }
                 }
 
                 base.OnLoad( e );
@@ -149,6 +139,24 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     nbErrorMessage.Title = "Please select a Role";
                     return;
                 }
+
+                //check for valid start date
+                Group group = new GroupService( new RockContext() ).Get( hfGroupId.ValueAsInt() );
+                group.LoadAttributes();
+                DateTime startDate = DateTime.Parse( group.GetAttributeValue( "ReportStartDate" ) );
+                DateTime memberDate = dpMemberStartDate.SelectedDate.Value;
+                if ( startDate > memberDate )
+                {
+                    nbErrorMessage.Title = String.Format( "Please select a start date after {0}", startDate.ToShortDateString() );
+                    return;
+                }
+                int daysOffOfWeek = ( memberDate - startDate ).Days % 7;
+                if ( daysOffOfWeek != 0 )
+                {
+                    nbErrorMessage.Title = String.Format( "Please select a {0}", startDate.DayOfWeek.ToString() );
+                    return;
+                }
+
 
                 // if adding a new group member 
                 if ( groupMemberId.Equals( 0 ) )
@@ -237,8 +245,6 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
                 groupMember.LoadAttributes();
 
-                Rock.Attribute.Helper.GetEditValues( phAttributes, groupMember );
-
                 if ( !Page.IsValid )
                 {
                     return;
@@ -249,19 +255,18 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     return;
                 }
 
-                // using WrapTransaction because there are two Saves
-                rockContext.WrapTransaction( () =>
+
+                if ( groupMember.Id.Equals( 0 ) )
                 {
-                    if ( groupMember.Id.Equals( 0 ) )
-                    {
-                        groupMemberService.Add( groupMember );
-                    }
+                    groupMemberService.Add( groupMember );
+                }
 
-                    groupMember.SaveAttributeValues( rockContext );
-                    rockContext.SaveChanges();
-                } );
+                groupMember.SetAttributeValue( "MemberStartDate", dpMemberStartDate.SelectedDate.Value.ToShortDateString() );
+                groupMember.SaveAttributeValues( rockContext );
+                rockContext.SaveChanges();
 
-                Group group = new GroupService( rockContext ).Get( groupMember.GroupId );
+
+                group = new GroupService( rockContext ).Get( groupMember.GroupId );
                 if ( group.IsSecurityRole || group.GroupType.Guid.Equals( Rock.SystemGuid.GroupType.GROUPTYPE_SECURITY_ROLE.AsGuid() ) )
                 {
                     Rock.Security.Role.Flush( group.Id );
@@ -559,12 +564,18 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             rblEditStatus.SetValue( (int)groupMember.GroupMemberStatus );
             rblEditStatus.Enabled = !readOnly;
             rblEditStatus.Label = string.Format( "{0} Status", group.GroupType.GroupMemberTerm );
+            if ( !groupMemberId.Equals( 0 ) )
+            {
+                groupMember.LoadAttributes();
+                dpMemberStartDate.SelectedDate = DateTime.Parse( groupMember.GetAttributeValue( "MemberStartDate" ) );
+            }
+            else
+            {
+                Group newMemberGroup = new GroupService( new RockContext() ).Get( groupId.Value );
+                newMemberGroup.LoadAttributes();
+                dpMemberStartDate.SelectedDate = DateTime.Parse( newMemberGroup.GetAttributeValue( "ReportStartDate" ) );
+            }
 
-            groupMember.LoadAttributes();
-            phAttributes.Controls.Clear();
-
-            Rock.Attribute.Helper.AddEditControls( groupMember, phAttributes, true, "", true );
-            phAttributes.Visible = true;
         }
 
         /// <summary>

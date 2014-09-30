@@ -131,8 +131,6 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="e">The <see cref="System.Web.UI.WebControls.GridViewRowEventArgs"/> instance containing the event data.</param>
         public void gGroupMembers_RowDataBound( object sender, System.Web.UI.WebControls.GridViewRowEventArgs e )
         {
-
-
             if ( e.Row.RowType == DataControlRowType.DataRow )
             {
                 var groupMember = e.Row.DataItem as GroupMember;
@@ -466,7 +464,15 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 personInfo[3] = "-";
                 personInfo[4] = "-";
             }
-            personInfo[5] = score.ToString( "0.00" );
+            if ( opportunities == 0 )
+            {
+                personInfo[4] = "-";
+                personInfo[5] = "-";
+            }
+            else
+            {
+                personInfo[5] = score.ToString( "0.00" );
+            }
             return personInfo;
         }
 
@@ -480,12 +486,19 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             DateTime today = DateTime.Now;
             DateTime reportDue = today;
 
-            int daysElapsed = ( today - reportStartDate ).Days;
-            int remainder = daysElapsed % 7;
-            if ( remainder != 0 )
+            int daysElapsed = ( today.Date - reportStartDate ).Days;
+            if ( daysElapsed >= 0 )
             {
-                int daysUntil = 7 - remainder;
-                reportDue = today.AddDays( daysUntil );
+                int remainder = daysElapsed % 7;
+                if ( remainder != 0 )
+                {
+                    int daysUntil = 7 - remainder;
+                    reportDue = today.AddDays( daysUntil );
+                }
+            }
+            else
+            {
+                reportDue = today.AddDays( -( daysElapsed ) );
             }
             return reportDue;
         }

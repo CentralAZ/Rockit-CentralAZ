@@ -51,7 +51,7 @@
                             </div>
                             <div class="col-md-6">
                                 <Rock:RockRadioButtonList ID="rblEditStatus" runat="server" Label="Status" RepeatDirection="Horizontal" />
-                                <asp:PlaceHolder ID="phAttributes" runat="server" EnableViewState="false"></asp:PlaceHolder>
+                                <Rock:DatePicker ID="dpMemberStartDate" runat="server" Label="Member Start Date" />
                             </div>
                         </div>
 

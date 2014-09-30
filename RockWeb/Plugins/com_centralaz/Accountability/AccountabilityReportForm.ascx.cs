@@ -404,12 +404,19 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             DateTime today = DateTime.Now;
             DateTime reportDue = today;
 
-            int daysElapsed = ( today - reportStartDate ).Days;
-            int remainder = daysElapsed % 7;
-            if ( remainder != 0 )
+            int daysElapsed = ( today.Date - reportStartDate ).Days;
+            if ( daysElapsed >= 0 )
             {
-                int daysUntil = 7 - remainder;
-                reportDue = today.AddDays( daysUntil );
+                int remainder = daysElapsed % 7;
+                if ( remainder != 0 )
+                {
+                    int daysUntil = 7 - remainder;
+                    reportDue = today.AddDays( daysUntil );
+                }
+            }
+            else
+            {
+                reportDue = today.AddDays( -( daysElapsed ) );
             }
             return reportDue;
         }
