@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -300,6 +300,8 @@ namespace RockWeb.Blocks.WorkFlow
                 gWorkflows.DataSource = workflows.Where( w => w.WorkflowTypeId == selectedWorkflowType.Id ).ToList();
                 gWorkflows.DataBind();
                 gWorkflows.Visible = true;
+
+                lWorkflow.Text = workflows.Where( w => w.WorkflowTypeId == selectedWorkflowType.Id ).Select( w => w.WorkflowType.Name ).FirstOrDefault() + " Workflows";
 
             }
             else

@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="Categories.ascx.cs" Inherits="RockWeb.Blocks.Core.Categories" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="Categories.ascx.cs" Inherits="RockWeb.Blocks.Core.Categories" %>
 
 <asp:UpdatePanel ID="upnlCategories" runat="server">
     <ContentTemplate>
@@ -49,6 +49,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <Rock:CategoryPicker ID="catpParentCategory" runat="server" Label="Parent Category" />
+                        <asp:PlaceHolder ID="phAttributes" runat="server" EnableViewState="false"></asp:PlaceHolder>
                     </div>
                     <div class="col-md-6">
                         <Rock:DataTextBox ID="tbIconCssClass" runat="server" SourceTypeName="Rock.Model.Category, Rock" PropertyName="IconCssClass" />

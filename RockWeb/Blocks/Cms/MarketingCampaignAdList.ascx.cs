@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,7 +105,7 @@ namespace RockWeb.Blocks.Cms
         /// </summary>
         private void BindFilter()
         {
-            ddlApprovalStatus.BindToEnum( typeof( MarketingCampaignAdStatus ) );
+            ddlApprovalStatus.BindToEnum<MarketingCampaignAdStatus>();
             ddlApprovalStatus.Items.Insert( 0, Rock.Constants.All.ListItem );
 
             ddlApprovalStatus.SetValue( rFilter.GetUserPreference( "Approval Status" ) );

@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -495,8 +495,7 @@ namespace RockWeb.Blocks.Finance
             // Load the Campus drop down
             ddlCampus.Items.Clear();
             ddlCampus.Items.Add( new ListItem( string.Empty, string.Empty ) );
-            var campusService = new CampusService( new RockContext() );
-            foreach ( Campus campus in campusService.Queryable() )
+            foreach ( var campus in CampusCache.All() )
             {
                 ListItem li = new ListItem( campus.Name, campus.Id.ToString() );
                 ddlCampus.Items.Add( li );

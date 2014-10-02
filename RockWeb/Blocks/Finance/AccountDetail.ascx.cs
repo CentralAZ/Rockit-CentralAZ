@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -224,7 +224,7 @@ namespace RockWeb.Blocks.Finance
         {
             ddlAccountType.BindToDefinedType( DefinedTypeCache.Read( Rock.SystemGuid.DefinedType.FINANCIAL_ACCOUNT_TYPE.AsGuid() ) );
 
-            cpCampus.Campuses = new CampusService( new RockContext() ).Queryable().OrderBy( a => a.Name ).ToList();
+            cpCampus.Campuses = CampusCache.All();
             cpCampus.Visible = cpCampus.Items.Count > 0;
         }
 

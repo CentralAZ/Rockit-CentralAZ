@@ -31,7 +31,6 @@ D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\System.Net.Http.Formatt
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\ImageResizer.xml
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\Facebook.xml
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\EPPlus.xml
-D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\it\DotLiquid.resources.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\ar\AjaxControlToolkit.resources.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\cs\AjaxControlToolkit.resources.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\de\AjaxControlToolkit.resources.dll
@@ -52,3 +51,4 @@ D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\zh-CHT\AjaxControlToolk
 D:\Rock-CentralAZ\com.centralaz.Accountability\obj\Debug\com.centralaz.Accountability.csprojResolveAssemblyReference.cache
 D:\Rock-CentralAZ\com.centralaz.Accountability\obj\Debug\com.centralaz.Accountability.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\obj\Debug\com.centralaz.Accountability.pdb
+D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\Humanizer.dll

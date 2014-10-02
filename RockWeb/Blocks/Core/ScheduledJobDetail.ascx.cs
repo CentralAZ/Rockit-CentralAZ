@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -235,7 +235,7 @@ namespace RockWeb.Blocks.Administration
         /// </summary>
         private void LoadDropDowns()
         {
-            ddlNotificationStatus.BindToEnum( typeof( JobNotificationStatus ) );
+            ddlNotificationStatus.BindToEnum<JobNotificationStatus>();
 
             int? jobEntityTypeId = Rock.Web.Cache.EntityTypeCache.Read( "Rock.Model.ServiceJob" ).Id;
 

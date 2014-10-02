@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -226,6 +226,7 @@ namespace RockWeb.Blocks.Administration
                     page.BrowserTitle = page.PageTitle;
                     page.EnableViewState = true;
                     page.IncludeAdminFooter = true;
+                    page.MenuDisplayChildPages = true;
 
                     Rock.Model.Page lastPage =
                         pageService.GetByParentPageId( _page.Id ).
