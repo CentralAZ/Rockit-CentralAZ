@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Rock.Plugin;
 namespace com.centralaz.Accountability.Migrations
 {
-    [MigrationNumber(1, "1.0.12")]
+    [MigrationNumber(1, "1.0.14")]
     public class CreateDb : Migration
     {
         public override void Up()

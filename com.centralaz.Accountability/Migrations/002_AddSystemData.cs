@@ -4,14 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Rock;
 using Rock.Plugin;
+using Rock.Web.Cache;
 namespace com.centralaz.Accountability.Migrations
 {
-    [MigrationNumber( 2, "1.0.12" )]
+    [MigrationNumber( 2, "1.0.14" )]
     public class AddSystemData : Migration
     {
         public override void Up()
         {
+            RockMigrationHelper.AddDefinedValue( Rock.SystemGuid.DefinedType.GROUPTYPE_PURPOSE, "Accountability Group", "A group type for accountability groups", "ECF09F24-41DD-4E57-9642-A4CAE0B29E14", false );
+            RockMigrationHelper.AddGroupType( "Accountability Group", "", "Group", "Member", false, true, true, "fa fa-eye", 0, null, 0, null, "DC99BF69-8A1A-411F-A267-1AE75FDC2341", false );
+            RockMigrationHelper.AddGroupTypeGroupAttribute( "DC99BF69-8A1A-411F-A267-1AE75FDC2341", Rock.SystemGuid.FieldType.DATE, "Report Start Date", "The first report submit date for the group", 0, "10/1/2014", "37D911E7-5E0A-45CE-A35A-91F75480DB6B" );
+           
             RockMigrationHelper.AddPage( "B0F4B33D-DD11-4CCC-B79D-9342831B8701", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Accountability Groups", "", "1D5A2E3C-8D8A-4086-9FF5-CE173874568D", "fa fa-eye" ); // Site:Rock RMS
             RockMigrationHelper.AddPage( "1D5A2E3C-8D8A-4086-9FF5-CE173874568D", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Accountability Group Detail", "", "6B3C673B-E693-48EF-8262-C9EA46B70C3F", "" ); // Site:Rock RMS
             RockMigrationHelper.AddPage( "6B3C673B-E693-48EF-8262-C9EA46B70C3F", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Group Member Detail Page", "", "AAD50DFC-5412-4DD1-B41A-E1840F848FC8", "" ); // Site:Rock RMS
@@ -541,6 +547,12 @@ namespace com.centralaz.Accountability.Migrations
             RockMigrationHelper.DeletePage( "AAD50DFC-5412-4DD1-B41A-E1840F848FC8" ); //  Page: Group Member Detail Page, Layout: Full Width, Site: Rock RMS
             RockMigrationHelper.DeletePage( "6B3C673B-E693-48EF-8262-C9EA46B70C3F" ); //  Page: Accountability Group Detail, Layout: Full Width, Site: Rock RMS
             RockMigrationHelper.DeletePage( "1D5A2E3C-8D8A-4086-9FF5-CE173874568D" ); //  Page: Accountability Groups, Layout: Full Width, Site: Rock RMS
+
+            RockMigrationHelper.DeleteAttribute( "37D911E7-5E0A-45CE-A35A-91F75480DB6B" );
+            RockMigrationHelper.DeleteGroupType( "DC99BF69-8A1A-411F-A267-1AE75FDC2341" );
+            RockMigrationHelper.DeleteDefinedValue( "ECF09F24-41DD-4E57-9642-A4CAE0B29E14" );
+
+
         }
     }
 }

@@ -403,23 +403,26 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                             qry = qry.Where( a => a.IsActive == true );
                         }
                     }
-
-                    gGroups.DataSource = qry.Select( g => new
+                    if ( purpose != null )
                     {
-                        Id = g.Id,
-                        Name = g.Name,
-                        GroupTypeName = g.GroupType.Name,
-                        GroupOrder = g.Order,
-                        GroupTypeOrder = g.GroupType.Order,
-                        Description = g.Description,
-                        IsSystem = g.IsSystem,
-                        IsActive = g.IsActive,
-                        GroupRole = string.Empty,
-                        DateAdded = DateTime.MinValue,
-                        MemberCount = g.Members.Count()
-                    } )
-                        .Sort( sortProperty )
-                        .ToList();
+                        gGroups.DataSource = qry.Select( g => new
+                                            {
+                                                Id = g.Id,
+                                                Name = g.Name,
+                                                GroupTypeName = g.GroupType.Name,
+                                                GroupOrder = g.Order,
+                                                GroupTypeOrder = g.GroupType.Order,
+                                                Description = g.Description,
+                                                IsSystem = g.IsSystem,
+                                                IsActive = g.IsActive,
+                                                GroupRole = string.Empty,
+                                                DateAdded = DateTime.MinValue,
+                                                MemberCount = g.Members.Count()
+                                            } )
+                                                .Sort( sortProperty )
+                                                .ToList();
+                    }
+
                 }
             }
 
