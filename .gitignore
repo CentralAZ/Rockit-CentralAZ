@@ -25,5 +25,6 @@ StyleCop.Cache
 [Oo]bj/
 RockWeb/Cache/*
 RockWeb/App_Data/PackageStaging
+com.centralaz.*/bin/Debug/*.*
 /scaffolding.config
 /packages/*.*
