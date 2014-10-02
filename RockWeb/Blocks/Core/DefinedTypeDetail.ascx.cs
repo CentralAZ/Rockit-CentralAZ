@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -195,7 +195,7 @@ namespace RockWeb.Blocks.Core
 
             definedType.FieldTypeId = FieldTypeCache.Read( Rock.SystemGuid.FieldType.TEXT ).Id;
             definedType.Name = tbTypeName.Text;
-            definedType.Category = tbTypeCategory.Text;
+            definedType.CategoryId = cpCategory.SelectedValueAsInt();
             definedType.Description = tbTypeDescription.Text;
             definedType.HelpText = tbHelpText.Text;
 
@@ -294,10 +294,10 @@ namespace RockWeb.Blocks.Core
 
             definedType.LoadAttributes();
 
-            if (!_isStandAlone)
+            if (!_isStandAlone && definedType.Category != null )
             {
                 lblMainDetails.Text = new DescriptionList()
-                    .Add("Category", definedType.Category)
+                    .Add( "Category", definedType.Category.Name )
                     .Html;
             }
 
@@ -321,7 +321,7 @@ namespace RockWeb.Blocks.Core
             SetEditMode( true );
 
             tbTypeName.Text = definedType.Name;
-            tbTypeCategory.Text = definedType.Category;
+            cpCategory.SetValue( definedType.CategoryId );
             tbTypeDescription.Text = definedType.Description;
             tbHelpText.Text = definedType.HelpText;
         }

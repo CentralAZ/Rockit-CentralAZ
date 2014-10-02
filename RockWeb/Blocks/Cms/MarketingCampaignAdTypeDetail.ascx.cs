@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -311,7 +311,7 @@ namespace RockWeb.Blocks.Cms
         /// </summary>
         private void LoadDropDowns()
         {
-            ddlDateRangeType.BindToEnum( typeof( DateRangeTypeEnum ) );
+            ddlDateRangeType.BindToEnum<DateRangeTypeEnum>();
         }
 
         /// <summary>

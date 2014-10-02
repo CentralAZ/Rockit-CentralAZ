@@ -66,7 +66,7 @@ namespace RockWeb.Plugins.com_centralaz.SampleProject
 
             if ( !Page.IsPostBack )
             {
-                var campusi = new CampusService( new RockContext() ).Queryable().OrderBy( a => a.Name ).ToList();
+                var campusi = CampusCache.All();
                 cpCampus.Campuses = campusi;
                 cpCampus.Visible = campusi.Any();
 

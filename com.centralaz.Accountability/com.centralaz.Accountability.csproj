@@ -47,6 +47,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -59,6 +60,7 @@
     <Compile Include="Data\NamedModel.cs" />
     <Compile Include="Migrations\001_CreateDb.cs" />
     <Compile Include="Migrations\002_AddSystemData.cs" />
+    <Compile Include="Migrations\003_MemberStartDate.cs" />
     <Compile Include="Model\Question.cs" />
     <Compile Include="Model\QuestionService.cs" />
     <Compile Include="Model\Response.cs" />

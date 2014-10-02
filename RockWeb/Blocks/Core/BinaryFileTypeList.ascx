@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="BinaryFileTypeList.ascx.cs" Inherits="RockWeb.Blocks.Administration.BinaryFileTypeList" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="BinaryFileTypeList.ascx.cs" Inherits="RockWeb.Blocks.Administration.BinaryFileTypeList" %>
 
 <asp:UpdatePanel ID="upBinaryFileType" runat="server">
     <ContentTemplate>
@@ -11,7 +11,7 @@
             <div class="panel-body">
 
                 <div class="grid grid-panel">
-                    <Rock:Grid ID="gBinaryFileType" runat="server" AllowSorting="true" OnRowDataBound="gBinaryFileType_RowDataBound" OnRowSelected="gBinaryFileType_Edit">
+                    <Rock:Grid ID="gBinaryFileType" runat="server" AllowSorting="true" OnRowSelected="gBinaryFileType_Edit">
                         <Columns>
                             <asp:BoundField DataField="Name" HeaderText="Name" SortExpression="Name" />
                             <asp:BoundField DataField="Description" HeaderText="Description" SortExpression="Description" />
@@ -19,7 +19,7 @@
                             <asp:BoundField DataField="BinaryFileCount" HeaderText="File Count" SortExpression="BinaryFileCount" ItemStyle-HorizontalAlign="Right" HeaderStyle-HorizontalAlign="Right" />
                             <Rock:BoolField DataField="IsSystem" HeaderText="System" SortExpression="IsSystem" />
                             <Rock:BoolField DataField="AllowCaching" HeaderText="Allows Caching" SortExpression="AllowCaching" />
-                            <Rock:BoolField DataField="RequiresSecurity" HeaderText="Requires Security" SortExpression="RequiresSecurity" />
+                            <Rock:BoolField DataField="RequiresViewSecurity" HeaderText="Requires View Security" SortExpression="RequiresViewSecurity" />
                             <Rock:SecurityField TitleField="Name" />
                             <Rock:DeleteField OnClick="gBinaryFileType_Delete" />
                         </Columns>
@@ -28,8 +28,6 @@
 
             </div>
         </div>
-
-
         
     </ContentTemplate>
 </asp:UpdatePanel>

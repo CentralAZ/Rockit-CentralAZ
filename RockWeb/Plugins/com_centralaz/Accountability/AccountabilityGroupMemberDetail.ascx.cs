@@ -445,7 +445,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
             // render UI based on Authorized and IsSystem
             var group = groupMember.Group;
-            rblStatus.BindToEnum( typeof( GroupMemberStatus ) );
+            rblStatus.BindToEnum<GroupMemberStatus>();
             rblStatus.SetValue( (int)groupMember.GroupMemberStatus );
             rblStatus.Enabled = false;
             rblStatus.Label = string.Format( "Status" );
@@ -621,8 +621,8 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 ddlGroupRole.DataBind();
             }
 
-            rblStatus.BindToEnum( typeof( GroupMemberStatus ) );
-            rblEditStatus.BindToEnum( typeof( GroupMemberStatus ) );
+            rblStatus.BindToEnum<GroupMemberStatus>();
+            rblEditStatus.BindToEnum<GroupMemberStatus>();
         }
 
         /// <summary>

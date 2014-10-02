@@ -4,9 +4,10 @@ D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\DotLiquid.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\EntityFramework.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\EntityFramework.SqlServer.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\Rock.dll
+D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\Humanizer.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\Quartz.dll
-D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\Newtonsoft.Json.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\NuGet.Core.dll
+D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\Newtonsoft.Json.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\AjaxControlToolkit.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\System.Web.Http.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\DDay.iCal.dll
@@ -31,7 +32,6 @@ D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\System.Net.Http.Formatt
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\ImageResizer.xml
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\Facebook.xml
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\EPPlus.xml
-D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\it\DotLiquid.resources.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\ar\AjaxControlToolkit.resources.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\cs\AjaxControlToolkit.resources.dll
 D:\Rock-CentralAZ\com.centralaz.Accountability\bin\Debug\de\AjaxControlToolkit.resources.dll

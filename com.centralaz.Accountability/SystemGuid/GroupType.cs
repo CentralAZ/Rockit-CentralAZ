@@ -10,6 +10,6 @@ namespace com.centralaz.Accountability.SystemGuid
         /// <summary>
         /// Type's of GroupTypes
         /// </summary>
-        public const string ACCOUNTABILITY_GROUP_TYPE = "FB2EEB40-68B7-49D5-9315-1DD3FC3E0699";
+        public const string ACCOUNTABILITY_GROUP_TYPE = "DC99BF69-8A1A-411F-A267-1AE75FDC2341";
     }
 }
