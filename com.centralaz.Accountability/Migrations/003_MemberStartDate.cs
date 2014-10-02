@@ -12,6 +12,7 @@ namespace com.centralaz.Accountability.Migrations
     [MigrationNumber( 3, "1.0.14" )]
     public class MemberStartDate : Migration
     {
+        //
         public override void Up()
         {
             GroupTypeCache theGroupType = GroupTypeCache.Read( "DC99BF69-8A1A-411F-A267-1AE75FDC2341" );
