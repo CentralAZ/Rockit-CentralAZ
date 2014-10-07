@@ -262,7 +262,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 }
                 myResponse.Comment = commentText;
                 myResponseSet.Responses.Add( myResponse );
-                
+
             }
             dataContext = new AccountabilityContext();
             responseSetService = new ResponseSetService( dataContext );
@@ -320,22 +320,22 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             var recipients = new List<string>();
             recipients.Add( recipient );
 
-            var channelData = new Dictionary<string, string>();
-            channelData.Add( "From", from );
-            channelData.Add( "Subject", subject );
-            channelData.Add( "Body", System.Text.RegularExpressions.Regex.Replace( body, @"\[\[\s*UnsubscribeOption\s*\]\]", string.Empty ) );
+            var mediumData = new Dictionary<string, string>();
+            mediumData.Add( "From", from );
+            mediumData.Add( "Subject", subject );
+            mediumData.Add( "Body", System.Text.RegularExpressions.Regex.Replace( body, @"\[\[\s*UnsubscribeOption\s*\]\]", string.Empty ) );
 
-            var channelEntity = EntityTypeCache.Read( Rock.SystemGuid.EntityType.COMMUNICATION_CHANNEL_EMAIL.AsGuid(), rockContext );
-            if ( channelEntity != null )
+            var mediumEntity = EntityTypeCache.Read( Rock.SystemGuid.EntityType.COMMUNICATION_MEDIUM_EMAIL.AsGuid(), rockContext );
+            if ( mediumEntity != null )
             {
-                var channel = ChannelContainer.GetComponent( channelEntity.Name );
-                if ( channel != null && channel.IsActive )
+                var medium = MediumContainer.GetComponent( mediumEntity.Name );
+                if ( medium != null && medium.IsActive )
                 {
-                    var transport = channel.Transport;
+                    var transport = medium.Transport;
                     if ( transport != null && transport.IsActive )
                     {
                         var appRoot = GlobalAttributesCache.Read( rockContext ).GetValue( "PublicApplicationRoot" );
-                        transport.Send( channelData, recipients, appRoot, string.Empty );
+                        transport.Send( mediumData, recipients, appRoot, string.Empty );
                     }
                 }
             }
