@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="BusinessList.ascx.cs" Inherits="RockWeb.Blocks.Finance.BusinessList" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="BusinessList.ascx.cs" Inherits="RockWeb.Blocks.Finance.BusinessList" %>
 
 <asp:UpdatePanel ID="upnlBusinesses" runat="server">
     <ContentTemplate>
@@ -26,7 +26,7 @@
                     <Rock:ModalAlert ID="mdGridWarning" runat="server" />
                     <Rock:Grid ID="gBusinessList" runat="server" RowItemText="Business" EmptyDataText="No Businesses Found" AllowSorting="true" OnRowDataBound="gBusinessList_RowDataBound" OnRowSelected="gBusinessList_RowSelected">
                         <Columns>
-                            <asp:BoundField DataField="FirstName" HeaderText="Business Name" SortExpression="FirstName" />
+                            <asp:BoundField DataField="LastName" HeaderText="Business Name" SortExpression="LastName" />
                             <asp:TemplateField>
                                 <HeaderTemplate>Contact</HeaderTemplate>
                                 <ItemTemplate>
