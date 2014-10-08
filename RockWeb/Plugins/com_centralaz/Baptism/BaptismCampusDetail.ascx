@@ -22,13 +22,14 @@
         </div>
 
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <asp:Panel ID="pnlCalendar" runat="server" CssClass="panel panel-block">
 
                     <div class="panel-heading">
                         <h1 class="panel-title">Calendar<h1>
                     </div>
                     <div class="panel-body">
+                        <center>
                         <asp:Calendar ID="calBaptism" runat="server" DayNameFormat="FirstLetter" SelectionMode="Day" BorderColor="#999999"
                             TitleStyle-BackColor="#e5e5e5" NextPrevStyle-ForeColor="#333333" FirstDayOfWeek="Monday" Width="200" CssClass="calendar" OnSelectionChanged="calBaptism_SelectionChanged" OnDayRender="calBaptisms_DayRender">
                             <DayStyle CssClass="calendar-day" />
@@ -39,12 +40,14 @@
                             <NextPrevStyle CssClass="calendar-next-prev" ForeColor="#777777" />
                             <TitleStyle CssClass="calendar-title" />
                         </asp:Calendar>
+
+                        </center>
                     </div>
 
                 </asp:Panel>
             </div>
 
-            <div class="col-md-8">
+            <div class="col-md-9">
                 <asp:Panel ID="pnlBaptismList" runat="server" CssClass="panel panel-block">
 
                     <div class="panel-heading">

@@ -65,10 +65,18 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
             base.OnLoad( e );
             GetBlackoutDates();
-            BindCalendar();
+
+
             if ( !Page.IsPostBack )
             {
-                // added for your convenience
+                if ( PageParameter( "SelectedDate" ).AsDateTime().HasValue )
+                {
+                    BindCalendar( PageParameter( "SelectedDate" ).AsDateTime().Value );
+                }
+                else
+                {
+                    BindCalendar();
+                }
             }
         }
 
@@ -111,23 +119,25 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
         protected void calBaptism_SelectionChanged( object sender, EventArgs e )
         {
+            //    PageParameter( "SelectedDate" ) = calBaptism.SelectedDate.ToShortDateString();
             UpdateScheduleList();
         }
 
         protected void calBaptisms_DayRender( object sender, DayRenderEventArgs e )
         {
             DateTime day = e.Day.Date;
- 
-            if ( baptizeeList.Any(b=>b.BaptismDateTime.Day==day.Day ))
+            if ( baptizeeList != null )
             {
-                e.Cell.Style.Add( "font-weight", "bold" );
+                if ( baptizeeList.Any( b => b.BaptismDateTime.Day == day.Day ) )
+                {
+                    e.Cell.Style.Add( "font-weight", "bold" );
+                }
             }
-            //foreach(Schedule i in blackoutDates){
-            //    if(i.iCalendarContent.Any( s => s.ScheduleItemDate.Date == day.Date ) )
-            //    {
-            //        e.Cell.Style.Add( "background-color", "#ffcfcf" );
-            //    }            
-            //}
+            if ( blackoutDates.Any( b => b.EffectiveStartDate.Value.Day == day.Day ) )
+            {
+                e.Cell.Style.Add( "background-color", "#ffcfcf" );
+            }
+
         }
 
 
@@ -150,6 +160,11 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             calBaptism.SelectedDate = DateTime.Today;
             UpdateScheduleList();
         }
+        protected void BindCalendar( DateTime selectedDate )
+        {
+            calBaptism.SelectedDate = selectedDate;
+            UpdateScheduleList();
+        }
         protected void UpdateScheduleList()
         {
             DateTime[] dateRange = GetTheDateRange( calBaptism.SelectedDate );
@@ -161,19 +176,30 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             else
             {
                 lPanelHeadingDateRange.Text = String.Format( "{0}: {1} - {2}", group.Name, dateRange[0].ToString( "MMMM d" ), dateRange[1].ToString( "MMMM d" ) );
-                //bool for if blackout date
-                nbBlackOutWeek.Visible = false;
-                baptizeeList = new BaptizeeService( new BaptismContext() ).GetBaptizeesByDateRange( dateRange[0], dateRange[1] );
-                if ( baptizeeList.Count == 0 )
+                Schedule blackoutDate = blackoutDates.Where( b => b.EffectiveStartDate.Value.Day == calBaptism.SelectedDate.Day ).FirstOrDefault();
+                nbNoBaptisms.Visible = false;
+                if ( blackoutDate != null )
                 {
-                    nbNoBaptisms.Text = "No baptisms scheduled for the selected week!";
-                    nbNoBaptisms.Visible = true;
+                    nbBlackOutWeek.Title = String.Format( "{0} has been blacked out!</br>", blackoutDate.EffectiveStartDate.Value.ToLongDateString() );
+                    nbBlackOutWeek.Text = blackoutDate.Description;
+                    nbBlackOutWeek.Visible = true;
                 }
                 else
                 {
-                    nbNoBaptisms.Visible = false;
-                    PopulateScheduleList( baptizeeList );
+                    nbBlackOutWeek.Visible = false;
+                    baptizeeList = new BaptizeeService( new BaptismContext() ).GetBaptizeesByDateRange( dateRange[0], dateRange[1] );
+                    if ( baptizeeList.Count == 0 )
+                    {
+                        nbNoBaptisms.Text = "No baptisms scheduled for the selected week!";
+                        nbNoBaptisms.Visible = true;
+                    }
+                    else
+                    {
+                        nbNoBaptisms.Visible = false;
+                        PopulateScheduleList( baptizeeList );
+                    }
                 }
+
             }
         }
         protected DateTime[] GetTheDateRange( DateTime daySelected )

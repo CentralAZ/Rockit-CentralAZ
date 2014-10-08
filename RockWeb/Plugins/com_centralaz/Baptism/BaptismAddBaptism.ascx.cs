@@ -31,7 +31,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         #endregion
 
         #region Properties
-
+        List<Schedule> blackoutDates;
         Baptizee baptizee = null;
 
         #endregion
@@ -60,6 +60,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         protected override void OnLoad( EventArgs e )
         {
             base.OnLoad( e );
+            GetBlackoutDates();
             if ( PageParameter( "BaptizeeId" ).AsIntegerOrNull() == null )
             {
                 btnDelete.Visible = false;
@@ -67,7 +68,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
             else
             {
-                BindValues();
+                BindValues( PageParameter( "BaptizeeId" ).AsInteger() );
             }
             if ( !Page.IsPostBack )
             {
@@ -92,6 +93,26 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         }
         protected void btnSave_OnClick( object sender, EventArgs e )
         {
+            nbErrorWarning.Visible = false;
+            if ( !dtpBaptismDate.SelectedDateTime.HasValue )
+            {
+                nbErrorWarning.Text = "Please select a date and time";
+                nbErrorWarning.Visible = true;
+                return;
+            }
+            if ( ppBaptizee.PersonId == null )
+            {
+                nbErrorWarning.Text = "Please select a person to be baptized";
+                nbErrorWarning.Visible = true;
+                return;
+            }
+            if ( blackoutDates.Any( b => b.EffectiveStartDate.Value.Day == dtpBaptismDate.SelectedDateTime.Value.Day ) )
+            {
+                nbErrorWarning.Text = "The date you selected is a blackout date";
+                nbErrorWarning.Visible = true;
+                return;
+            }
+
             BaptismContext baptismContext = new BaptismContext();
             BaptizeeService baptizeeService = new BaptizeeService( baptismContext );
             if ( PageParameter( "BaptizeeId" ).AsIntegerOrNull() == null )
@@ -147,6 +168,15 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
         #region Methods
 
+        protected void GetBlackoutDates()
+        {
+            Category category = new CategoryService( new RockContext() ).Queryable()
+                .Where( c => c.Name == "Mesa Blackout" )
+                .FirstOrDefault();
+            blackoutDates = new ScheduleService( new RockContext() ).Queryable()
+                .Where( s => s.CategoryId == category.Id )
+                .ToList();
+        }
         protected void ReturnToParentPage()
         {
             Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
@@ -155,9 +185,15 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             NavigateToParentPage( dictionaryInfo );
         }
 
-        protected void BindValues()
+        protected void BindValues(int baptizeeId)
         {
-
+            Baptizee baptizee = new BaptizeeService(new BaptismContext()).Get(baptizeeId);
+            dtpBaptismDate.SelectedDateTime = baptizee.BaptismDateTime;
+            ppBaptizee.PersonId = baptizee.PersonAliasId;
+            ppBaptizer1.PersonId = baptizee.Baptizer1AliasId;
+            ppBaptizer2.PersonId = baptizee.Baptizer2AliasId;
+            ppApprover.PersonId = baptizee.ApproverAliasId;
+            cbIsConfirmed.Checked = baptizee.IsConfirmed;
         }
         #endregion
     }

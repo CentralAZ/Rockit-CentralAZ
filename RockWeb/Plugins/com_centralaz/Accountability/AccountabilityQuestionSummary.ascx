@@ -6,7 +6,7 @@
         
             <div class="panel-heading">
                 <h1 class="panel-title"><asp:Literal ID="lBlockTitle" runat="server" /></h1>
-                    <asp:Literal ID="lBlockTitle" runat="server" /></h1>
+
 
                 <div class="panel-labels">
                     <Rock:HighlightLabel ID="hlblTest" runat="server" LabelType="Info" Text="Label" />
