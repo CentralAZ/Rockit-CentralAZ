@@ -261,8 +261,8 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             plBaptismList.Controls.Add( new LiteralControl( theString ) );
 
             plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
-            plBaptismList.Controls.Add( new LiteralControl( string.Format( "<li>{0}</li>", baptizee.Baptizer1.FullName ) ) );
-            plBaptismList.Controls.Add( new LiteralControl( string.Format( "<li>{0}</li>", baptizee.Baptizer2.FullName ) ) );
+            plBaptismList.Controls.Add( new LiteralControl( string.Format( "<li>{0}</li>", baptizee.Baptizer1.FullName ?? "") ) );
+            plBaptismList.Controls.Add( new LiteralControl( string.Format( "<li>{0}</li>", baptizee.Baptizer2.FullName ?? "" ) ) );
             plBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
 
             plBaptismList.Controls.Add( new LiteralControl( theString ) );
@@ -270,7 +270,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             theString = String.Format( "<div class='col-md-2'>{0}</div>", baptizee.Person.PhoneNumbers.FirstOrDefault() );
             plBaptismList.Controls.Add( new LiteralControl( theString ) );
 
-            theString = String.Format( "<div class='col-md-2'>{0}</div>", baptizee.Approver.FullName );
+            theString = String.Format( "<div class='col-md-2'>{0}</div>", baptizee.Approver.FullName ?? "" );
             plBaptismList.Controls.Add( new LiteralControl( theString ) );
 
             CheckBox cb = new CheckBox
