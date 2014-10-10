@@ -37,6 +37,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
         protected List<Schedule> blackoutDates;
         protected List<Baptizee> baptizeeList;
+        protected Schedule blackoutDate;
 
         #endregion
 
@@ -55,6 +56,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlContent );
+
         }
 
         /// <summary>
@@ -112,6 +114,16 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             NavigateToLinkedPage( "AddBlackoutDayPage", dictionaryInfo );
         }
 
+        protected void lbEditBlackout_Click( object sender, EventArgs e )
+        {
+            blackoutDate = blackoutDates.Where( b => b.EffectiveStartDate.Value.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
+            Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
+            dictionaryInfo.Add( "GroupId", PageParameter( "GroupId" ) );
+            dictionaryInfo.Add( "SelectedDate", calBaptism.SelectedDate.ToShortDateString() );
+            dictionaryInfo.Add( "BlackoutId", blackoutDate.Id.ToString() );
+            NavigateToLinkedPage( "AddBlackoutDayPage", dictionaryInfo );
+        }
+
         protected void lbPrintReport_Click( object sender, EventArgs e )
         {
 
@@ -128,12 +140,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             DateTime day = e.Day.Date;
             if ( baptizeeList != null )
             {
-                if ( baptizeeList.Any( b => b.BaptismDateTime.Day == day.Day ) )
+                if ( baptizeeList.Any( b => b.BaptismDateTime.Date == day.Date ) )
                 {
                     e.Cell.Style.Add( "font-weight", "bold" );
                 }
             }
-            if ( blackoutDates.Any( b => b.EffectiveStartDate.Value.Day == day.Day ) )
+            if ( blackoutDates.Any( b => b.EffectiveStartDate.Value.Date == day.Date ) )
             {
                 e.Cell.Style.Add( "background-color", "#ffcfcf" );
             }
@@ -147,9 +159,10 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
         protected void GetBlackoutDates()
         {
-            Category category = new CategoryService( new RockContext() ).Queryable()
-                .Where( c => c.Name == "Mesa Blackout" )
-                .FirstOrDefault();
+            Group group = new GroupService( new RockContext() ).Get( PageParameter( "GroupId" ).AsInteger() );
+            group.LoadAttributes();
+            Guid categoryguid = group.GetAttributeValue( "BlackoutDates" ).AsGuid();
+            CategoryCache category = CategoryCache.Read( categoryguid );
             blackoutDates = new ScheduleService( new RockContext() ).Queryable()
                 .Where( s => s.CategoryId == category.Id )
                 .ToList();
@@ -176,16 +189,19 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             else
             {
                 lPanelHeadingDateRange.Text = String.Format( "{0}: {1} - {2}", group.Name, dateRange[0].ToString( "MMMM d" ), dateRange[1].ToString( "MMMM d" ) );
-                Schedule blackoutDate = blackoutDates.Where( b => b.EffectiveStartDate.Value.Day == calBaptism.SelectedDate.Day ).FirstOrDefault();
+                blackoutDate = blackoutDates.Where( b => b.EffectiveStartDate.Value.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
                 nbNoBaptisms.Visible = false;
                 if ( blackoutDate != null )
                 {
-                    nbBlackOutWeek.Title = String.Format( "{0} has been blacked out!</br>", blackoutDate.EffectiveStartDate.Value.ToLongDateString() );
-                    nbBlackOutWeek.Text = blackoutDate.Description;
+                    nbBlackOutWeek.Title = String.Format( "{0} has been blacked out!</br>", calBaptism.SelectedDate.ToLongDateString() );
+                    nbBlackOutWeek.Text = String.Format( "{0}", blackoutDate.Description );
+                    lbEditBlackout.Visible = true;
                     nbBlackOutWeek.Visible = true;
+                    //PopulateWithBlackoutMessage( blackoutDate );
                 }
                 else
                 {
+                    lbEditBlackout.Visible = false;
                     nbBlackOutWeek.Visible = false;
                     baptizeeList = new BaptizeeService( new BaptismContext() ).GetBaptizeesByDateRange( dateRange[0], dateRange[1] );
                     if ( baptizeeList.Count == 0 )
@@ -212,8 +228,62 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         }
         protected void PopulateScheduleList( List<Baptizee> baptizeeList )
         {
+            DateTime current = DateTime.MinValue;
+            foreach ( Baptizee b in baptizeeList )
+            {
+                if ( current != b.BaptismDateTime )
+                {
+                    current = b.BaptismDateTime;
+                    BuildItemListHeader( current );
+                }
 
+                BuildListItem( b );
+            }
         }
+        protected void BuildItemListHeader( DateTime date )
+        {
+            Literal lHeader = new Literal();
+            lHeader.Text = string.Format( "<h4>Service: {0} - {1} {2}</h4>",
+                date.ToShortTimeString(), date.DayOfWeek, date.ToString( "MM/d" ) );
+            plBaptismList.Controls.Add( lHeader );
+            plBaptismList.Controls.Add( new LiteralControl( "<div class='row'>" ) );
+            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>Attendee</div>" ) );
+            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>Baptized By</div>" ) );
+            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>Phone Number</div>" ) );
+            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>Approved By</div>" ) );
+            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>Confirmed</div>" ) );
+            plBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
+            plBaptismList.Controls.Add( new LiteralControl( "<hr>" ) );
+        }
+        protected void BuildListItem( Baptizee baptizee )
+        {
+            String theString = String.Format( "<div class='col-md-2'>{0}</div>", baptizee.Person.FullName );
+            plBaptismList.Controls.Add( new LiteralControl( theString ) );
+
+            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
+            plBaptismList.Controls.Add( new LiteralControl( string.Format( "<li>{0}</li>", baptizee.Baptizer1.FullName ) ) );
+            plBaptismList.Controls.Add( new LiteralControl( string.Format( "<li>{0}</li>", baptizee.Baptizer2.FullName ) ) );
+            plBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
+
+            plBaptismList.Controls.Add( new LiteralControl( theString ) );
+
+            theString = String.Format( "<div class='col-md-2'>{0}</div>", baptizee.Person.PhoneNumbers.FirstOrDefault() );
+            plBaptismList.Controls.Add( new LiteralControl( theString ) );
+
+            theString = String.Format( "<div class='col-md-2'>{0}</div>", baptizee.Approver.FullName );
+            plBaptismList.Controls.Add( new LiteralControl( theString ) );
+
+            CheckBox cb = new CheckBox
+            {
+                ID = string.Format( "cbConfirmed_{0}", baptizee.Id ),
+                Checked = baptizee.IsConfirmed,
+                Enabled = false
+            };
+            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
+            plBaptismList.Controls.Add( cb );
+            plBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
+        }
+
         #endregion
     }
 }

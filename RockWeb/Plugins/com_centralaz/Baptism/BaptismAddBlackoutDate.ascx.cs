@@ -6,6 +6,8 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
+using DDay.iCal;
+using DDay.iCal.Serialization.iCalendar;
 using Rock;
 using Rock.Data;
 using Rock.Model;
@@ -29,7 +31,8 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
         #region Properties
 
-        // used for public / protected properties
+        protected List<Schedule> blackoutDates;
+        protected Schedule blackoutDate;
 
         #endregion
 
@@ -60,7 +63,15 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
             if ( !Page.IsPostBack )
             {
-                // added for your convenience
+                if ( PageParameter( "BlackoutId" ).AsIntegerOrNull() == null )
+                {
+                    dpBlackOutDate.SelectedDate = PageParameter( "SelectedDate" ).AsDateTime();
+                    btnDelete.Visible = false;
+                }
+                else
+                {
+                    BindValues( PageParameter( "BlackoutId" ).AsInteger() );
+                }
             }
         }
 
@@ -79,12 +90,113 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
 
         }
-
+        protected void btnSave_OnClick( object sender, EventArgs e )
+        {
+            nbNotification.Visible = false;
+            //baptisms exist for blackout date
+            //blackout date already exists
+            GetBlackoutDates();
+            if ( blackoutDates.Any( b => ( b.EffectiveStartDate.Value.Date == dpBlackOutDate.SelectedDate.Value.Date ) && ( b.Id != PageParameter( "BlackoutId" ).AsIntegerOrNull() ) ) )
+            {
+                nbNotification.Text = "Blackout already exists for that date";
+                nbNotification.Visible = true;
+                return;
+            }
+            //check that group is valid
+            int categoryId = GetCategoryId();
+            if ( categoryId == -1 )
+            {
+                nbNotification.Text = "Error loading campus";
+                nbNotification.Visible = true;
+                return;
+            }
+            //save blackout date to db
+            RockContext rockContext = new RockContext();
+            ScheduleService scheduleService = new ScheduleService( rockContext );
+            if ( PageParameter( "BlackoutId" ).AsIntegerOrNull() == null )
+            {
+                blackoutDate = new Schedule { Id = 0 };
+                blackoutDate.CategoryId = categoryId;
+            }
+            else
+            {
+                blackoutDate = scheduleService.Get( PageParameter( "BlackoutId" ).AsInteger() );
+            }
+            iCalendar calendar = new iCalendar();
+            DDay.iCal.IDateTime datetime = new iCalDateTime();
+            Event theEvent = new Event();
+            calendar.Events.Add( theEvent );
+            var x1 = theEvent.DTStart;
+            datetime.Value = dpBlackOutDate.SelectedDate.Value;
+            calendar.Events[0].DTStart = datetime;
+            iCalendarSerializer calSerializer = new iCalendarSerializer( calendar );
+            blackoutDate.iCalendarContent = calSerializer.SerializeToString();
+            blackoutDate.Description = tbDescription.Text;
+            scheduleService.Add( blackoutDate );
+            rockContext.SaveChanges();
+            ReturnToParentPage();
+        }
+        protected void btnDelete_OnClick( object sender, EventArgs e )
+        {
+            RockContext rockContext = new RockContext();
+            ScheduleService scheduleService = new ScheduleService( rockContext );
+            if ( blackoutDate == null )
+            {
+                blackoutDate = scheduleService.Get( PageParameter( "BleackoutId" ).AsInteger() );
+            }
+            if ( blackoutDate != null )
+            {
+                scheduleService.Delete( blackoutDate );
+                rockContext.SaveChanges();
+            }
+            ReturnToParentPage();
+        }
+        protected void btnCancel_OnClick( object sender, EventArgs e )
+        {
+            ReturnToParentPage();
+        }
         #endregion
 
         #region Methods
 
-        // helper functional methods (like BindGrid(), etc.)
+        protected void GetBlackoutDates()
+        {
+            Category category = new CategoryService( new RockContext() ).Queryable()
+                .Where( c => c.Name == "Mesa Blackout" )
+                .FirstOrDefault();
+            blackoutDates = new ScheduleService( new RockContext() ).Queryable()
+                .Where( s => s.CategoryId == category.Id )
+                .ToList();
+        }
+        protected void ReturnToParentPage()
+        {
+            Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
+            dictionaryInfo.Add( "GroupId", PageParameter( "GroupId" ) );
+            dictionaryInfo.Add( "SelectedDate", PageParameter( "SelectedDate" ) );
+            NavigateToParentPage( dictionaryInfo );
+        }
+
+        protected void BindValues( int blackoutId )
+        {
+            Schedule blackoutDate = new ScheduleService( new RockContext() ).Get( blackoutId );
+            dpBlackOutDate.SelectedDate = blackoutDate.EffectiveStartDate;
+            tbDescription.Text = blackoutDate.Description;
+        }
+        protected int GetCategoryId()
+        {
+            Group group = new GroupService( new RockContext() ).Get( PageParameter( "GroupId" ).AsInteger() );
+            group.LoadAttributes();
+            Guid categoryguid = group.GetAttributeValue( "BlackoutDates" ).AsGuid();
+            CategoryCache category = CategoryCache.Read( categoryguid );
+            if ( category == null )
+            {
+                return -1;
+            }
+            else
+            {
+                return category.Id;
+            }
+        }
 
         #endregion
     }

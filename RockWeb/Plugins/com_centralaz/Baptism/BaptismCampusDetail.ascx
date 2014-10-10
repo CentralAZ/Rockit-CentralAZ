@@ -58,6 +58,7 @@
                     <div class="panel-body">
                         <Rock:NotificationBox ID="nbNoBaptisms" NotificationBoxType="Info" runat="server"></Rock:NotificationBox>
                         <Rock:NotificationBox ID="nbBlackOutWeek" NotificationBoxType="Danger" runat="server"></Rock:NotificationBox>
+                         <asp:LinkButton ID='lbEditBlackout' runat='server' OnClick='lbEditBlackout_Click' Text='Edit.'/>
                         <asp:PlaceHolder ID="plBaptismList" runat="server"></asp:PlaceHolder>
                     </div>
 

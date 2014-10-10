@@ -41,19 +41,19 @@ namespace com.centralaz.Baptism.Model
         /// The Id of the first Baptizer
         /// </summary>
         [DataMember]
-        public int Baptizer1AliasId { get; set; }
+        public int? Baptizer1AliasId { get; set; }
 
         /// <summary>
         /// The Id of the second Baptizer
         /// </summary>
         [DataMember]
-        public int Baptizer2AliasId { get; set; }
+        public int? Baptizer2AliasId { get; set; }
 
         /// <summary>
         /// The Id of the approver of the baptism
         /// </summary>
         [DataMember]
-        public int ApproverAliasId { get; set; }
+        public int? ApproverAliasId { get; set; }
 
         /// <summary>
         /// The bool for whether the baptism is confirmed or not

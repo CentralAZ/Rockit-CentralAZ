@@ -10,8 +10,8 @@
 
             </div>
             <div class="panel-body">
-                <Rock:DateTimePicker ID="dtpBaptismDate" runat="server" Label="Date" />
                 <Rock:NotificationBox ID="nbErrorWarning" runat="server" NotificationBoxType="Danger" />
+                <Rock:DateTimePicker ID="dtpBaptismDate" runat="server" Label="Date" />
                 <Rock:PersonPicker ID="ppBaptizee" runat="server" Label="Person being baptized" />
                 <Rock:PersonPicker ID="ppBaptizer1" runat="server" Label="Primary Baptizer" />
                 <Rock:PersonPicker ID="ppBaptizer2" runat="server" Label="Secondary Baptizer (Optional)" />
