@@ -132,7 +132,11 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             iCalendarSerializer calSerializer = new iCalendarSerializer( calendar );
             blackoutDate.iCalendarContent = calSerializer.SerializeToString();
             blackoutDate.Description = tbDescription.Text;
+            if ( blackoutDate.Id.Equals( 0 ) )
+            {
             scheduleService.Add( blackoutDate );
+
+            }
             rockContext.SaveChanges();
             ReturnToParentPage();
         }
@@ -142,7 +146,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             ScheduleService scheduleService = new ScheduleService( rockContext );
             if ( blackoutDate == null )
             {
-                blackoutDate = scheduleService.Get( PageParameter( "BleackoutId" ).AsInteger() );
+                blackoutDate = scheduleService.Get( PageParameter( "BlackoutId" ).AsInteger() );
             }
             if ( blackoutDate != null )
             {
@@ -172,7 +176,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
             Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
             dictionaryInfo.Add( "GroupId", PageParameter( "GroupId" ) );
-            dictionaryInfo.Add( "SelectedDate", PageParameter( "SelectedDate" ) );
+            dictionaryInfo.Add( "SelectedDate", dpBlackOutDate.SelectedDate.Value.ToShortDateString());
             NavigateToParentPage( dictionaryInfo );
         }
 

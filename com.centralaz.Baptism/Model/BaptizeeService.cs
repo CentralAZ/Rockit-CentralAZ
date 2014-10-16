@@ -28,5 +28,12 @@ namespace com.centralaz.Baptism.Model
                 .ToList();
             return baptizeeList;
         }
+
+        public List<Baptizee> GetAllBaptizees()
+        {
+            List<Baptizee> baptizeeList = Queryable()
+                .ToList();
+            return baptizeeList;
+        }
     }
 }

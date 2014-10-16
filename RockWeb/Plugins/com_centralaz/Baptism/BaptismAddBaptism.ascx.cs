@@ -156,21 +156,25 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
             if ( ppBaptizer1.PersonId != null )
             {
-                 theId = (int)new PersonAliasService( new RockContext() ).GetPrimaryAliasId( (int)ppBaptizer1.PersonId );
+                theId = (int)new PersonAliasService( new RockContext() ).GetPrimaryAliasId( (int)ppBaptizer1.PersonId );
                 baptizee.Baptizer1AliasId = theId;
             }
             if ( ppBaptizer2.PersonId != null )
             {
-                 theId = (int)new PersonAliasService( new RockContext() ).GetPrimaryAliasId( (int)ppBaptizer2.PersonId );
+                theId = (int)new PersonAliasService( new RockContext() ).GetPrimaryAliasId( (int)ppBaptizer2.PersonId );
                 baptizee.Baptizer2AliasId = theId;
             }
             if ( ppApprover.PersonId != null )
             {
-                 theId = (int)new PersonAliasService( new RockContext() ).GetPrimaryAliasId( (int)ppApprover.PersonId );
+                theId = (int)new PersonAliasService( new RockContext() ).GetPrimaryAliasId( (int)ppApprover.PersonId );
                 baptizee.ApproverAliasId = theId;
             }
             baptizee.IsConfirmed = cbIsConfirmed.Checked;
+            if ( baptizee.Id.Equals( 0 ) )
+            {
             baptizeeService.Add( baptizee );
+
+            }
             baptismContext.SaveChanges();
             ReturnToParentPage();
         }
@@ -259,10 +263,21 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
             Baptizee baptizee = new BaptizeeService( new BaptismContext() ).Get( baptizeeId );
             dtpBaptismDate.SelectedDateTime = baptizee.BaptismDateTime;
-            ppBaptizee.PersonId = baptizee.PersonAliasId;
-            ppBaptizer1.PersonId = baptizee.Baptizer1AliasId;
-            ppBaptizer2.PersonId = baptizee.Baptizer2AliasId;
-            ppApprover.PersonId = baptizee.ApproverAliasId;
+            ppBaptizee.SetValue( baptizee.Person );
+            if ( baptizee.Baptizer1 != null )
+            {
+                ppBaptizer1.SetValue( baptizee.Baptizer1 );
+            }
+            if ( baptizee.Baptizer2 != null )
+            {
+                ppBaptizer2.SetValue(baptizee.Baptizer2);
+
+            }
+            if ( baptizee.Approver != null )
+            {
+                ppApprover.SetValue( baptizee.Approver );
+
+            }
             cbIsConfirmed.Checked = baptizee.IsConfirmed;
         }
 
