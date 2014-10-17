@@ -21,17 +21,18 @@ namespace com.centralaz.Baptism.Model
         public BaptizeeService( BaptismContext context ) : base( context ) { }
 
 
-        public List<Baptizee> GetBaptizeesByDateRange( DateTime firstDay, DateTime lastDay )
+        public List<Baptizee> GetBaptizeesByDateRange( DateTime firstDay, DateTime lastDay, int groupId )
         {
             List<Baptizee> baptizeeList = Queryable()
-                .Where( b => b.BaptismDateTime.Day >= firstDay.Day && b.BaptismDateTime.Day <= lastDay.Day )
+                .Where( b => b.BaptismDateTime.Day >= firstDay.Day && b.BaptismDateTime.Day <= lastDay.Day && b.GroupId == groupId)
                 .ToList();
             return baptizeeList;
         }
 
-        public List<Baptizee> GetAllBaptizees()
+        public List<Baptizee> GetAllBaptizees(int groupId)
         {
             List<Baptizee> baptizeeList = Queryable()
+                .Where(b=> b.GroupId==groupId)
                 .ToList();
             return baptizeeList;
         }

@@ -96,7 +96,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             //baptisms exist for blackout date
             //blackout date already exists
             GetBlackoutDates();
-            if ( blackoutDates.Any( b => ( b.EffectiveStartDate.Value.Date == dpBlackOutDate.SelectedDate.Value.Date ) && ( b.Id != PageParameter( "BlackoutId" ).AsIntegerOrNull() ) ) )
+            if ( blackoutDates.Any( b => ( b.EffectiveStartDate.Value.Date == dpBlackOutDate.SelectedDate.Value.Date ) && ( b.CategoryId == GetCategoryId() ) && ( b.Id != PageParameter( "BlackoutId" ).AsIntegerOrNull() ) ) )
             {
                 nbNotification.Text = "Blackout already exists for that date";
                 nbNotification.Visible = true;
@@ -134,7 +134,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             blackoutDate.Description = tbDescription.Text;
             if ( blackoutDate.Id.Equals( 0 ) )
             {
-            scheduleService.Add( blackoutDate );
+                scheduleService.Add( blackoutDate );
 
             }
             rockContext.SaveChanges();
@@ -176,7 +176,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
             Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
             dictionaryInfo.Add( "GroupId", PageParameter( "GroupId" ) );
-            dictionaryInfo.Add( "SelectedDate", dpBlackOutDate.SelectedDate.Value.ToShortDateString());
+            dictionaryInfo.Add( "SelectedDate", dpBlackOutDate.SelectedDate.Value.ToShortDateString() );
             NavigateToParentPage( dictionaryInfo );
         }
 

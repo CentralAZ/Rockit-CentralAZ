@@ -9,14 +9,18 @@ using System.Web.UI.WebControls;
 using com.centralaz.Baptism.Model;
 using com.centralaz.Baptism.Data;
 
-
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using iTextSharp.text.pdf.draw;
 
 using Rock;
 using Rock.Data;
 using Rock.Model;
 using Rock.Web.Cache;
+using Rock.Web.UI;
 using Rock.Web.UI.Controls;
 using Rock.Attribute;
+using Rock.Web;
 
 namespace RockWeb.Plugins.com_centralaz.Baptism
 {
@@ -26,6 +30,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
     [Description( "Detail block for Baptism scheduling" )]
     [LinkedPage( "Add Baptism Page", "", true, "", "", 0 )]
     [LinkedPage( "Add Blackout Day Page", "", true, "", "", 0 )]
+    [TextField( "Report Font", "", true, "Gotham", "", 0 )]
     public partial class BaptismCampusDetail : Rock.Web.UI.RockBlock
     {
         #region Fields
@@ -55,9 +60,15 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
             base.OnInit( e );
 
+            RockPage.AddCSSLink( ResolveRockUrl( "~/Plugins/com_centralaz/Baptism/Styles/BaptismCampusDetail.css" ) );
+
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlContent );
+
+            // register btnDumpDiagnostics as a PostBackControl since it is returning a File download
+            ScriptManager scriptManager = ScriptManager.GetCurrent( Page );
+            scriptManager.RegisterPostBackControl( lbPrintReport );
 
         }
 
@@ -89,6 +100,40 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
         }
 
+        /// <summary>
+        /// Returns breadcrumbs specific to the block that should be added to navigation
+        /// based on the current page reference.  This function is called during the page's
+        /// oninit to load any initial breadcrumbs.
+        /// </summary>
+        /// <param name="pageReference">The <see cref="Rock.Web.PageReference" />.</param>
+        /// <returns>
+        /// A <see cref="System.Collections.Generic.List{BreadCrumb}" /> of block related <see cref="Rock.Web.UI.BreadCrumb">BreadCrumbs</see>.
+        /// </returns>
+        public override List<BreadCrumb> GetBreadCrumbs( PageReference pageReference )
+        {
+            var breadCrumbs = new List<BreadCrumb>();
+
+            int? groupId = PageParameter( pageReference, "GroupId" ).AsIntegerOrNull();
+            if ( groupId != null )
+            {
+                Group group = new GroupService( new RockContext() ).Get( groupId.Value );
+                if ( group != null )
+                {
+                    breadCrumbs.Add( new BreadCrumb( group.Name, pageReference ) );
+                }
+                else
+                {
+                    breadCrumbs.Add( new BreadCrumb( "New Group", pageReference ) );
+                }
+            }
+            else
+            {
+                // don't show a breadcrumb if we don't have a pageparam to work with
+            }
+
+            return breadCrumbs;
+        }
+
         #endregion
 
         #region Events
@@ -105,6 +150,11 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
         }
 
+        /// <summary>
+        /// Handles the Click event of the lbAddBaptism control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void lbAddBaptism_Click( object sender, EventArgs e )
         {
             Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
@@ -113,6 +163,11 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             NavigateToLinkedPage( "AddBaptismPage", dictionaryInfo );
         }
 
+        /// <summary>
+        /// Handles the Click event of the lbAddBlackout control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void lbAddBlackout_Click( object sender, EventArgs e )
         {
             Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
@@ -121,6 +176,11 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             NavigateToLinkedPage( "AddBlackoutDayPage", dictionaryInfo );
         }
 
+        /// <summary>
+        /// Handles the Click event of the lbEditBlackout control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void lbEditBlackout_Click( object sender, EventArgs e )
         {
             blackoutDate = blackoutDates.Where( b => b.EffectiveStartDate.Value.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
@@ -131,17 +191,85 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             NavigateToLinkedPage( "AddBlackoutDayPage", dictionaryInfo );
         }
 
+        /// <summary>
+        /// Handles the Click event of the lbPrintReport control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void lbPrintReport_Click( object sender, EventArgs e )
         {
+            //Get the data
+            DateTime[] dateRange = GetTheDateRange( calBaptism.SelectedDate );
+            Group group = new GroupService( new RockContext() ).Get( PageParameter( "GroupId" ).AsInteger() );
+            baptizeeList = new BaptizeeService( new BaptismContext() ).GetBaptizeesByDateRange( dateRange[0], dateRange[1], group.Id );
+            String font = GetAttributeValue( "ReportFont" );
 
+            //Setup the document
+            var document = new Document( PageSize.A4, 50, 50, 25, 25 );
+
+            var output = new MemoryStream();
+            var writer = PdfWriter.GetInstance( document, output );
+
+            document.Open();
+
+            var titleFont = FontFactory.GetFont( font, 16, Font.BOLD );
+            var subTitleFont = FontFactory.GetFont( font, 14, Color.GRAY );
+
+            //Add church logo
+            var logo = iTextSharp.text.Image.GetInstance( Server.MapPath( ResolveRockUrl( "~/Assets/Icons/CentralChristianChurchArizona_165_90.png" ) ) );
+            logo.Alignment = iTextSharp.text.Image.RIGHT_ALIGN;
+            logo.ScaleAbsolute( 100, 55 );
+            document.Add( logo );
+
+            //Write the document
+            String title = String.Format( "{0}: {1} - {2}", group.Name, dateRange[0].ToString( "MMMM d" ), dateRange[1].ToString( "MMMM d" ) );
+            document.Add( new Paragraph( title, titleFont ) );
+
+            String subTitle = String.Format( "Baptism Schedule for {0}", group.Campus.ToString() );
+            document.Add( new Paragraph( subTitle, subTitleFont ) );
+
+            //Populate the Lists
+            DateTime current = DateTime.MinValue;
+            foreach ( Baptizee b in baptizeeList )
+            {
+                if ( current != b.BaptismDateTime )
+                {
+                    current = b.BaptismDateTime;
+                    BuildPDFItemListHeader( current, document, font );
+                }
+
+                BuildPDFListItem( b, document, font );
+            }
+
+            document.Close();
+
+            Response.ClearHeaders();
+            Response.ClearContent();
+            Response.Clear();
+            Response.ContentType = "application/pdf";
+            Response.AddHeader( "Content-Disposition", string.Format( "attachment;filename={0} Baptism Schedule.pdf", group.Campus.ToString() ) );
+            Response.BinaryWrite( output.ToArray() );
+            Response.Flush();
+            Response.End();
+            return;
         }
 
+        /// <summary>
+        /// Handles the SelectionChanged event of the calBaptism control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void calBaptism_SelectionChanged( object sender, EventArgs e )
         {
             //    PageParameter( "SelectedDate" ) = calBaptism.SelectedDate.ToShortDateString();
-            UpdateScheduleList();
+            UpdateSchedulePanel();
         }
 
+        /// <summary>
+        /// Handles the DayRender event of the calBaptisms control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="DayRenderEventArgs" /> instance containing the event data.</param>
         protected void calBaptisms_DayRender( object sender, DayRenderEventArgs e )
         {
             DateTime day = e.Day.Date;
@@ -150,11 +278,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 if ( baptizees.Any( b => b.BaptismDateTime.Date == day.Date ) )
                 {
                     e.Cell.Style.Add( "font-weight", "bold" );
+                    e.Cell.AddCssClass( "alert-success" );
                 }
             }
             if ( blackoutDates.Any( b => b.EffectiveStartDate.Value.Date == day.Date ) )
             {
-                e.Cell.Style.Add( "background-color", "#ffcfcf" );
+                e.Cell.AddCssClass( "alert-danger" );
             }
 
         }
@@ -163,11 +292,17 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
         #region Methods
 
+        /// <summary>
+        /// Fills the baptizee List with all baptizees for that group
+        /// </summary>
         protected void UpdateBaptizees()
         {
-            baptizees = new BaptizeeService( new BaptismContext() ).GetAllBaptizees();
+            baptizees = new BaptizeeService( new BaptismContext() ).GetAllBaptizees( PageParameter( "GroupId" ).AsInteger() );
         }
 
+        /// <summary>
+        /// Fills the blackout date list with all blackout dates for that group
+        /// </summary>
         protected void GetBlackoutDates()
         {
             Group group = new GroupService( new RockContext() ).Get( PageParameter( "GroupId" ).AsInteger() );
@@ -179,21 +314,31 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 .ToList();
         }
 
+        /// <summary>
+        /// Sets the calendar's seleccted date to today
+        /// </summary>
         protected void BindCalendar()
         {
 
             calBaptism.SelectedDate = DateTime.Today;
-            UpdateScheduleList();
+            UpdateSchedulePanel();
         }
 
+        /// <summary>
+        /// Sets the calendar's selected date to selectedDate
+        /// </summary>
+        /// <param name="selectedDate"></param>
         protected void BindCalendar( DateTime selectedDate )
         {
 
             calBaptism.SelectedDate = selectedDate;
-            UpdateScheduleList();
+            UpdateSchedulePanel();
         }
 
-        protected void UpdateScheduleList()
+        /// <summary>
+        /// Updates the baptism schedule panel
+        /// </summary>
+        protected void UpdateSchedulePanel()
         {
             DateTime[] dateRange = GetTheDateRange( calBaptism.SelectedDate );
             Group group = new GroupService( new RockContext() ).Get( PageParameter( "GroupId" ).AsInteger() );
@@ -218,7 +363,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 {
                     lbEditBlackout.Visible = false;
                     nbBlackOutWeek.Visible = false;
-                    baptizeeList = new BaptizeeService( new BaptismContext() ).GetBaptizeesByDateRange( dateRange[0], dateRange[1] );
+                    baptizeeList = new BaptizeeService( new BaptismContext() ).GetBaptizeesByDateRange( dateRange[0], dateRange[1], group.Id );
                     if ( baptizeeList.Count == 0 )
                     {
                         nbNoBaptisms.Text = "No baptisms scheduled for the selected week!";
@@ -273,46 +418,81 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             Literal lHeader = new Literal();
             lHeader.Text = string.Format( "<h3>Service: {0} - {1} {2}</h3>",
                 date.ToShortTimeString(), date.DayOfWeek, date.ToString( "MM/d" ) );
-            plBaptismList.Controls.Add( lHeader );
-            plBaptismList.Controls.Add( new LiteralControl( "<div class='row'>" ) );
-            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'><h4>Attendee</h4></div>" ) );
-            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'><h4>Baptized By</h4></div>" ) );
-            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'><h4>Phone Number</h4></div>" ) );
-            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'><h4>Approved By</h4></div>" ) );
-            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'><h4>Confirmed</h4></div>" ) );
-            plBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
-            plBaptismList.Controls.Add( new LiteralControl( "<hr>" ) );
+            phBaptismList.Controls.Add( lHeader );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='row'>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'><h5>Baptizee</h5></div>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'><h5>Phone Number</h5></div>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'><h5>Baptized By</h5></div>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'><h5>Approved By</h5></div>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'><h5>Confirmed</h5></div>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
+        }
+
+        protected void BuildPDFItemListHeader( DateTime date, Document document, String font )
+        {
+            //Fonts
+            var listHeaderFont = FontFactory.GetFont( font, 12, Font.BOLD, Color.DARK_GRAY );
+            var listSubHeaderFont = FontFactory.GetFont( font, 10, Font.BOLD, Color.DARK_GRAY );
+
+            //Build Header
+            document.Add( Chunk.NEWLINE );
+            String listHeader = date.ToString( "dddd, MMMM d, yyyy hh:mm" );
+            document.Add( new Paragraph( listHeader, listHeaderFont ) );
+
+            //Build Subheaders
+            var listSubHeaderTable = new PdfPTable( 5 );
+            listSubHeaderTable.LockedWidth = true;
+            listSubHeaderTable.TotalWidth = PageSize.A4.Width - document.LeftMargin - document.RightMargin;
+            listSubHeaderTable.HorizontalAlignment = 0;
+            listSubHeaderTable.SpacingBefore = 10;
+            listSubHeaderTable.SpacingAfter = 0;
+            listSubHeaderTable.DefaultCell.BorderWidth = 0;
+            listSubHeaderTable.DefaultCell.BorderWidthBottom = 1;
+            listSubHeaderTable.DefaultCell.BorderColorBottom = Color.DARK_GRAY;
+
+
+            listSubHeaderTable.AddCell( new Phrase( "Being Baptized", listSubHeaderFont ) );
+            listSubHeaderTable.AddCell( new Phrase( "Phone Number", listSubHeaderFont ) );
+            listSubHeaderTable.AddCell( new Phrase( "Baptized By", listSubHeaderFont ) );
+            listSubHeaderTable.AddCell( new Phrase( "Approved By", listSubHeaderFont ) );
+            listSubHeaderTable.AddCell( new Phrase( "Confirmed", listSubHeaderFont ) );
+
+            document.Add( listSubHeaderTable );
+
+            //LineSeparator lineSeparator = new LineSeparator();
+            //lineSeparator.LineWidth = 4;
+            //document.Add( new Chunk( new LineSeparator() ) );
         }
 
         protected void BuildListItem( Baptizee baptizee )
         {
-            plBaptismList.Controls.Add( new LiteralControl( "<div class='row'>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='row'>" ) );
             string url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Person.Id ) );
             String theString = String.Format( "<div class='col-md-2'><a href=\"{0}\">{1}</a></div>", url, baptizee.Person.FullName );
-            plBaptismList.Controls.Add( new LiteralControl( theString ) );
+            phBaptismList.Controls.Add( new LiteralControl( theString ) );
 
-            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
+            theString = String.Format( "<div class='col-md-2'>{0}</div>", baptizee.Person.PhoneNumbers.FirstOrDefault() );
+            phBaptismList.Controls.Add( new LiteralControl( theString ) );
+
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
             if ( baptizee.Baptizer1 != null )
             {
                 url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Baptizer1.Id ) );
-                plBaptismList.Controls.Add( new LiteralControl( string.Format( "<li><a href=\"{0}\">{1}</a></li>", url, baptizee.Baptizer1.FullName ?? "" ) ) );
+                phBaptismList.Controls.Add( new LiteralControl( string.Format( "<li><a href=\"{0}\">{1}</a></li>", url, baptizee.Baptizer1.FullName ?? "" ) ) );
             }
             else
             {
-                plBaptismList.Controls.Add( new LiteralControl( "" ) );
+                phBaptismList.Controls.Add( new LiteralControl( "" ) );
             }
             if ( baptizee.Baptizer2 != null )
             {
                 url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Baptizer2.Id ) );
-                plBaptismList.Controls.Add( new LiteralControl( string.Format( "<li><a href=\"{0}\">{1}</a></li>", url, baptizee.Baptizer2.FullName ?? "" ) ) );
+                phBaptismList.Controls.Add( new LiteralControl( string.Format( "<li><a href=\"{0}\">{1}</a></li>", url, baptizee.Baptizer2.FullName ?? "" ) ) );
             }
             else
             {
-                plBaptismList.Controls.Add( new LiteralControl( "" ) );
-            } plBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
-
-            theString = String.Format( "<div class='col-md-2'>{0}</div>", baptizee.Person.PhoneNumbers.FirstOrDefault() );
-            plBaptismList.Controls.Add( new LiteralControl( theString ) );
+                phBaptismList.Controls.Add( new LiteralControl( "" ) );
+            } phBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
 
             if ( baptizee.Approver != null )
             {
@@ -323,7 +503,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             {
                 theString = "<div class='col-md-2'></div>";
             }
-            plBaptismList.Controls.Add( new LiteralControl( theString ) );
+            phBaptismList.Controls.Add( new LiteralControl( theString ) );
 
             CheckBox cb = new CheckBox
             {
@@ -344,15 +524,70 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 PostBackUrl = theString
             };
             //  lbEdit.Click += lbEdit_Click;
-            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
-            plBaptismList.Controls.Add( cb );
-            plBaptismList.Controls.Add( new LiteralControl( "  </div>" ) );
-            plBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
-            plBaptismList.Controls.Add( lbEdit );
-            plBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
-            plBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
+            phBaptismList.Controls.Add( cb );
+            phBaptismList.Controls.Add( new LiteralControl( "  </div>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
+            phBaptismList.Controls.Add( lbEdit );
+            phBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
 
             ScriptManager.GetCurrent( this.Page ).RegisterAsyncPostBackControl( lbEdit );
+        }
+
+        protected void BuildPDFListItem( Baptizee baptizee, Document document, String font )
+        {
+            //Fonts
+            var listItemFont = FontFactory.GetFont( font, 8, Font.NORMAL );
+
+
+            //Build the list item table
+            var listItemTable = new PdfPTable( 5 );
+            listItemTable.LockedWidth = true;
+            listItemTable.TotalWidth = PageSize.A4.Width - document.LeftMargin - document.RightMargin;
+            listItemTable.HorizontalAlignment = 0;
+            listItemTable.SpacingBefore = 0;
+            listItemTable.SpacingAfter = 1;
+            listItemTable.DefaultCell.BorderWidth = 0;
+
+
+            //Add the list items
+            listItemTable.AddCell( new Phrase( baptizee.Person.FullName, listItemFont ) );
+
+            String baptizeePhone = "";
+            if ( baptizee.Person.PhoneNumbers.FirstOrDefault() != null )
+            {
+                baptizeePhone = baptizee.Person.PhoneNumbers.FirstOrDefault().ToString();
+            }
+            listItemTable.AddCell( new Phrase( baptizeePhone, listItemFont ) );
+
+            String baptizerNames = "";
+            if ( baptizee.Baptizer1 != null && baptizee.Baptizer2 != null )
+            {
+                baptizerNames = String.Format( "{0}, {1}", baptizee.Baptizer1.FullName, baptizee.Baptizer2.FullName );
+            }
+            else if ( baptizee.Baptizer1 != null )
+            {
+                baptizerNames = String.Format( "{0}", baptizee.Baptizer1.FullName );
+            }
+            else if ( baptizee.Baptizer2 != null )
+            {
+                baptizerNames = String.Format( "{0}", baptizee.Baptizer2.FullName );
+            }
+            listItemTable.AddCell( new Phrase( baptizerNames, listItemFont ) );
+
+            String approverName = "";
+            if ( baptizee.Approver != null )
+            {
+                approverName = baptizee.Approver.FullName;
+            }
+
+            listItemTable.AddCell( new Phrase( approverName, listItemFont ) );
+
+
+            listItemTable.AddCell( new Phrase( baptizee.IsConfirmed.ToYesNo(), listItemFont ) );
+
+            document.Add( listItemTable );
         }
 
         #endregion

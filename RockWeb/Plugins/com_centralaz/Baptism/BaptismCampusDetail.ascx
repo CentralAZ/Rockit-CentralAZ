@@ -30,17 +30,18 @@
                     </div>
                     <div class="panel-body">
                         <center>
-                        <asp:Calendar ID="calBaptism" runat="server" DayNameFormat="FirstLetter" SelectionMode="Day" BorderColor="#999999"
-                            TitleStyle-BackColor="#e5e5e5" NextPrevStyle-ForeColor="#333333" FirstDayOfWeek="Monday" Width="200" CssClass="calendar" OnSelectionChanged="calBaptism_SelectionChanged" OnDayRender="calBaptisms_DayRender">
-                            <DayStyle CssClass="calendar-day" />
-                            <TodayDayStyle CssClass="calendar-today" />
-                            <SelectedDayStyle CssClass="calendar-selected" />
-                            <OtherMonthDayStyle CssClass="calendar-last-month" ForeColor="#999999" />
-                            <DayHeaderStyle CssClass="calendar-day-header" />
-                            <NextPrevStyle CssClass="calendar-next-prev" ForeColor="#777777" />
-                            <TitleStyle CssClass="calendar-title" />
-                        </asp:Calendar>
-
+                        <div id="calendar">
+                            <asp:Calendar ID="calBaptism" runat="server" DayNameFormat="FirstLetter" SelectionMode="Day" BorderColor="#999999"
+                                TitleStyle-BackColor="#e5e5e5" NextPrevStyle-ForeColor="#333333" FirstDayOfWeek="Monday" Width="200" CssClass="calendar" OnSelectionChanged="calBaptism_SelectionChanged" OnDayRender="calBaptisms_DayRender">
+                                <DayStyle CssClass="calendar-day" />
+                                <TodayDayStyle CssClass="calendar-today" />
+                                <SelectedDayStyle CssClass="calendar-selected" />
+                                <OtherMonthDayStyle CssClass="calendar-last-month" ForeColor="#999999" />
+                                <DayHeaderStyle CssClass="calendar-day-header" />
+                                <NextPrevStyle CssClass="calendar-next-prev" ForeColor="#777777" />
+                                <TitleStyle CssClass="calendar-title" />
+                            </asp:Calendar>
+                        </div>
                         </center>
                     </div>
 
@@ -58,8 +59,8 @@
                     <div class="panel-body">
                         <Rock:NotificationBox ID="nbNoBaptisms" NotificationBoxType="Info" runat="server"></Rock:NotificationBox>
                         <Rock:NotificationBox ID="nbBlackOutWeek" NotificationBoxType="Danger" runat="server"></Rock:NotificationBox>
-                         <asp:LinkButton ID='lbEditBlackout' runat='server' OnClick='lbEditBlackout_Click' Text='Edit.'/>
-                        <asp:PlaceHolder ID="plBaptismList" runat="server"></asp:PlaceHolder>
+                        <asp:LinkButton ID='lbEditBlackout' runat='server' OnClick='lbEditBlackout_Click' Text='Edit' />
+                        <asp:PlaceHolder ID="phBaptismList" runat="server"></asp:PlaceHolder>
                     </div>
 
                 </asp:Panel>
