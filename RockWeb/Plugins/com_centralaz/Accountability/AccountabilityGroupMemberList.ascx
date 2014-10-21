@@ -25,7 +25,7 @@
                             <Rock:Grid ID="gGroupMembers" runat="server" DisplayType="Full" AllowSorting="true" OnRowDataBound="gGroupMembers_RowDataBound" OnRowSelected="gGroupMembers_View">
                                 <Columns>
 
-                                    <asp:BoundField DataField="Person.FullName" HeaderText="First Name" SortExpression="Person.NickName" />
+                                    <asp:BoundField DataField="Person.FullName" HeaderText="Name" SortExpression="Person.NickName" />
                                     
                                     <asp:TemplateField SortExpression="FirstReport" HeaderText="First Report">
                                         <ItemTemplate>

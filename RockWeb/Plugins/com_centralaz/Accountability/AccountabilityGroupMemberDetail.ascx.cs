@@ -24,7 +24,6 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
     [DisplayName( "Accountability Group Member Detail" )]
     [Category( "com_centralaz > Accountability" )]
     [Description( "Shows the detail for a group Member" )]
-    [LinkedPage( "Detail Page" )]
     [BooleanField( "Able to choose leader" )]
 
     public partial class AccountabilityGroupMemberDetail : Rock.Web.UI.RockBlock

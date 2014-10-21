@@ -24,7 +24,6 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
     [Description( "Lists all members in the accountability group" )]
 
     [LinkedPage( "Detail Page", "", true, "", "", 0 )]
-    [LinkedPage( "Add Member Page", "", true, "", "", 0 )]
     public partial class AccountabilityGroupMemberList : Rock.Web.UI.RockBlock
     {
         #region Private Variables
@@ -232,7 +231,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <exception cref="System.NotImplementedException"></exception>
         protected void gGroupMembers_AddClick( object sender, EventArgs e )
         {
-            NavigateToLinkedPage( "AddMemberPage", "GroupMemberId", 0, "GroupId", _group.Id );
+            NavigateToLinkedPage( "DetailPage", "GroupMemberId", 0, "GroupId", _group.Id );
         }
 
         /// <summary>
