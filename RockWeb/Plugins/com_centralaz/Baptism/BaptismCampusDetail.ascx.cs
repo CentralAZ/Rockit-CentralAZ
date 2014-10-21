@@ -379,6 +379,11 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
         }
 
+        /// <summary>
+        /// Gets the first and last day of the week for the date selected
+        /// </summary>
+        /// <param name="daySelected">The date selected</param>
+        /// <returns>dateRange[0] returns the Monday of theat week, and dateRange[1] returns the Sunday, based off of a Monday-first week type</returns>
         protected DateTime[] GetTheDateRange( DateTime daySelected )
         {
             DateTime[] dateRange = new DateTime[2];
@@ -398,6 +403,10 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             return dateRange;
         }
 
+        /// <summary>
+        /// Builds the baptizee schedule in the schedule panel
+        /// </summary>
+        /// <param name="baptizeeList"></param>
         protected void PopulateScheduleList( List<Baptizee> baptizeeList )
         {
             DateTime current = DateTime.MinValue;
@@ -413,6 +422,10 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
         }
 
+        /// <summary>
+        /// Builds the header for a new baptizee date in the panel
+        /// </summary>
+        /// <param name="date">The baptism dateTime</param>
         protected void BuildItemListHeader( DateTime date )
         {
             Literal lHeader = new Literal();
@@ -428,6 +441,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             phBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
         }
 
+        /// <summary>
+        /// Builds the header for a new baptizee date in the pdf
+        /// </summary>
+        /// <param name="date">The baptism dateTime</param>
+        /// <param name="document">The document we're writing the header into</param>
+        /// <param name="font">The font that the header is in</param>
         protected void BuildPDFItemListHeader( DateTime date, Document document, String font )
         {
             //Fonts
@@ -464,6 +483,10 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             //document.Add( new Chunk( new LineSeparator() ) );
         }
 
+        /// <summary>
+        /// Builds a row for the baptisee and fills it in the panel
+        /// </summary>
+        /// <param name="baptizee">The baptizee</param>
         protected void BuildListItem( Baptizee baptizee )
         {
             phBaptismList.Controls.Add( new LiteralControl( "<div class='row'>" ) );
@@ -535,6 +558,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             ScriptManager.GetCurrent( this.Page ).RegisterAsyncPostBackControl( lbEdit );
         }
 
+        /// <summary>
+        /// Builds a row for the baptisee and fills it in the pdf
+        /// </summary>
+        /// <param name="baptizee">The baptizee</param>
+        /// <param name="document">The document we're writing the row into</param>
+        /// <param name="font">The font that the row is in</param>
         protected void BuildPDFListItem( Baptizee baptizee, Document document, String font )
         {
             //Fonts

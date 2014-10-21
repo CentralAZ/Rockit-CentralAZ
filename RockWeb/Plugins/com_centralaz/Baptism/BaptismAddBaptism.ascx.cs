@@ -98,6 +98,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
 
         }
+
+        /// <summary>
+        /// Handles the Click event of the btnSave control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void btnSave_OnClick( object sender, EventArgs e )
         {
 
@@ -178,6 +184,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             baptismContext.SaveChanges();
             ReturnToParentPage();
         }
+
+        /// <summary>
+        /// Handles the Click event of the btnDelete control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void btnDelete_OnClick( object sender, EventArgs e )
         {
             BaptismContext baptismContext = new BaptismContext();
@@ -193,6 +205,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
             ReturnToParentPage();
         }
+
+        /// <summary>
+        /// Handles the Click event of the btnCancel control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void btnCancel_OnClick( object sender, EventArgs e )
         {
             ReturnToParentPage();
@@ -201,7 +219,9 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         #endregion
 
         #region Methods
-
+        /// <summary>
+        /// Grabs the service times for the campus
+        /// </summary>
         protected void GetServiceTimes()
         {
             serviceTimes = new List<DateTime>();
@@ -241,6 +261,9 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
         }
 
+        /// <summary>
+        /// Grabs the blackout dates for the campus
+        /// </summary>
         protected void GetBlackoutDates()
         {
             Group group = new GroupService( new RockContext() ).Get( PageParameter( "GroupId" ).AsInteger() );
@@ -251,6 +274,10 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 .Where( s => s.CategoryId == category.Id )
                 .ToList();
         }
+
+        /// <summary>
+        /// Returns the user to the schedule page
+        /// </summary>
         protected void ReturnToParentPage()
         {
             Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
@@ -259,6 +286,10 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             NavigateToParentPage( dictionaryInfo );
         }
 
+        /// <summary>
+        /// For existing baptisms, binds the values to the controls
+        /// </summary>
+        /// <param name="baptizeeId"></param>
         protected void BindValues( int baptizeeId )
         {
             Baptizee baptizee = new BaptizeeService( new BaptismContext() ).Get( baptizeeId );
@@ -281,6 +312,10 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             cbIsConfirmed.Checked = baptizee.IsConfirmed;
         }
 
+        /// <summary>
+        /// If the user entered an invalid service time, and the baptism times are bound to the service times, returns a string with a list of valid service times
+        /// </summary>
+        /// <returns>returns an unordered list of valid service times</returns>
         protected string BuildInvalidServiceTimeString()
         {
             StringBuilder stringBuilder = new StringBuilder();
@@ -293,6 +328,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             stringBuilder.Append( "</ul>" );
             return stringBuilder.ToString();
         }
+
         #endregion
     }
 }

@@ -71,16 +71,29 @@ namespace com.centralaz.Baptism.Model
 
         #region Virtual Properties
 
-
+        /// <summary>
+        /// The Group
+        /// </summary>
         public virtual Group Group { get; set; }
 
-
+        /// <summary>
+        /// The Baptizee
+        /// </summary>
         public virtual Person Person { get; set; }
 
+        /// <summary>
+        /// The first baptizer of the baptizee
+        /// </summary>
         public virtual Person Baptizer1 { get; set; }
 
+        /// <summary>
+        /// The second baptizer of the baptizee
+        /// </summary>
         public virtual Person Baptizer2 { get; set; }
 
+        /// <summary>
+        /// The approver of the baptism
+        /// </summary>
         public virtual Person Approver { get; set; }
 
         #endregion

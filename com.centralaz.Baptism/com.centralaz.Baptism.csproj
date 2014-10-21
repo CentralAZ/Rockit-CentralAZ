@@ -60,13 +60,13 @@
   <ItemGroup>
     <Compile Include="Data\BaptismContext.cs" />
     <Compile Include="Data\BaptismService.cs" />
+    <Compile Include="Migrations\001_CreateDb.cs" />
+    <Compile Include="Migrations\002_AddSystemData.cs" />
     <Compile Include="Model\Baptizee.cs" />
     <Compile Include="Model\BaptizeeService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

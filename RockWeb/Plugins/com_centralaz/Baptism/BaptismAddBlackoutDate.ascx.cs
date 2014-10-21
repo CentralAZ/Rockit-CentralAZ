@@ -90,6 +90,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
 
         }
+
+        /// <summary>
+        /// Handles the Click event of the btnSave control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void btnSave_OnClick( object sender, EventArgs e )
         {
             nbNotification.Visible = false;
@@ -140,6 +146,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             rockContext.SaveChanges();
             ReturnToParentPage();
         }
+
+        /// <summary>
+        /// Handles the Click event of the btnDelete control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void btnDelete_OnClick( object sender, EventArgs e )
         {
             RockContext rockContext = new RockContext();
@@ -155,23 +167,35 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
             ReturnToParentPage();
         }
+
+        /// <summary>
+        /// Handles the Click event of the btnCancel control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void btnCancel_OnClick( object sender, EventArgs e )
         {
             ReturnToParentPage();
         }
+
         #endregion
 
         #region Methods
 
+        /// <summary>
+        /// Grabs all the blackout dates for the campus
+        /// </summary>
         protected void GetBlackoutDates()
         {
-            Category category = new CategoryService( new RockContext() ).Queryable()
-                .Where( c => c.Name == "Mesa Blackout" )
-                .FirstOrDefault();
+            int categoryId = GetCategoryId();
             blackoutDates = new ScheduleService( new RockContext() ).Queryable()
-                .Where( s => s.CategoryId == category.Id )
+                .Where( s => s.CategoryId == categoryId )
                 .ToList();
         }
+
+        /// <summary>
+        /// Returns the user to the Campus Schedule page
+        /// </summary>
         protected void ReturnToParentPage()
         {
             Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
@@ -180,12 +204,21 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             NavigateToParentPage( dictionaryInfo );
         }
 
+        /// <summary>
+        /// Binds the values for an existing blackout date to the controls
+        /// </summary>
+        /// <param name="blackoutId"></param>
         protected void BindValues( int blackoutId )
         {
             Schedule blackoutDate = new ScheduleService( new RockContext() ).Get( blackoutId );
             dpBlackOutDate.SelectedDate = blackoutDate.EffectiveStartDate;
             tbDescription.Text = blackoutDate.Description;
         }
+
+        /// <summary>
+        /// Grabs the category Id for the campus's blackout date collection
+        /// </summary>
+        /// <returns></returns>
         protected int GetCategoryId()
         {
             Group group = new GroupService( new RockContext() ).Get( PageParameter( "GroupId" ).AsInteger() );
