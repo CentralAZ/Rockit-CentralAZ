@@ -384,7 +384,7 @@ namespace RockWeb.Blocks.Examples
             rockContext.WrapTransaction( () =>
             {
                 // First we'll clean up by deleting any previously created data such as
-                // families, addresses, people, photos, attendance data, etc.
+                // campuses, families, addresses, people, photos, attendance data, etc.
                 _stopwatch.Start();
                 DeleteExistingGroups( elemGroups, rockContext );
                 DeleteExistingFamilyData( elemFamilies, rockContext );
@@ -399,7 +399,11 @@ namespace RockWeb.Blocks.Examples
             // using RockContext in case there are multiple saves (like Attributes)
             rockContext.WrapTransaction( () =>
             {
-                // Now we can add the families (and people) and then groups.
+                // Now we can add the campuses, families (and people) and then groups.
+                AddCampuses( elemCampuses, rockContext );
+                ts = _stopwatch.Elapsed;
+                _sb.AppendFormat( "{0:00}:{1:00}.{2:00} campuses added<br/>", ts.Minutes, ts.Seconds, ts.Milliseconds / 10 );
+
                 AddFamilies( elemFamilies, rockContext );
                 ts = _stopwatch.Elapsed;
                 _sb.AppendFormat( "{0:00}:{1:00}.{2:00} families added<br/>", ts.Minutes, ts.Seconds, ts.Milliseconds / 10 );
@@ -951,6 +955,23 @@ namespace RockWeb.Blocks.Examples
             }
         }
 
+        private void AddCampuses( XElement elemCampuses, RockContext rockContext )
+        {
+            //Add campuses
+            if ( elemCampuses == null )
+            {
+                return;
+            }
+
+            CampusService campusService = new CampusService( rockContext );
+
+            //Next create the campus
+            foreach ( var elemCampus in elemCampuses.Elements( "campus" ) )
+            {
+                Guid guid = elemCampus.Attribute( "guid" ).Value.Trim().AsGuid();
+            }
+        }
+
         /// <summary>
         /// Handles adding people to the security groups from the given XML element snippet.
         /// </summary>
@@ -1213,12 +1234,34 @@ namespace RockWeb.Blocks.Examples
                 }
             }
         }
-
+        /// <summary>
+        /// Delete all campuses found in the given XML.
+        /// </summary>
+        /// <param name="elemCampuses">The elem groups.</param>
+        /// <param name="rockContext">The rock context</param>
         private void DeleteExistingCampuses( XElement elemCampuses, RockContext rockContext )
         {
             if ( elemCampuses == null )
             {
                 return;
+            }
+            CampusService campusService = new CampusService( rockContext );
+     
+            foreach ( var elemCampus in elemCampuses.Elements( "campus" ) )
+            {
+                Guid guid = elemCampus.Attribute( "guid" ).Value.Trim().AsGuid();
+                Campus campus = campusService.Get( guid );
+                if ( campus != null )
+                {
+                    if ( campusService.Delete( campus ) )
+                    {
+                        // ok
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException( "Unable to delete campus: " + campus.Name );
+                    }
+                }
             }
         }
 
