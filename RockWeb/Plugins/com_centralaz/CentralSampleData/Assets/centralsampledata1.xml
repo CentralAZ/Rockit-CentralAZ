@@ -7,6 +7,68 @@
   not only subject to change, it will certainly change quite often.
 -->
 <data>
+  <categories>
+    <category name="Mesa Blackout Times"
+              guid="52449160-7DE4-45A4-BAB1-B8D5C8748880"
+              entitytypeguid="0B2C38A7-D79C-4F85-9757-F1B045D32C8A"
+              parentcategoryguid="FFC06491-1BE9-4F3B-AC76-81A47E17D0AE"
+              />
+
+    <category name="Gilbert Blackout Times"
+              guid="1BFE93FA-247F-4177-BABA-54F4FC6EA9C6"
+              entitytypeguid="0B2C38A7-D79C-4F85-9757-F1B045D32C8A"
+              parentcategoryguid="FFC06491-1BE9-4F3B-AC76-81A47E17D0AE"
+              />
+
+    <category name="Queen Creek Blackout Times"
+              guid="56A92DEE-2A73-4DF6-AB4C-CA1DA28271B2"
+              entitytypeguid="0B2C38A7-D79C-4F85-9757-F1B045D32C8A"
+              parentcategoryguid="FFC06491-1BE9-4F3B-AC76-81A47E17D0AE"
+              />
+
+    <category name="Glendale Blackout Times"
+              guid="73A2940F-384B-414D-919E-DCBBD2D31E38"
+              entitytypeguid="0B2C38A7-D79C-4F85-9757-F1B045D32C8A"
+              parentcategoryguid="FFC06491-1BE9-4F3B-AC76-81A47E17D0AE"
+              />
+
+    <category name="Ahwatukee Blackout Times"
+              guid="D3712291-0AC5-410F-AC45-106CAE0DF916"
+              entitytypeguid="0B2C38A7-D79C-4F85-9757-F1B045D32C8A"
+              parentcategoryguid="FFC06491-1BE9-4F3B-AC76-81A47E17D0AE"
+              />
+
+    <category name="Mesa Service Times"
+              guid="19A44F9C-7876-46C8-9D1E-52CF46015582"
+              entitytypeguid="0B2C38A7-D79C-4F85-9757-F1B045D32C8A"
+              parentcategoryguid="4FECC91B-83F9-4269-AE03-A006F401C47E"
+              />
+
+    <category name="Gilbert Service Times"
+              guid="E0F931EF-81B5-460B-A142-F3C87C0C0EE9"
+              entitytypeguid="0B2C38A7-D79C-4F85-9757-F1B045D32C8A"
+              parentcategoryguid="4FECC91B-83F9-4269-AE03-A006F401C47E"
+              />
+
+    <category name="Queen Creek Service Times"
+              guid="E6BDAC14-9C8E-4344-B4C7-D44EAC3F2E57"
+              entitytypeguid="0B2C38A7-D79C-4F85-9757-F1B045D32C8A"
+              parentcategoryguid="4FECC91B-83F9-4269-AE03-A006F401C47E"
+              />
+
+    <category name="Glendale Service Times"
+              guid="28777120-E72B-4F64-AA53-385266453F29"
+              entitytypeguid="0B2C38A7-D79C-4F85-9757-F1B045D32C8A"
+              parentcategoryguid="4FECC91B-83F9-4269-AE03-A006F401C47E"
+              />
+
+    <category name="Ahwatukee Service Times"
+              guid="560BF75E-4C86-471D-96CE-A4E98BC43032"
+              entitytypeguid="0B2C38A7-D79C-4F85-9757-F1B045D32C8A"
+              parentcategoryguid="4FECC91B-83F9-4269-AE03-A006F401C47E"
+              />
+
+  </categories>
   <campuses>
     <campus name="Mesa Campus"
             guid="5A21D9C9-76A4-4FC2-A174-7B3E4A2E954E"
