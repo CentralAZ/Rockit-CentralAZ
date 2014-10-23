@@ -377,6 +377,8 @@ namespace RockWeb.Blocks.Examples
             var elemRelationships = xdoc.Element( "data" ).Element( "relationships" );
             var elemSecurityGroups = xdoc.Element( "data" ).Element( "securityRoles" );
             var elemCampuses = xdoc.Element( "data" ).Element( "campuses" );
+            var elemCategories = xdoc.Element( "data" ).Element( "categories" );
+            var elemSchedules = xdoc.Element( "data" ).Element( "schedules" );
             TimeSpan ts;
 
             //// First delete any sample data that might exist already 
@@ -384,11 +386,12 @@ namespace RockWeb.Blocks.Examples
             rockContext.WrapTransaction( () =>
             {
                 // First we'll clean up by deleting any previously created data such as
-                // campuses, families, addresses, people, photos, attendance data, etc.
+                // categories, schedules, campuses, families, addresses, people, photos, attendance data, etc.
                 _stopwatch.Start();
                 DeleteExistingGroups( elemGroups, rockContext );
                 DeleteExistingFamilyData( elemFamilies, rockContext );
                 DeleteExistingCampuses( elemCampuses, rockContext );
+                DeleteExistingCategories( elemCategories, rockContext );
                 //rockContext.ChangeTracker.DetectChanges();
                 //rockContext.SaveChanges( disablePrePostProcessing: true );
                 ts = _stopwatch.Elapsed;
@@ -399,7 +402,11 @@ namespace RockWeb.Blocks.Examples
             // using RockContext in case there are multiple saves (like Attributes)
             rockContext.WrapTransaction( () =>
             {
-                // Now we can add the campuses, families (and people) and then groups.
+                // Now we can add the categories, schedules, campuses, families (and people) and then groups.
+                AddCategories( elemCategories, rockContext );
+                ts = _stopwatch.Elapsed;
+                _sb.AppendFormat( "{0:00}:{1:00}.{2:00} categories added<br/>", ts.Minutes, ts.Seconds, ts.Milliseconds / 10 );
+
                 AddCampuses( elemCampuses, rockContext );
                 ts = _stopwatch.Elapsed;
                 _sb.AppendFormat( "{0:00}:{1:00}.{2:00} campuses added<br/>", ts.Minutes, ts.Seconds, ts.Milliseconds / 10 );
@@ -955,6 +962,59 @@ namespace RockWeb.Blocks.Examples
             }
         }
 
+        /// <summary>
+        /// Handles adding categories from the given XML snippet
+        /// </summary>
+        /// <param name="elemCategories">the elem categories</param>
+        /// <param name="rockContext">the rock context</param>
+        private void AddCategories( XElement elemCategories, RockContext rockContext )
+        {
+            //Add categories
+            if ( elemCategories == null )
+            {
+                return;
+            }
+
+            CategoryService categoryService = new CategoryService( rockContext );
+            EntityTypeService entityTypeService = new EntityTypeService( rockContext );
+
+            foreach ( var elemCategory in elemCategories.Elements( "category" ) )
+            {
+                Guid guid = elemCategory.Attribute( "guid" ).Value.Trim().AsGuid();
+                Category category = new Category()
+                {
+                    Guid = guid,
+                    Name = elemCategory.Attribute("name").Value.Trim()
+                };
+
+                if ( elemCategory.Attribute( "entitytypeguid" ) != null )
+                {
+                    EntityType entityType = entityTypeService.Get( elemCategory.Attribute( "entitytypeguid" ).Value.AsGuid() );
+                    if ( entityType != null )
+                    {
+                        category.EntityTypeId = entityType.Id;
+                    }
+                }
+                if ( elemCategory.Attribute( "parentcategoryguid" ) != null )
+                {
+                    Category parentCategory = categoryService.Get( elemCategory.Attribute( "parentcategoryguid" ).Value.AsGuid() );
+                    if ( parentCategory != null )
+                    {
+                        category.ParentCategoryId = parentCategory.Id;
+                    }
+                }
+
+                categoryService.Add( category );
+                rockContext.SaveChanges();
+
+            }
+        }
+
+        /// <summary>
+        /// Handles adding campuses from the given XML snippet
+        /// </summary>
+        /// <param name="elemCampuses">the elem campuses</param>
+        /// <param name="rockContext">the rock context</param>
         private void AddCampuses( XElement elemCampuses, RockContext rockContext )
         {
             //Add campuses
@@ -1297,10 +1357,43 @@ namespace RockWeb.Blocks.Examples
                 }
             }
         }
+
+        /// <summary>
+        /// Delete all categories found in the given XML
+        /// </summary>
+        /// <param name="elemCategories">the elem categories</param>
+        /// <param name="rockContext">the rock context</param>
+        private void DeleteExistingCategories( XElement elemCategories, RockContext rockContext )
+        {
+            if ( elemCategories == null )
+            {
+                return;
+            }
+
+            CategoryService categoryService = new CategoryService( rockContext );
+            foreach ( var elemCategory in elemCategories.Elements( "category" ) )
+            {
+                Guid guid = elemCategory.Attribute( "guid" ).Value.Trim().AsGuid();
+                Category category = categoryService.Get( guid );
+                if ( category != null )
+                {
+                    if ( categoryService.Delete( category ) )
+                    {
+                        // ok
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException( "Unable to delete category: " + category.Name );
+                    }
+                }
+            }
+
+        }
+
         /// <summary>
         /// Delete all campuses found in the given XML.
         /// </summary>
-        /// <param name="elemCampuses">The elem groups.</param>
+        /// <param name="elemCampuses">The elem campuses.</param>
         /// <param name="rockContext">The rock context</param>
         private void DeleteExistingCampuses( XElement elemCampuses, RockContext rockContext )
         {
