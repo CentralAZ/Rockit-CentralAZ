@@ -201,7 +201,7 @@ namespace RockWeb.Blocks.Examples
         /// <param name="e"></param>
         protected void bbtnLoadData_Click( object sender, EventArgs e )
         {
-            string saveFile = Path.Combine( MapPath( "~/Plugins/com_centralaz/CentralSampleData/Assets" ),"centralsampledata1.xml" );
+            string saveFile = Path.Combine( MapPath( "~/Plugins/com_centralaz/CentralSampleData/Assets" ), "centralsampledata1.xml" );
 
             try
             {
@@ -964,11 +964,74 @@ namespace RockWeb.Blocks.Examples
             }
 
             CampusService campusService = new CampusService( rockContext );
+            LocationService locationService = new LocationService( rockContext );
+            var locationCampusValue = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.LOCATION_TYPE_CAMPUS.AsGuid() );
+
 
             //Next create the campus
             foreach ( var elemCampus in elemCampuses.Elements( "campus" ) )
             {
                 Guid guid = elemCampus.Attribute( "guid" ).Value.Trim().AsGuid();
+                Campus campus = new Campus()
+                {
+                    Guid = guid,
+                    Name = elemCampus.Attribute( "name" ).Value.Trim()
+                };
+
+                if ( elemCampus.Attribute( "description" ) != null )
+                {
+                    campus.Description = elemCampus.Attribute( "description" ).Value;
+                }
+
+                if ( elemCampus.Attribute( "shortcode" ) != null )
+                {
+                    campus.ShortCode = elemCampus.Attribute( "shortcode" ).Value;
+                }
+
+                campusService.Add( campus );
+
+                //Add Location
+                var location = locationService.Queryable()
+                    .Where( l =>
+                        l.Name.Equals( campus.Name, StringComparison.OrdinalIgnoreCase ) &&
+                        l.LocationTypeValueId == locationCampusValue.Id )
+                    .FirstOrDefault();
+                if ( location == null )
+                {
+                    location = new Location();
+                    locationService.Add( location );
+                }
+
+                campus.Location = location;
+                campus.Location.Name = campus.Name;
+                campus.Location.LocationTypeValueId = locationCampusValue.Id;
+
+                if ( elemCampus.Attribute( "street1" ) != null )
+                {
+                    campus.Location.Street1 = elemCampus.Attribute( "street1" ).Value;
+                }
+
+                if ( elemCampus.Attribute( "city" ) != null )
+                {
+                    campus.Location.City = elemCampus.Attribute( "city" ).Value;
+                }
+
+                if ( elemCampus.Attribute( "state" ) != null )
+                {
+                    campus.Location.State = elemCampus.Attribute( "state" ).Value;
+                }
+
+                if ( elemCampus.Attribute( "country" ) != null )
+                {
+                    campus.Location.Country = elemCampus.Attribute( "country" ).Value;
+                }
+
+                if ( elemCampus.Attribute( "postalcode" ) != null )
+                {
+                    campus.Location.PostalCode = elemCampus.Attribute( "postalcode" ).Value;
+                }
+
+                rockContext.SaveChanges();
             }
         }
 
@@ -1246,13 +1309,23 @@ namespace RockWeb.Blocks.Examples
                 return;
             }
             CampusService campusService = new CampusService( rockContext );
-     
+            LocationService locationService = new LocationService( rockContext );
+            var locationCampusValue = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.LOCATION_TYPE_CAMPUS.AsGuid() );
+
             foreach ( var elemCampus in elemCampuses.Elements( "campus" ) )
             {
                 Guid guid = elemCampus.Attribute( "guid" ).Value.Trim().AsGuid();
                 Campus campus = campusService.Get( guid );
                 if ( campus != null )
                 {
+                    //Get the campus location
+                    Location location = locationService.Queryable()
+                    .Where( l =>
+                        l.Name.Equals( campus.Name, StringComparison.OrdinalIgnoreCase ) &&
+                        l.LocationTypeValueId == locationCampusValue.Id )
+                    .FirstOrDefault();
+                    
+                    //Remove the campus
                     if ( campusService.Delete( campus ) )
                     {
                         // ok
@@ -1260,6 +1333,19 @@ namespace RockWeb.Blocks.Examples
                     else
                     {
                         throw new InvalidOperationException( "Unable to delete campus: " + campus.Name );
+                    }
+
+                    //Remove the campus location
+                    if ( location != null )
+                    {
+                        if ( locationService.Delete( location ) )
+                        {
+                            // ok
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException( "Unable to delete location: " + location.Name );
+                        }
                     }
                 }
             }
