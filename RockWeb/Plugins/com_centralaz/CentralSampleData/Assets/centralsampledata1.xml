@@ -7,6 +7,63 @@
   not only subject to change, it will certainly change quite often.
 -->
 <data>
+  <campuses>
+    <campus name="Mesa Campus"
+            guid="5A21D9C9-76A4-4FC2-A174-7B3E4A2E954E"
+            description=""
+            shortcode="MESA"
+            street1 ="933 N. Lindsay Rd."
+            city="Mesa"
+            state="AZ"
+            country="US"
+            postalcode="85213"
+            />
+    
+    <campus name="Gilbert Campus"
+            guid="098579C3-963E-4C40-A733-5072CF61DD8E"
+            description=""
+            shortcode="GILBERT"
+            street1 ="965 E Germann Rd"
+            city="Gilbert"
+            state="AZ"
+            country="US"
+            postalcode="85297"
+            />
+    
+    <campus name="Queen Creek Campus"
+            guid="A34F2968-AACF-413F-92E1-1A4A99174E68"
+            description=""
+            shortcode="QUEENCREEK"
+            street1 ="22149 E. Ocotillo Rd."
+            city="Queen Creek"
+            state="AZ"
+            country="US"
+            postalcode="85142"
+            />
+    
+    <campus name="Glendale Campus"
+            guid="BB360455-E80F-4724-AA69-A6E4C1DFFCD9"
+            description=""
+            shortcode="GLENDALE"
+            street1 ="8600 W. Glendale Ave"
+            city="Glendale"
+            state="AZ"
+            country="US"
+            postalcode="85305"
+            />
+    
+    <campus name="Ahwatukee Campus"
+            guid="E67D8FE6-85ED-4912-8786-3D8BECF1798D"
+            description=""
+            shortcode="AHWATUKEE"
+            street1 ="15920 S. 48th St."
+            city="Phoenix"
+            state="AZ"
+            country="US"
+            postalcode="85048"
+            />
+    
+  </campuses>
   <families>
 
     <!-- The Decker family kids attend service about 80% of the time and attend the regular service 88% of the time.
