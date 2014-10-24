@@ -7,6 +7,125 @@
   not only subject to change, it will certainly change quite often.
 -->
 <data>
+  <schedules>
+    <schedule name="Saturday 4:00pm"
+              time ="4:00:00 PM"
+              dayofweek="Saturday"
+              checkinstart="30"
+              checkinend="30"
+              guid="C7AD06E4-3224-4ABB-A9F7-01C3DB8E4983"
+              categoryguid="19A44F9C-7876-46C8-9D1E-52CF46015582"
+              />
+
+    <schedule name="Sunday 9:00am"
+             time ="9:00:00 AM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="67CCFF6A-09F7-44DD-B908-C7135776CB53"
+              categoryguid="19A44F9C-7876-46C8-9D1E-52CF46015582"
+              />
+
+    <schedule name="Sunday 10:45am"
+             time ="10:45:00 AM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="70A53AFB-187F-4237-ACD4-43754E552248"
+              categoryguid="19A44F9C-7876-46C8-9D1E-52CF46015582"
+              />
+
+    <schedule name="Saturday 5:30pm"
+              time ="5:30:00 PM"
+              dayofweek="Saturday"
+              checkinstart="30"
+              checkinend="30"
+              guid="F2339CBC-98A3-4598-BAFB-D07016F9C3A3"
+              categoryguid="E0F931EF-81B5-460B-A142-F3C87C0C0EE9"
+              />
+
+    <schedule name="Sunday 9:00am"
+              time ="9:00:00 AM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="7EF45AFB-C5BB-4CFB-9FC7-6496101252FB"
+              categoryguid="E0F931EF-81B5-460B-A142-F3C87C0C0EE9"
+              />
+
+    <schedule name="Sunday 10:45am"
+              time ="10:45:00 AM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="80B3F684-5849-4D57-A370-D88459FDA8A8"
+              categoryguid="E0F931EF-81B5-460B-A142-F3C87C0C0EE9"
+              />
+
+    <schedule name="Sunday 12:30pm"
+              time ="12:30:00 PM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="05B48426-E8F2-4798-82C0-80B50EF3FCE4"
+              categoryguid="E0F931EF-81B5-460B-A142-F3C87C0C0EE9"
+              />
+
+    <schedule name="Sunday 9:00am"
+              time ="9:00:00 AM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="8A481F2B-6A7E-4AAE-8579-C61D67681F9C"
+              categoryguid="E6BDAC14-9C8E-4344-B4C7-D44EAC3F2E57"
+              />
+
+    <schedule name="Sunday 10:45am"
+              time ="10:45:00 AM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="A77EA74A-9A0F-4ACB-9CE5-CC79CA607EC2"
+              categoryguid="E6BDAC14-9C8E-4344-B4C7-D44EAC3F2E57"
+              />
+
+    <schedule name="Sunday 9:00am"
+              time ="9:00:00 AM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="98EF8E6D-0024-4DB8-9197-D6F5D042D8B3"
+              categoryguid="28777120-E72B-4F64-AA53-385266453F29"
+              />
+
+    <schedule name="Sunday 10:45am"
+              time ="10:45:00 AM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="A8775D56-9BA3-4EDB-8C48-AD7B620F9C29"
+              categoryguid="28777120-E72B-4F64-AA53-385266453F29"
+              />
+
+    <schedule name="Sunday 9:00am"
+             time ="9:00:00 AM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="CE38A310-F5D2-4A92-A829-73ED3A96E637"
+              categoryguid="560BF75E-4C86-471D-96CE-A4E98BC43032"
+              />
+
+    <schedule name="Sunday 10:45am"
+              time ="10:45:00 AM"
+              dayofweek="Sunday"
+              checkinstart="30"
+              checkinend="30"
+              guid="09108299-27EB-480E-B35D-336925452F67"
+              categoryguid="560BF75E-4C86-471D-96CE-A4E98BC43032"
+              />
+
+  </schedules>
   <categories>
     <category name="Mesa Blackout Times"
               guid="52449160-7DE4-45A4-BAB1-B8D5C8748880"
@@ -80,7 +199,7 @@
             country="US"
             postalcode="85213"
             />
-    
+
     <campus name="Gilbert Campus"
             guid="098579C3-963E-4C40-A733-5072CF61DD8E"
             description=""
@@ -91,7 +210,7 @@
             country="US"
             postalcode="85297"
             />
-    
+
     <campus name="Queen Creek Campus"
             guid="A34F2968-AACF-413F-92E1-1A4A99174E68"
             description=""
@@ -102,7 +221,7 @@
             country="US"
             postalcode="85142"
             />
-    
+
     <campus name="Glendale Campus"
             guid="BB360455-E80F-4724-AA69-A6E4C1DFFCD9"
             description=""
@@ -113,7 +232,7 @@
             country="US"
             postalcode="85305"
             />
-    
+
     <campus name="Ahwatukee Campus"
             guid="E67D8FE6-85ED-4912-8786-3D8BECF1798D"
             description=""
@@ -124,7 +243,7 @@
             country="US"
             postalcode="85048"
             />
-    
+
   </campuses>
   <families>
 
@@ -342,7 +461,7 @@
             <login userName="amarble"/>
           </logins>
         </person>
-        
+
         <person guid="1EA811BB-3118-42D1-B020-32A82BC8081A"
          firstName="William" nickName="Bill" lastName="Marble" birthDate="2/29/1964" gender="male"
          email="bill.marble@rocksoliddemochurch.com" emailIsActive="true" emailDoNotEmail="false" recordType="person"
@@ -415,7 +534,7 @@
             <login userName="pfoster"/>
           </logins>
         </person>
-        
+
         <person guid="F4450E80-F221-4556-881D-CB92B008C2DA"
           firstName="Adelle" nickName="Pamela" lastName="Foster" birthDate="7/4/1976" age="50" gender="female"
           email="pamela@rocksoliddemochurch.com" emailIsActive="true" emailDoNotEmail="false" recordType="person"
@@ -490,7 +609,7 @@
       <person fullname="Alisha Marble" guid="69DC0FDC-B451-4303-BD91-EF17C0015D23"/>
       <person fullname="Jenny Michaels" guid="82309081-A110-496F-8295-CE6A4720D7A8"/>
     </group>
-    
+
   </groups>
 
   <securityRoles>

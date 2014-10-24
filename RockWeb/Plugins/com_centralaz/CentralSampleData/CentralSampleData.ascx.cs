@@ -12,6 +12,9 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Xml.Linq;
 
+using DDay.iCal;
+using DDay.iCal.Serialization.iCalendar;
+
 using Rock;
 using Rock.Attribute;
 using Rock.Constants;
@@ -391,6 +394,7 @@ namespace RockWeb.Blocks.Examples
                 DeleteExistingGroups( elemGroups, rockContext );
                 DeleteExistingFamilyData( elemFamilies, rockContext );
                 DeleteExistingCampuses( elemCampuses, rockContext );
+                DeleteExistingSchedules( elemSchedules, rockContext );
                 DeleteExistingCategories( elemCategories, rockContext );
                 //rockContext.ChangeTracker.DetectChanges();
                 //rockContext.SaveChanges( disablePrePostProcessing: true );
@@ -406,6 +410,10 @@ namespace RockWeb.Blocks.Examples
                 AddCategories( elemCategories, rockContext );
                 ts = _stopwatch.Elapsed;
                 _sb.AppendFormat( "{0:00}:{1:00}.{2:00} categories added<br/>", ts.Minutes, ts.Seconds, ts.Milliseconds / 10 );
+
+                AddSchedules( elemSchedules, rockContext );
+                ts = _stopwatch.Elapsed;
+                _sb.AppendFormat( "{0:00}:{1:00}.{2:00} schedules added<br/>", ts.Minutes, ts.Seconds, ts.Milliseconds / 10 );
 
                 AddCampuses( elemCampuses, rockContext );
                 ts = _stopwatch.Elapsed;
@@ -965,6 +973,81 @@ namespace RockWeb.Blocks.Examples
         /// <summary>
         /// Handles adding categories from the given XML snippet
         /// </summary>
+        /// <param name="elemSchedules">the elem schedules</param>
+        /// <param name="rockContext">the rock context</param>
+        private void AddSchedules( XElement elemSchedules, RockContext rockContext )
+        {
+            //Add Schedules
+            if ( elemSchedules == null )
+            {
+                return;
+            }
+
+            ScheduleService scheduleService = new ScheduleService( rockContext );
+            CategoryService categoryService = new CategoryService(rockContext);
+
+            foreach ( var elemSchedule in elemSchedules.Elements( "schedule" ) )
+            {
+                Guid guid = elemSchedule.Attribute( "guid" ).Value.Trim().AsGuid();
+                Schedule schedule = new Schedule()
+                {
+                    Guid = guid,
+                    Name = elemSchedule.Attribute( "name" ).Value.Trim()
+                };
+
+                if ( elemSchedule.Attribute( "checkinstart" ) != null )
+                {
+                    schedule.CheckInStartOffsetMinutes = elemSchedule.Attribute( "checkinstart" ).Value.Trim().AsInteger();
+                }
+
+                if ( elemSchedule.Attribute( "checkinend" ) != null )
+                {
+                    schedule.CheckInEndOffsetMinutes = elemSchedule.Attribute( "checkinend" ).Value.Trim().AsInteger();
+                }
+
+                if ( elemSchedule.Attribute( "categoryguid" ) != null )
+                {
+                    Category category = categoryService.Get( elemSchedule.Attribute( "categoryguid" ).Value.Trim().AsGuid() );
+                    if ( category != null )
+                    {
+                        schedule.CategoryId = category.Id;
+                    }
+                }
+
+                if ( elemSchedule.Attribute( "time" ) != null && elemSchedule.Attribute("dayofweek")!=null)
+                {
+                    iCalendar calendar = new iCalendar();
+                    Event serviceTimes = new Event();
+                    DDay.iCal.IDateTime datetime = new iCalDateTime();
+                    DateTime start, end = new DateTime();
+                    DDay.iCal.RecurrencePattern thePattern = new RecurrencePattern();
+                    DDay.iCal.WeekDay theDay = new WeekDay();
+
+                    String date = String.Format( "1/1/2014 {0}", elemSchedule.Attribute( "time" ).Value );
+                    start=DateTime.Parse(date);
+                    end=start.AddHours(1);                   
+                    theDay.DayOfWeek = (DayOfWeek)Enum.Parse( typeof( DayOfWeek ), elemSchedule.Attribute( "dayofweek" ).Value, true );
+                    thePattern.Frequency = DDay.iCal.FrequencyType.Weekly;
+                    thePattern.ByDay.Add(theDay);
+                    serviceTimes.RecurrenceRules.Add(thePattern);
+                    datetime.Value = start;
+                    serviceTimes.DTStart = datetime;
+                    serviceTimes.DTStart.Value = start;
+                    datetime.Value = end;
+                    serviceTimes.DTEnd = datetime;
+                    calendar.Events.Add( serviceTimes );
+                    iCalendarSerializer calSerializer = new iCalendarSerializer( calendar );
+                    schedule.iCalendarContent = calSerializer.SerializeToString();
+
+                }
+                scheduleService.Add( schedule );
+                rockContext.SaveChanges();
+            }
+        }
+
+        /// <summary>
+        /// Handles adding categories from the given XML snippet
+        /// </summary>
         /// <param name="elemCategories">the elem categories</param>
         /// <param name="rockContext">the rock context</param>
         private void AddCategories( XElement elemCategories, RockContext rockContext )
@@ -989,7 +1072,7 @@ namespace RockWeb.Blocks.Examples
 
                 if ( elemCategory.Attribute( "entitytypeguid" ) != null )
                 {
-                    EntityType entityType = entityTypeService.Get( elemCategory.Attribute( "entitytypeguid" ).Value.AsGuid() );
+                    EntityType entityType = entityTypeService.Get( elemCategory.Attribute( "entitytypeguid" ).Value.Trim().AsGuid() );
                     if ( entityType != null )
                     {
                         category.EntityTypeId = entityType.Id;
@@ -997,7 +1080,7 @@ namespace RockWeb.Blocks.Examples
                 }
                 if ( elemCategory.Attribute( "parentcategoryguid" ) != null )
                 {
-                    Category parentCategory = categoryService.Get( elemCategory.Attribute( "parentcategoryguid" ).Value.AsGuid() );
+                    Category parentCategory = categoryService.Get( elemCategory.Attribute( "parentcategoryguid" ).Value.Trim().AsGuid() );
                     if ( parentCategory != null )
                     {
                         category.ParentCategoryId = parentCategory.Id;
@@ -1354,6 +1437,38 @@ namespace RockWeb.Blocks.Examples
                 if ( group != null )
                 {
                     DeleteGroupAndMemberData( group, rockContext );
+                }
+            }
+        }
+
+        /// <summary>
+        /// Delete all schedules found in the given XML
+        /// </summary>
+        /// <param name="elemSchedules">the elem categories</param>
+        /// <param name="rockContext">the rock context</param>
+        private void DeleteExistingSchedules( XElement elemSchedules, RockContext rockContext )
+        {
+            if ( elemSchedules == null )
+            {
+                return;
+            }
+
+            ScheduleService scheduleService = new ScheduleService( rockContext );
+
+            foreach ( var elemSchedule in elemSchedules.Elements( "schedule" ) )
+            {
+                Guid guid = elemSchedule.Attribute( "guid" ).Value.Trim().AsGuid();
+                Schedule schedule = scheduleService.Get( guid );
+                if ( schedule != null )
+                {
+                    if ( scheduleService.Delete( schedule ) )
+                    {
+                        // ok
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException( "Unable to delete schedule: " + schedule.Name );
+                    }
                 }
             }
         }
