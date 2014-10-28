@@ -260,11 +260,10 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     groupMemberService.Add( groupMember );
                 }
 
+                rockContext.SaveChanges();
                 groupMember.SetAttributeValue( "MemberStartDate", dpMemberStartDate.SelectedDate.Value.ToShortDateString() );
                 groupMember.SaveAttributeValues( rockContext );
-                rockContext.SaveChanges();
-
-
+                
                 group = new GroupService( rockContext ).Get( groupMember.GroupId );
                 if ( group.IsSecurityRole || group.GroupType.Guid.Equals( Rock.SystemGuid.GroupType.GROUPTYPE_SECURITY_ROLE.AsGuid() ) )
                 {

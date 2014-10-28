@@ -334,7 +334,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                     var transport = medium.Transport;
                     if ( transport != null && transport.IsActive )
                     {
-                        var appRoot = GlobalAttributesCache.Read( rockContext ).GetValue( "PublicApplicationRoot" );
+                        var appRoot = GlobalAttributesCache.Read( rockContext ).GetValue( "InternalApplicationRoot" );
                         transport.Send( mediumData, recipients, appRoot, string.Empty );
                     }
                 }
