@@ -1018,7 +1018,7 @@ namespace RockWeb.Blocks.Examples
                 {
                     iCalendar calendar = new iCalendar();
                     Event serviceTimes = new Event();
-                    DDay.iCal.IDateTime datetime = new iCalDateTime();
+                    DDay.iCal.IDateTime datetime, dateStart, dateEnd = new iCalDateTime();
                     DateTime start, end = new DateTime();
                     DDay.iCal.RecurrencePattern thePattern = new RecurrencePattern();
                     DDay.iCal.WeekDay theDay = new WeekDay();
@@ -1030,11 +1030,10 @@ namespace RockWeb.Blocks.Examples
                     thePattern.Frequency = DDay.iCal.FrequencyType.Weekly;
                     thePattern.ByDay.Add(theDay);
                     serviceTimes.RecurrenceRules.Add(thePattern);
-                    datetime.Value = start;
-                    serviceTimes.DTStart = datetime;
-                    serviceTimes.DTStart.Value = start;
-                    datetime.Value = end;
-                    serviceTimes.DTEnd = datetime;
+                    dateStart = new iCalDateTime( start );
+                    dateEnd = dateStart.AddHours( 1 );
+                    serviceTimes.DTStart = dateStart;
+                    serviceTimes.DTEnd = dateEnd;
                     calendar.Events.Add( serviceTimes );
                     iCalendarSerializer calSerializer = new iCalendarSerializer( calendar );
                     schedule.iCalendarContent = calSerializer.SerializeToString();
