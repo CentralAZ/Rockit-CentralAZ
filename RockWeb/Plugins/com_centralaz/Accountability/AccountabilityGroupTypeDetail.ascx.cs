@@ -212,9 +212,6 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             role.IsLeader = true;
             groupType.Roles.Add( role );
 
-
-
-
             groupType.Name = dtbName.Text;
             groupType.Description = dtbDescription.Text;
             groupType.GroupTypePurposeValue = new DefinedValueService( rockContext ).GetByDefinedTypeGuid( Rock.SystemGuid.DefinedType.GROUPTYPE_PURPOSE.AsGuid() ).Where( a => a.Value == "Accountability Group" ).FirstOrDefault();
@@ -230,16 +227,11 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                 return;
             }
 
-            // use WrapTransaction since SaveAttributeValues does it's own RockContext.SaveChanges()
-            //rockContext.WrapTransaction(() =>
-            // {
             if ( groupType.Id.Equals( 0 ) )
             {
                 groupTypeService.Add( groupType );
             }
             rockContext.SaveChanges();
-
-            //    });
 
             var qryParams = new Dictionary<string, string>();
             qryParams["GroupTypeId"] = groupType.Id.ToString();
