@@ -3,7 +3,72 @@
 <asp:UpdatePanel ID="upnlContent" runat="server">
     <ContentTemplate>
 
-        <asp:Panel ID="pnlView" runat="server" CssClass="panel panel-block">
+        <asp:Panel ID="pnlErrorGrid" runat="server" CssClass="panel panel-block" Visible="false">
+            <div class="panel-heading">
+                <h1 class="panel-title">Import Errors</h1>
+            </div>
+            <div class="panel-body">
+                <div class="grid grid-panel">
+                    <Rock:Grid ID="gErrors" runat="server" AllowSorting="true" OnRowDataBound="gErrors_RowDataBound">
+                        <Columns>
+                            <asp:TemplateField SortExpression="ReferenceNumber" HeaderText="Reference Number">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lReferenceNumber" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            <asp:TemplateField SortExpression="ChurchCode" HeaderText="Church Code">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lChurchCode" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            <asp:TemplateField SortExpression="IndividualId" HeaderText="Individual ID">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lIndividualId" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            <asp:TemplateField SortExpression="ContributorName" HeaderText="Contributor Name">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lContributorName" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            <asp:TemplateField SortExpression="FundName" HeaderText="Fund Name">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lFundName" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            <asp:TemplateField SortExpression="FundCode" HeaderText="Fund Code">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lFundCode" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            <asp:TemplateField SortExpression="ReceivedDate" HeaderText="Received Date">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lReceivedDate" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            <asp:TemplateField SortExpression="Amount" HeaderText="Amount">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lAmount" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            <asp:TemplateField SortExpression="TransactionId" HeaderText="Transaction ID">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lTransactionId" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>                            
+                            <asp:TemplateField SortExpression="ContributionType" HeaderText="Contribution Type">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lContributionType" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                        </Columns>
+                    </Rock:Grid>
+                </div>
+            </div>
+        </asp:Panel>
+
+        <asp:Panel ID="pnlImport" runat="server" CssClass="panel panel-block">
 
             <div class="panel-heading">
                 <h1 class="panel-title">Import SecureGive</h1>
@@ -20,19 +85,34 @@
                     </asp:LinkButton>
                 </p>
 
+                <Rock:NotificationBox ID="nbBatch" runat="server" NotificationBoxType="Success" />
                 <Rock:NotificationBox ID="nbMessage" runat="server" NotificationBoxType="Danger" />
 
-                <Rock:NotificationBox ID="nbBatch" runat="server" NotificationBoxType="Success" />
-                <div class="grid grid-panel">
-                    <Rock:Grid ID="gContributions" runat="server" AllowSorting="true" Visible="false" OnRowSelected="gContributions_View">
-                        <Columns>
-                            <asp:BoundField DataField="FinancialTransactionDetail.Transaction.Id" HeaderText="Transaction Id" SortExpression="TransactionId" />
-                            <asp:BoundField DataField="FinancialTransactionDetail.Transaction.ProcessedDateTime" HeaderText="Transaction Date" SortExpression="TransactionDate" />
-                            <asp:BoundField DataField="FinancialTransactionDetail.Transaction.AuthorizedPersonAlias.Person.FullName" HeaderText="Full Name" SortExpression="FullName" />
-                            <asp:BoundField DataField="FinancialTransactionDetail.TransactionTypeValue" HeaderText="Transaction Type" SortExpression="TransactionType" />
-                            <asp:BoundField DataField="FinancialTransactionDetail.Account" HeaderText="Fund Name" SortExpression="FundName" />
-                            <asp:BoundField DataField="FinancialTransactionDetail.Amount" HeaderText="Amount" SortExpression="Amount" />
+            </div>
+        </asp:Panel>
 
+        <asp:Panel ID="pnlGrid" runat="server" CssClass="panel panel-block" Visible="false">
+            <div class="panel-heading">
+                <h1 class="panel-title">Batch Summary</h1>
+            </div>
+            <div class="panel-body">
+                <div class="grid grid-panel">
+                    <Rock:Grid ID="gContributions" runat="server" AllowSorting="true">
+                        <Columns>
+                            <asp:TemplateField SortExpression="TransactionId" HeaderText="Transaction ID">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lTransactionID" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            <asp:BoundField DataField="Transaction.ProcessedDateTime" HeaderText="Transaction Date" SortExpression="TransactionDate" />
+                            <asp:TemplateField SortExpression="FullName" HeaderText="Full Name">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lFullName" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                            <asp:BoundField DataField="Transaction.CurrencyTypeValue" HeaderText="Transaction Type" SortExpression="TransactionType" />
+                            <asp:BoundField DataField="Account" HeaderText="Fund Name" SortExpression="FundName" />
+                            <asp:BoundField DataField="Amount" HeaderText="Amount" SortExpression="Amount" />
                         </Columns>
                     </Rock:Grid>
                 </div>

@@ -41,6 +41,8 @@ namespace RockWeb.Plugins.com_centralaz.Finance
 
         private FinancialBatch _financialBatch;
         private List<string> errors = new List<string>();
+        private List<XElement> errorElements = new List<XElement>();
+
 
         #endregion
 
@@ -61,7 +63,10 @@ namespace RockWeb.Plugins.com_centralaz.Finance
         protected override void OnInit( EventArgs e )
         {
             base.OnInit( e );
-            gContributions.GridRebind += gList_GridRebind;
+            gContributions.GridRebind += gContributions_GridRebind;
+            gContributions.RowDataBound+=gContributions_RowDataBound;
+            gErrors.GridRebind += gErrors_GridRebind;
+            gErrors.RowDataBound += gErrors_RowDataBound;
 
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
@@ -78,7 +83,11 @@ namespace RockWeb.Plugins.com_centralaz.Finance
         protected override void OnLoad( EventArgs e )
         {
             base.OnLoad( e );
-
+            if ( !Page.IsPostBack )
+            {
+                BindGrid();
+                BindErrorGrid();
+            }
         }
 
         #endregion
@@ -106,9 +115,6 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                 Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
                 dictionaryInfo.Add( "batchId", _financialBatch.Id.ToString() );
                 string url = LinkedPageUrl( "BatchDetailPage", dictionaryInfo );
-                //                PageService pageService = new PageService( rockContext );
-                //                var pageNumber = pageService.Get( "606BDA31-A8FE-473A-B3F8-A00ECF7E06EC".AsGuid() ).Id;
-                //                string url = ResolveUrl( string.Format( "~/page/{0}?batchId={1}", pageNumber, _financialBatch.Id ) );
                 String theString = String.Format( "Batch <a href=\"{0}\">{1}</a> was created.", url, _financialBatch.Id.ToString() );
                 nbBatch.Text = theString;
                 nbBatch.Visible = true;
@@ -124,24 +130,10 @@ namespace RockWeb.Plugins.com_centralaz.Finance
 
                 if ( errors.Count > 0 )
                 {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.Append( "The following records need to be addressed:" );
-                    foreach ( string error in errors )
-                    {
-                        stringBuilder.AppendLine( string.Format( "{0}", error ) );
-                    }
-                    nbMessage.Text = stringBuilder.ToString();
-                    nbMessage.Visible = true;
+                    BindErrorGrid();
                 }
 
             }
-        }
-
-        protected void gContributions_View( object sender, RowEventArgs e )
-        {
-            FinancialTransactionDetailService financialTransactionDetailService = new FinancialTransactionDetailService( new RockContext() );
-            var ftd = financialTransactionDetailService.Get( e.RowKeyId );
-            NavigateToLinkedPage( "ContributionDetailPage", "transactionId", ftd.TransactionId, "batchId", _financialBatch.Id );
         }
 
         /// <summary>
@@ -159,9 +151,14 @@ namespace RockWeb.Plugins.com_centralaz.Finance
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void gList_GridRebind( object sender, EventArgs e )
+        private void gContributions_GridRebind( object sender, EventArgs e )
         {
             BindGrid();
+        }
+
+        private void gErrors_GridRebind( object sender, EventArgs e )
+        {
+            BindErrorGrid();
         }
 
         #endregion
@@ -255,7 +252,6 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                     TransactionId = financialTransaction.Id,
                     AccountId = account.Id
                 };
-
                 financialTransactionDetailService.Add( financialTransactionDetail );
                 if ( elemGift.Element( "Amount" ) != null )
                 {
@@ -265,7 +261,8 @@ namespace RockWeb.Plugins.com_centralaz.Finance
             }
             catch ( Exception e )
             {
-                errors.Add( e.Message );
+                errors.Add( elemGift.Element( "ReferenceNumber" ).Value.ToString() );
+                errorElements.Add( elemGift );
                 return;
             }
         }
@@ -278,15 +275,134 @@ namespace RockWeb.Plugins.com_centralaz.Finance
             RockContext rockContext = new RockContext();
             FinancialTransactionDetailService financialTransactionDetailService = new FinancialTransactionDetailService( rockContext );
 
-            // sample query to display a few people
-            var qry = financialTransactionDetailService.Queryable()
-                        .Where( ftd => ftd.Transaction.BatchId == _financialBatch.Id )
-                       .ToList();
+            if ( _financialBatch != null )
+            {
+                var qry = financialTransactionDetailService.Queryable()
+                                        .Where( ftd => ftd.Transaction.BatchId == _financialBatch.Id )
+                                       .ToList();
 
-            gContributions.DataSource = qry.ToList();
+                gContributions.DataSource = qry;
+            }
             gContributions.DataBind();
+
+            pnlGrid.Visible = gContributions.Rows.Count > 0;
+
+        }
+
+        /// <summary>
+        /// Binds the error grid.
+        /// </summary>
+        private void BindErrorGrid()
+        {
+            RockContext rockContext = new RockContext();
+            FinancialTransactionDetailService financialTransactionDetailService = new FinancialTransactionDetailService( rockContext );
+
+            if ( errorElements.Count > 0 )
+            {
+                gErrors.DataSource = errorElements;
+            }
+            gErrors.DataBind();
+
+            pnlErrorGrid.Visible = gErrors.Rows.Count > 0;
+
         }
 
         #endregion
+        protected void gErrors_RowDataBound( object sender, GridViewRowEventArgs e )
+        {
+            if ( e.Row.RowType == DataControlRowType.DataRow )
+            {
+                var elemError = e.Row.DataItem as XElement;
+                if ( elemError != null )
+                {
+                    Literal lReferenceNumber = e.Row.FindControl( "lReferenceNumber" ) as Literal;
+                    if ( lReferenceNumber != null )
+                    {
+                        lReferenceNumber.Text = elemError.Element( "ReferenceNumber" ).Value.ToString();
+                    }
+
+                    Literal lChurchCode = e.Row.FindControl( "lChurchCode" ) as Literal;
+                    if ( lChurchCode != null )
+                    {
+                        lChurchCode.Text = elemError.Element( "ChurchCode" ).Value.ToString();
+                    }
+
+                    Literal lIndividualId = e.Row.FindControl( "lIndividualId" ) as Literal;
+                    if ( lIndividualId != null )
+                    {
+                        lIndividualId.Text = elemError.Element( "IndividualID" ).Value.ToString();
+                    }
+
+                    Literal lContributorName = e.Row.FindControl( "lContributorName" ) as Literal;
+                    if ( lContributorName != null )
+                    {
+                        lContributorName.Text = elemError.Element( "ContributorName" ).Value.ToString();
+                    }
+
+                    Literal lFundName = e.Row.FindControl( "lFundName" ) as Literal;
+                    if ( lFundName != null )
+                    {
+                        lFundName.Text = elemError.Element( "FundName" ).Value.ToString();
+                    }
+
+                    Literal lFundCode = e.Row.FindControl( "lFundCode" ) as Literal;
+                    if ( lFundCode != null )
+                    {
+                        lFundCode.Text = elemError.Element( "FundCode" ).Value.ToString();
+                    }
+
+                    Literal lReceivedDate = e.Row.FindControl( "lReceivedDate" ) as Literal;
+                    if ( lReceivedDate != null )
+                    {
+                        lReceivedDate.Text = elemError.Element( "ReceivedDate" ).Value.ToString();
+                    }
+
+                    Literal lAmount = e.Row.FindControl( "lAmount" ) as Literal;
+                    if ( lAmount != null )
+                    {
+                        lAmount.Text = elemError.Element( "Amount" ).Value.ToString();
+                    }
+
+                    Literal lTransactionId = e.Row.FindControl( "lTransactionId" ) as Literal;
+                    if ( lTransactionId != null )
+                    {
+                        lTransactionId.Text = elemError.Element( "TransactionID" ).Value.ToString();
+                    }
+
+                    Literal lContributionType = e.Row.FindControl( "lContributionType" ) as Literal;
+                    if ( lContributionType != null )
+                    {
+                        lContributionType.Text = elemError.Element( "ContributionType" ).Value.ToString();
+                    }
+                }
+            }
+        }
+        protected void gContributions_RowDataBound( object sender, GridViewRowEventArgs e )
+        {
+            if ( e.Row.RowType == DataControlRowType.DataRow )
+            {
+                FinancialTransactionDetail financialTransactionDetail = e.Row.DataItem as FinancialTransactionDetail;
+                if ( financialTransactionDetail != null )
+                {
+                    Literal lTransactionID = e.Row.FindControl( "lTransactionID" ) as Literal;
+                    if ( lTransactionID != null )
+                    {
+                        Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
+                        dictionaryInfo.Add( "transactionId", financialTransactionDetail.TransactionId.ToString() );
+                        string url = LinkedPageUrl( "ContributionDetailPage", dictionaryInfo );
+                        String theString = String.Format( "<a href=\"{0}\">{1}</a>", url, financialTransactionDetail.TransactionId.ToString() );
+                        lTransactionID.Text = theString;
+                    }
+
+                    Literal lFullName = e.Row.FindControl( "lFullName" ) as Literal;
+                    if ( lFullName != null )
+                    {
+                        String url = ResolveUrl( string.Format( "~/Person/{0}", financialTransactionDetail.Transaction.AuthorizedPersonAlias.PersonId ) );
+                        String theString = String.Format( "<a href=\"{0}\">{1}</a>", url, financialTransactionDetail.Transaction.AuthorizedPersonAlias.Person.FullName );
+                        lFullName.Text = theString;
+                    }
+                }
+            }
+        }
     }
 }
