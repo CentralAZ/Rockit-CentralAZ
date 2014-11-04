@@ -30,7 +30,7 @@ namespace RockWeb.Plugins.com_centralaz.Finance
 
     [DefinedValueField( "4F02B41E-AB7D-4345-8A97-3904DDD89B01", "Transaction Source", "The transaction source", true )]
     [DefinedValueField( "FFF62A4B-5D88-4DEB-AF8F-8E6178E41FE5", "TransactionType", "The means the transaction was submitted by", true )]
-    [IntegerField( "Anonymous Giver PersonID", "PersonId to use in case of anonymous giver", true )]
+    [IntegerField( "Anonymous Giver PersonAliasID", "PersonAliasId to use in case of anonymous giver", true )]
     [BooleanField( "Use Negative Foreign Keys", "Indicates whether Rock uses the negative of the SecureGive reference ID for the contribution record's foreign key", false )]
     [TextField( "Batch Name", "The name that should be used for the batches created", true, "SecureGive Import" )]
     [LinkedPage( "Batch Detail Page", "The page used to display the contributions for a specific batch", true, "", "", 0 )]
@@ -208,27 +208,15 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                     financialTransaction.TransactionCode = elemGift.Element( "TransactionID" ).Value.ToString();
                 }
 
-                if ( elemGift.Element( "ReferenceNumber" ) != null )
-                {
-                    if ( !GetAttributeValue( "UseNegativeForeignKeys" ).AsBoolean() )
-                    {
-                        financialTransaction.ForeignId = elemGift.Element( "ReferenceNumber" ).Value.ToString();
-                    }
-                    else
-                    {
-                        financialTransaction.ForeignId = ( elemGift.Element( "ReferenceNumber" ).Value.AsInteger() * -1 ).ToString();
-                    }
-                }
-
-                var person = personService.Get( GetAttributeValue( "AnonymousGiverPersonID" ).AsInteger() );
-                financialTransaction.AuthorizedPersonAliasId = personAliasService.GetPrimaryAliasId( person.Id );
+                
+                var person = personService.Get( personAliasService.GetPersonId( GetAttributeValue( "AnonymousGiverPersonAliasID" ).AsInteger() ).Value );
+                financialTransaction.AuthorizedPersonAliasId = GetAttributeValue( "AnonymousGiverPersonAliasID" ).AsInteger();
                 if ( elemGift.Element( "IndividualID" ) != null )
                 {
                     if ( elemGift.Element( "IndividualID" ).Value != "" )
                     {
                         financialTransaction.AuthorizedPersonAliasId = elemGift.Element( "IndividualID" ).Value.AsInteger();
-                        var personId =personAliasService.GetPersonId( elemGift.Element( "IndividualID" ).Value.AsInteger() );
-                        person = personService.Get(personId.Value);
+                        person = personService.Get( personAliasService.GetPersonId( elemGift.Element( "IndividualID" ).Value.AsInteger() ).Value );
                     }
                 }
 
@@ -251,11 +239,26 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                     TransactionId = financialTransaction.Id,
                     AccountId = account.Id
                 };
+
                 financialTransactionDetailService.Add( financialTransactionDetail );
+
                 if ( elemGift.Element( "Amount" ) != null )
                 {
                     financialTransactionDetail.Amount = elemGift.Element( "Amount" ).Value.AsDecimal();
                 }
+
+                if ( elemGift.Element( "ReferenceNumber" ) != null )
+                {
+                    if ( !GetAttributeValue( "UseNegativeForeignKeys" ).AsBoolean() )
+                    {
+                        financialTransactionDetail.Summary = elemGift.Element( "ReferenceNumber" ).Value.ToString();
+                    }
+                    else
+                    {
+                        financialTransactionDetail.Summary = ( elemGift.Element( "ReferenceNumber" ).Value.AsInteger() * -1 ).ToString();
+                    }
+                }
+
                 rockContext.SaveChanges();
             }
             catch ( Exception e )
