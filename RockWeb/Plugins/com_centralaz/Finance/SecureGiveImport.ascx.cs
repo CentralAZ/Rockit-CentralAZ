@@ -64,7 +64,7 @@ namespace RockWeb.Plugins.com_centralaz.Finance
         {
             base.OnInit( e );
             gContributions.GridRebind += gContributions_GridRebind;
-            gContributions.RowDataBound+=gContributions_RowDataBound;
+            gContributions.RowDataBound += gContributions_RowDataBound;
             gErrors.GridRebind += gErrors_GridRebind;
             gErrors.RowDataBound += gErrors_RowDataBound;
 
@@ -130,6 +130,7 @@ namespace RockWeb.Plugins.com_centralaz.Finance
 
                 if ( errors.Count > 0 )
                 {
+                    nbMessage.Text = "Errors found.";
                     BindErrorGrid();
                 }
 
@@ -220,33 +221,31 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                 }
 
                 var person = personService.Get( GetAttributeValue( "AnonymousGiverPersonID" ).AsInteger() );
-                if ( elemGift.Element( "ContributorName" ) != null )
+                financialTransaction.AuthorizedPersonAliasId = personAliasService.GetPrimaryAliasId( person.Id );
+                if ( elemGift.Element( "IndividualID" ) != null )
                 {
-                    if ( elemGift.Element( "ContributorName" ).Value != "" )
+                    if ( elemGift.Element( "IndividualID" ).Value != "" )
                     {
-                        person = personService.GetByFullName( elemGift.Element( "ContributorName" ).Value.ToString(), false, true, false ).FirstOrDefault();
+                        financialTransaction.AuthorizedPersonAliasId = elemGift.Element( "IndividualID" ).Value.AsInteger();
+                        var personId =personAliasService.GetPersonId( elemGift.Element( "IndividualID" ).Value.AsInteger() );
+                        person = personService.Get(personId.Value);
                     }
                 }
-                financialTransaction.AuthorizedPersonAliasId = personAliasService.GetPrimaryAliasId( person.Id );
+
+                string summary = string.Format("{0} donated {1} on {2}", person.FullName, elemGift.Element( "Amount" ).Value.AsDecimal().ToString("C"), financialTransaction.ProcessedDateTime.ToString());
+                financialTransaction.Summary = summary;
 
                 FinancialAccount account = new FinancialAccount();
 
-                if ( elemGift.Element( "FundName" ) != null )
+                if ( elemGift.Element( "FundCode" ) != null )
                 {
-                    String accountName = elemGift.Element( "FundName" ).Value.ToString();
+                    int accountId = elemGift.Element( "FundCode" ).Value.AsInteger();
                     account = financialAccountService.Queryable()
-                    .Where( fa => fa.Name == accountName )
-                    .FirstOrDefault();
-                }
-                if ( account == null )
-                {
-                    account = financialAccountService.Queryable()
-                    .Where( fa => fa.Name == "General Fund" )
+                    .Where( fa => fa.Id == accountId )
                     .FirstOrDefault();
                 }
 
                 rockContext.SaveChanges();
-
                 FinancialTransactionDetail financialTransactionDetail = new FinancialTransactionDetail()
                 {
                     TransactionId = financialTransaction.Id,
@@ -354,7 +353,8 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                     Literal lReceivedDate = e.Row.FindControl( "lReceivedDate" ) as Literal;
                     if ( lReceivedDate != null )
                     {
-                        lReceivedDate.Text = elemError.Element( "ReceivedDate" ).Value.ToString();
+                        DateTime receivedDate = DateTime.Parse(elemError.Element( "ReceivedDate" ).Value);
+                        lReceivedDate.Text = receivedDate.ToString();
                     }
 
                     Literal lAmount = e.Row.FindControl( "lAmount" ) as Literal;
