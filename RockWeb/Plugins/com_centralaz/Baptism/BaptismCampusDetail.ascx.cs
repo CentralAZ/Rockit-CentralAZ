@@ -69,7 +69,6 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             // register btnDumpDiagnostics as a PostBackControl since it is returning a File download
             ScriptManager scriptManager = ScriptManager.GetCurrent( Page );
             scriptManager.RegisterPostBackControl( lbPrintReport );
-
         }
 
         /// <summary>
@@ -225,7 +224,8 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             String title = String.Format( "{0}: {1} - {2}", group.Name, dateRange[0].ToString( "MMMM d" ), dateRange[1].ToString( "MMMM d" ) );
             document.Add( new Paragraph( title, titleFont ) );
 
-            String subTitle = String.Format( "Baptism Schedule for {0}", group.Campus.ToString() );
+            String campusName =  (group.Campus != null ) ? group.Campus.ToString() : "Unknown Campus";
+            String subTitle = String.Format( "Baptism Schedule for {0}", campusName );
             document.Add( new Paragraph( subTitle, subTitleFont ) );
 
             //Populate the Lists
@@ -247,7 +247,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             Response.ClearContent();
             Response.Clear();
             Response.ContentType = "application/pdf";
-            Response.AddHeader( "Content-Disposition", string.Format( "attachment;filename={0} Baptism Schedule.pdf", group.Campus.ToString() ) );
+            Response.AddHeader( "Content-Disposition", string.Format( "attachment;filename={0} Baptism Schedule.pdf", campusName ) );
             Response.BinaryWrite( output.ToArray() );
             Response.Flush();
             Response.End();
@@ -375,7 +375,6 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                         PopulateScheduleList( baptizeeList );
                     }
                 }
-
             }
         }
 
@@ -468,7 +467,6 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             listSubHeaderTable.DefaultCell.BorderWidth = 0;
             listSubHeaderTable.DefaultCell.BorderWidthBottom = 1;
             listSubHeaderTable.DefaultCell.BorderColorBottom = Color.DARK_GRAY;
-
 
             listSubHeaderTable.AddCell( new Phrase( "Being Baptized", listSubHeaderFont ) );
             listSubHeaderTable.AddCell( new Phrase( "Phone Number", listSubHeaderFont ) );
@@ -569,7 +567,6 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             //Fonts
             var listItemFont = FontFactory.GetFont( font, 8, Font.NORMAL );
 
-
             //Build the list item table
             var listItemTable = new PdfPTable( 5 );
             listItemTable.LockedWidth = true;
@@ -578,7 +575,6 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             listItemTable.SpacingBefore = 0;
             listItemTable.SpacingAfter = 1;
             listItemTable.DefaultCell.BorderWidth = 0;
-
 
             //Add the list items
             listItemTable.AddCell( new Phrase( baptizee.Person.FullName, listItemFont ) );
@@ -612,7 +608,6 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
 
             listItemTable.AddCell( new Phrase( approverName, listItemFont ) );
-
 
             listItemTable.AddCell( new Phrase( baptizee.IsConfirmed.ToYesNo(), listItemFont ) );
 
