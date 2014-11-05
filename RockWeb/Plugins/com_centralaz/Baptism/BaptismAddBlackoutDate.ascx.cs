@@ -134,6 +134,8 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             calendar.Events.Add( theEvent );
             var x1 = theEvent.DTStart;
             datetime.Value = dpBlackOutDate.SelectedDate.Value;
+            blackoutDate.Name = string.Format( "{0} blackout", dpBlackOutDate.SelectedDate.Value.ToShortDateString() );
+
             calendar.Events[0].DTStart = datetime;
             iCalendarSerializer calSerializer = new iCalendarSerializer( calendar );
             blackoutDate.iCalendarContent = calSerializer.SerializeToString();
