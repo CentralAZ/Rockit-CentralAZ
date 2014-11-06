@@ -526,13 +526,6 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
             phBaptismList.Controls.Add( new LiteralControl( theString ) );
 
-            CheckBox cb = new CheckBox
-            {
-                ID = string.Format( "cbConfirmed_{0}", baptizee.Id ),
-                Checked = baptizee.IsConfirmed,
-                Enabled = false
-            };
-
             Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
             dictionaryInfo.Add( "GroupId", PageParameter( "GroupId" ) );
             dictionaryInfo.Add( "SelectedDate", calBaptism.SelectedDate.ToShortDateString() );
@@ -546,9 +539,13 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             };
             //  lbEdit.Click += lbEdit_Click;
             phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
-            phBaptismList.Controls.Add( cb );
+            if ( baptizee.IsConfirmed )
+            {
+                phBaptismList.Controls.Add( new LiteralControl( "<i class='fa fa-check'></i>" ) );
+
+            }
             phBaptismList.Controls.Add( new LiteralControl( "  </div>" ) );
-            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>>" ) );
             phBaptismList.Controls.Add( lbEdit );
             phBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
             phBaptismList.Controls.Add( new LiteralControl( "</div>" ) );

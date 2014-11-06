@@ -22,8 +22,8 @@ namespace com.centralaz.Baptism.Migrations
 
             RockMigrationHelper.AddPage( "B0F4B33D-DD11-4CCC-B79D-9342831B8701", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Baptisms", "", "F08B7F8F-5EC6-4CEC-8C20-5AD5EC5A3800", "" ); // Site:Rock RMS
             RockMigrationHelper.AddPage( "F08B7F8F-5EC6-4CEC-8C20-5AD5EC5A3800", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Baptism Scheduler", "", "B248D7E3-AD38-4E83-9E3C-3CC6D3814AB4", "" ); // Site:Rock RMS
-            RockMigrationHelper.AddPage( "B248D7E3-AD38-4E83-9E3C-3CC6D3814AB4", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Add Baptism", "", "AD8BE3C5-54F5-48F7-B699-01D53238CD23", "" ); // Site:Rock RMS
-            RockMigrationHelper.AddPage( "B248D7E3-AD38-4E83-9E3C-3CC6D3814AB4", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Add Blackout Date", "", "A3882EAE-F086-467B-9F3C-DC0DB75403F7", "" ); // Site:Rock RMS
+            RockMigrationHelper.AddPage( "B248D7E3-AD38-4E83-9E3C-3CC6D3814AB4", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Baptism Detail", "", "AD8BE3C5-54F5-48F7-B699-01D53238CD23", "" ); // Site:Rock RMS
+            RockMigrationHelper.AddPage( "B248D7E3-AD38-4E83-9E3C-3CC6D3814AB4", "D65F783D-87A9-4CC9-8110-E83466A0EADB", "Blackout Date Detail", "", "A3882EAE-F086-467B-9F3C-DC0DB75403F7", "" ); // Site:Rock RMS
             RockMigrationHelper.UpdateBlockType( "Baptism Add Baptism Block", "Block for adding a baptism", "~/Plugins/com_centralaz/Baptism/BaptismAddBaptism.ascx", "com_centralaz > Baptism", "034AEBD6-FE85-4CC0-B060-25E93DCE20EB" );
             RockMigrationHelper.UpdateBlockType( "Baptism Add Blackout Date Block", "Block for adding blackout dates to baptism schedules", "~/Plugins/com_centralaz/Baptism/BaptismAddBlackoutDate.ascx", "com_centralaz > Baptism", "9DEC1094-FEC0-4E3A-B5C3-F08E2C296DB2" );
             RockMigrationHelper.UpdateBlockType( "Baptism Campus Detail Block", "Detail block for Baptism scheduling", "~/Plugins/com_centralaz/Baptism/BaptismCampusDetail.ascx", "com_centralaz > Baptism", "697B2414-42CE-4093-9546-DAF26E9B34CB" );

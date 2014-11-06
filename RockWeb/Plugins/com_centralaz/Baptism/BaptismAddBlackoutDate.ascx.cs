@@ -14,6 +14,8 @@ using Rock.Model;
 using Rock.Web.Cache;
 using Rock.Web.UI.Controls;
 using Rock.Attribute;
+using Rock.Web.UI;
+using Rock.Web;
 
 namespace RockWeb.Plugins.com_centralaz.Baptism
 {
@@ -67,12 +69,45 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 {
                     dpBlackOutDate.SelectedDate = PageParameter( "SelectedDate" ).AsDateTime();
                     btnDelete.Visible = false;
+                    lPanelTitle.Text = "Add Blackout Date";
+
                 }
                 else
                 {
                     BindValues( PageParameter( "BlackoutId" ).AsInteger() );
                 }
             }
+        }
+        /// <summary>
+        /// Returns breadcrumbs specific to the block that should be added to navigation
+        /// based on the current page reference.  This function is called during the page's
+        /// oninit to load any initial breadcrumbs
+        /// </summary>
+        /// <param name="pageReference">The page reference.</param>
+        /// <returns></returns>
+        public override List<BreadCrumb> GetBreadCrumbs( PageReference pageReference )
+        {
+            var breadCrumbs = new List<BreadCrumb>();
+
+            int? blackoutId = PageParameter( pageReference, "BlackoutId" ).AsIntegerOrNull();
+            if ( blackoutId != null )
+            {
+                Schedule blackout = new ScheduleService( new RockContext() ).Get( blackoutId.Value );
+                if ( blackout != null )
+                {
+                    breadCrumbs.Add( new BreadCrumb( "Edit Blackout Date", pageReference ) );
+                }
+                else
+                {
+                    breadCrumbs.Add( new BreadCrumb( "New Blackout Date", pageReference ) );
+                }
+            }
+            else
+            {
+                // don't show a breadcrumb if we don't have a pageparam to work with
+            }
+
+            return breadCrumbs;
         }
 
         #endregion
@@ -215,6 +250,8 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             Schedule blackoutDate = new ScheduleService( new RockContext() ).Get( blackoutId );
             dpBlackOutDate.SelectedDate = blackoutDate.EffectiveStartDate;
             tbDescription.Text = blackoutDate.Description;
+            lPanelTitle.Text = "Edit Blackout Date";
+
         }
 
         /// <summary>

@@ -6,7 +6,7 @@
         <asp:Panel ID="pnlView" runat="server" CssClass="panel panel-block">
 
             <div class="panel-heading">
-                <h1 class="panel-title">Add Blackout Date</h1>
+                <h1 class="panel-title"><asp:Literal ID="lPanelTitle" runat="server" /></h1>
             </div>
 
             <div class="panel-body">
