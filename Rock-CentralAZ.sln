@@ -2,11 +2,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "RockWeb", "http://localhost:50345", "{22348267-9BDF-4B5E-BB6E-37B5FA770224}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "RockWeb(Central)", "http://localhost:50345", "{22348267-9BDF-4B5E-BB6E-37B5FA770224}"
 	ProjectSection(WebsiteProperties) = preProject
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5.1"
-		ProjectReferences = "{496ec024-71ed-4ad1-b677-2a3fa60ccd05}|com.centralaz.SampleProject.dll;{1d63ac63-bcfa-4026-8715-74acd19d3fbe}|com.centralaz.Accountability.dll;{c30559e1-5d82-401f-a463-dd6759c2c1e9}|com.centralaz.Baptism.dll;"
+		ProjectReferences = "{496ec024-71ed-4ad1-b677-2a3fa60ccd05}|com.centralaz.SampleProject.dll;{1d63ac63-bcfa-4026-8715-74acd19d3fbe}|com.centralaz.Accountability.dll;{c30559e1-5d82-401f-a463-dd6759c2c1e9}|com.centralaz.Baptism.dll;{e3656a25-42dc-4ce8-8c7f-4f6514408735}|com.centralaz.Finance.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_50345"
 		Debug.AspNetCompiler.PhysicalPath = "RockWeb\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_50345\"
@@ -33,6 +33,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.centralaz.Accountability", "com.centralaz.Accountability\com.centralaz.Accountability.csproj", "{1D63AC63-BCFA-4026-8715-74ACD19D3FBE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.centralaz.Baptism", "com.centralaz.Baptism\com.centralaz.Baptism.csproj", "{C30559E1-5D82-401F-A463-DD6759C2C1E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.centralaz.Finance", "com.centralaz.Finance\com.centralaz.Finance.csproj", "{E3656A25-42DC-4CE8-8C7F-4F6514408735}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,10 @@ Global
 		{C30559E1-5D82-401F-A463-DD6759C2C1E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C30559E1-5D82-401F-A463-DD6759C2C1E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C30559E1-5D82-401F-A463-DD6759C2C1E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3656A25-42DC-4CE8-8C7F-4F6514408735}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3656A25-42DC-4CE8-8C7F-4F6514408735}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3656A25-42DC-4CE8-8C7F-4F6514408735}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3656A25-42DC-4CE8-8C7F-4F6514408735}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
