@@ -24,12 +24,12 @@ namespace RockWeb.Plugins.com_centralaz.Finance
     /// <summary>
     /// Template block for developers to use to start a new block.
     /// </summary>
-    [DisplayName( "SecureGiveImport" )]
+    [DisplayName( "SecureGive Import" )]
     [Category( "com_centralaz > Finance" )]
-    [Description( "Finance block to import contribution data from a SecureGive XML file." )]
+    [Description( "Finance block to import contribution data from a SecureGive XML file (FellowshipONE format)." )]
 
-    [DefinedValueField( "4F02B41E-AB7D-4345-8A97-3904DDD89B01", "Transaction Source", "The transaction source", true )]
-    [DefinedValueField( "FFF62A4B-5D88-4DEB-AF8F-8E6178E41FE5", "TransactionType", "The means the transaction was submitted by", true )]
+    [DefinedValueField( Rock.SystemGuid.DefinedType.FINANCIAL_SOURCE_TYPE, "Transaction Source", "The transaction source", true )]
+    [DefinedValueField( Rock.SystemGuid.DefinedType.FINANCIAL_TRANSACTION_TYPE, "TransactionType", "The means the transaction was submitted by", true )]
     [IntegerField( "Anonymous Giver PersonAliasID", "PersonAliasId to use in case of anonymous giver", true )]
     [BooleanField( "Use Negative Foreign Keys", "Indicates whether Rock uses the negative of the SecureGive reference ID for the contribution record's foreign key", false )]
     [TextField( "Batch Name", "The name that should be used for the batches created", true, "SecureGive Import" )]
@@ -42,8 +42,9 @@ namespace RockWeb.Plugins.com_centralaz.Finance
         private FinancialBatch _financialBatch;
         private List<string> errors = new List<string>();
         private List<XElement> errorElements = new List<XElement>();
-
-
+        private Dictionary<int, FinancialAccount> _financialAccountCache = new Dictionary<int, FinancialAccount>();
+        private Dictionary<string, DefinedValue> _tenderTypeDefinedValueCache = new Dictionary<string, DefinedValue>();
+        private int _anonymousPersonAliasId = 0;
         #endregion
 
         #region Properties
@@ -85,6 +86,7 @@ namespace RockWeb.Plugins.com_centralaz.Finance
             base.OnLoad( e );
             if ( !Page.IsPostBack )
             {
+                tbBatchName.Text = GetAttributeValue( "BatchName" );
                 BindGrid();
                 BindErrorGrid();
             }
@@ -99,16 +101,27 @@ namespace RockWeb.Plugins.com_centralaz.Finance
         {
             if ( fuImport.HasFile )
             {
-                _financialBatch = new FinancialBatch();
-
-                _financialBatch.Name = GetAttributeValue( "BatchName" );
-                _financialBatch.BatchStartDateTime = Rock.RockDateTime.Now;
                 RockContext rockContext = new RockContext();
                 FinancialBatchService financialBatchService = new FinancialBatchService( rockContext );
                 DefinedValueService definedValueService = new DefinedValueService( rockContext );
+                PersonAliasService personAliasService = new PersonAliasService( rockContext );
 
-                var transactionSource = definedValueService.GetIdByGuid( GetAttributeValue( "TransactionSource" ).AsGuid() );
-                var transactionType = definedValueService.GetIdByGuid( GetAttributeValue( "TransactionType" ).AsGuid() );
+                // Find/verify the anonymous person alias ID
+                var aliasId = personAliasService.GetPersonId( GetAttributeValue( "AnonymousGiverPersonAliasID" ).AsInteger() );
+                if ( aliasId == null )
+                {
+                    nbMessage.Text = "Invalid AnonymousGiverPersonAliasID block setting.";
+                    return;
+                }
+                else
+                {
+                    _anonymousPersonAliasId = aliasId.GetValueOrDefault();
+                }
+
+                _financialBatch = new FinancialBatch();
+                _financialBatch.Name = tbBatchName.Text;
+                _financialBatch.BatchStartDateTime = Rock.RockDateTime.Now;
+
                 financialBatchService.Add( _financialBatch );
                 rockContext.SaveChanges();
 
@@ -121,11 +134,14 @@ namespace RockWeb.Plugins.com_centralaz.Finance
 
                 var xdoc = XDocument.Load( System.Xml.XmlReader.Create( fuImport.FileContent ) );
                 var elemDonations = xdoc.Element( "Donation" );
+                
                 foreach ( var elemGift in elemDonations.Elements( "Gift" ) )
                 {
                     ProcessGift( elemGift, rockContext );
                 }
 
+                rockContext.SaveChanges();
+                
                 BindGrid();
 
                 if ( errors.Count > 0 )
@@ -134,6 +150,8 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                     BindErrorGrid();
                 }
 
+                _financialAccountCache = null;
+                _tenderTypeDefinedValueCache = null;
             }
         }
 
@@ -168,26 +186,22 @@ namespace RockWeb.Plugins.com_centralaz.Finance
 
         private void ProcessGift( XElement elemGift, RockContext rockContext )
         {
-            PersonAliasService personAliasService = new PersonAliasService( rockContext );
-            FinancialTransactionService financialTransactionService = new FinancialTransactionService( rockContext );
             FinancialAccountService financialAccountService = new FinancialAccountService( rockContext );
-            FinancialTransactionDetailService financialTransactionDetailService = new FinancialTransactionDetailService( rockContext );
             DefinedValueService definedValueService = new DefinedValueService( rockContext );
-            DefinedTypeService definedTypeService = new DefinedTypeService( rockContext );
+            PersonAliasService personAliasService = new PersonAliasService( rockContext );
             PersonService personService = new PersonService( rockContext );
-            var transactionSource = definedValueService.GetIdByGuid( GetAttributeValue( "TransactionSource" ).AsGuid() );
-            var transactionType = definedValueService.GetIdByGuid( GetAttributeValue( "TransactionType" ).AsGuid() );
-            var tenderType = definedTypeService.Get( "1D1304DE-E83A-44AF-B11D-0C66DD600B81".AsGuid() );
+
+            var transactionSource = DefinedValueCache.Read( GetAttributeValue( "TransactionSource" ).AsGuid() );
+            var transactionType = DefinedValueCache.Read( GetAttributeValue( "TransactionType" ).AsGuid() );
+            var tenderType = DefinedTypeCache.Read( Rock.SystemGuid.DefinedType.FINANCIAL_CURRENCY_TYPE.AsGuid() );
+
             try
             {
                 FinancialTransaction financialTransaction = new FinancialTransaction()
                 {
-                    TransactionTypeValueId = transactionType.Value,
-                    SourceTypeValueId = transactionSource.Value
+                    TransactionTypeValueId = transactionType.Id,
+                    SourceTypeValueId = transactionSource.Id
                 };
-
-                financialTransactionService.Add( financialTransaction );
-                financialTransaction.BatchId = _financialBatch.Id;
 
                 if ( elemGift.Element( "ReceivedDate" ) != null )
                 {
@@ -197,10 +211,21 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                 if ( elemGift.Element( "ContributionType" ) != null )
                 {
                     string elemValue = elemGift.Element( "ContributionType" ).Value.ToString();
-                    var contribution = definedValueService.Queryable()
-                        .Where( d => d.DefinedTypeId == tenderType.Id && d.Value == elemValue )
-                        .FirstOrDefault();
-                    financialTransaction.CurrencyTypeValue = contribution;
+                    DefinedValue contributionTenderType;
+                    // fetch the tender type from cache if we've encountered it before.
+                    if ( !_tenderTypeDefinedValueCache.ContainsKey( elemValue ) )
+                    {
+                        contributionTenderType = definedValueService.Queryable()
+                            .Where( d => d.DefinedTypeId == tenderType.Id && d.Value == elemValue )
+                            .FirstOrDefault();
+                        _tenderTypeDefinedValueCache.Add( elemValue, contributionTenderType );
+                    }
+                    else
+                    {
+                        contributionTenderType = _tenderTypeDefinedValueCache[elemValue];
+                    }
+
+                    financialTransaction.CurrencyTypeValue = contributionTenderType;
                 }
 
                 if ( elemGift.Element( "TransactionID" ) != null )
@@ -208,19 +233,28 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                     financialTransaction.TransactionCode = elemGift.Element( "TransactionID" ).Value.ToString();
                 }
 
-                
-                var person = personService.Get( personAliasService.GetPersonId( GetAttributeValue( "AnonymousGiverPersonAliasID" ).AsInteger() ).Value );
-                financialTransaction.AuthorizedPersonAliasId = GetAttributeValue( "AnonymousGiverPersonAliasID" ).AsInteger();
-                if ( elemGift.Element( "IndividualID" ) != null )
+                if ( elemGift.Element( "IndividualID" ) != null && ! elemGift.Element( "IndividualID" ).IsEmpty )
                 {
-                    if ( elemGift.Element( "IndividualID" ).Value != "" )
+                    int aliasId = elemGift.Element( "IndividualID" ).Value.AsInteger();
+
+                    // verify that this is a real person alias by trying to fetch it.
+                    var personId = personAliasService.GetPersonId( aliasId );
+                    if ( personId == null )
                     {
-                        financialTransaction.AuthorizedPersonAliasId = elemGift.Element( "IndividualID" ).Value.AsInteger();
-                        person = personService.Get( personAliasService.GetPersonId( elemGift.Element( "IndividualID" ).Value.AsInteger() ).Value );
+                        throw new Exception( string.Format( "Invalid person alias Id {0}", aliasId ) );
                     }
+
+                    financialTransaction.AuthorizedPersonAliasId = aliasId;
+                }
+                else
+                {
+                    financialTransaction.AuthorizedPersonAliasId = _anonymousPersonAliasId;
                 }
 
-                string summary = string.Format("{0} donated {1} on {2}", person.FullName, elemGift.Element( "Amount" ).Value.AsDecimal().ToString("C"), financialTransaction.ProcessedDateTime.ToString());
+                string summary = string.Format( "{0} donated {1} on {2}", 
+                    elemGift.Element( "ContributorName" ).IsEmpty ? "Anonymous" : elemGift.Element( "ContributorName" ).Value,
+                    elemGift.Element( "Amount" ).Value.AsDecimal().ToString("C")
+                    , financialTransaction.ProcessedDateTime.ToString() );
                 financialTransaction.Summary = summary;
 
                 FinancialAccount account = new FinancialAccount();
@@ -228,19 +262,22 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                 if ( elemGift.Element( "FundCode" ) != null )
                 {
                     int accountId = elemGift.Element( "FundCode" ).Value.AsInteger();
-                    account = financialAccountService.Queryable()
-                    .Where( fa => fa.Id == accountId )
-                    .FirstOrDefault();
+
+                    // look in cache to see if we already fetched it
+                    if ( !_financialAccountCache.ContainsKey( accountId ) )
+                    {
+                        account = financialAccountService.Queryable()
+                        .Where( fa => fa.Id == accountId )
+                        .FirstOrDefault();
+                        _financialAccountCache.Add( accountId, account );
+                    }
+                    account = _financialAccountCache[accountId];
                 }
 
-                rockContext.SaveChanges();
                 FinancialTransactionDetail financialTransactionDetail = new FinancialTransactionDetail()
                 {
-                    TransactionId = financialTransaction.Id,
                     AccountId = account.Id
                 };
-
-                financialTransactionDetailService.Add( financialTransactionDetail );
 
                 if ( elemGift.Element( "Amount" ) != null )
                 {
@@ -259,9 +296,10 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                     }
                 }
 
-                rockContext.SaveChanges();
+                financialTransaction.TransactionDetails.Add( financialTransactionDetail );
+                _financialBatch.Transactions.Add( financialTransaction );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 errors.Add( elemGift.Element( "ReferenceNumber" ).Value.ToString() );
                 errorElements.Add( elemGift );
@@ -282,13 +320,11 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                 var qry = financialTransactionDetailService.Queryable()
                                         .Where( ftd => ftd.Transaction.BatchId == _financialBatch.Id )
                                        .ToList();
-
                 gContributions.DataSource = qry;
             }
             gContributions.DataBind();
 
             pnlGrid.Visible = gContributions.Rows.Count > 0;
-
         }
 
         /// <summary>
@@ -305,8 +341,11 @@ namespace RockWeb.Plugins.com_centralaz.Finance
             }
             gErrors.DataBind();
 
-            pnlErrorGrid.Visible = gErrors.Rows.Count > 0;
-
+            if ( gErrors.Rows.Count > 0 )
+            {
+                pnlErrors.Visible = true;
+                gErrors.Visible = true;
+            }
         }
 
         #endregion
@@ -356,7 +395,7 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                     Literal lReceivedDate = e.Row.FindControl( "lReceivedDate" ) as Literal;
                     if ( lReceivedDate != null )
                     {
-                        DateTime receivedDate = DateTime.Parse(elemError.Element( "ReceivedDate" ).Value);
+                        DateTime receivedDate = DateTime.Parse( elemError.Element( "ReceivedDate" ).Value );
                         lReceivedDate.Text = receivedDate.ToString();
                     }
 
@@ -380,6 +419,7 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                 }
             }
         }
+
         protected void gContributions_RowDataBound( object sender, GridViewRowEventArgs e )
         {
             if ( e.Row.RowType == DataControlRowType.DataRow )
