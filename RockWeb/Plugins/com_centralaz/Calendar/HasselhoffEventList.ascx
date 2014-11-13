@@ -1,4 +1,4 @@
-﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="HasselhoffEventList.ascx.cs" Inherits="ArenaWeb.UserControls.Custom.Cccev.Web2.HasselhoffEventList" %>
+﻿<%--<%@ Control Language="C#" AutoEventWireup="true" CodeFile="HasselhoffEventList.ascx.cs" Inherits="ArenaWeb.UserControls.Custom.Cccev.Web2.HasselhoffEventList" %>
 <%@ Import Namespace="Arena.Portal" %>
 <asp:ScriptManagerProxy ID="smpScripts" runat="server">
     <Scripts>
@@ -14,4 +14,4 @@
     <div id="event-featured-list"></div>
     <div id="event-list"></div>
     <div id="event-list-overlay" class="spinner"></div>
-</div>
+</div>--%>

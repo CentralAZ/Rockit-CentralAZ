@@ -1,4 +1,4 @@
-﻿<%@ Control Language="C#" ClassName="ArenaWeb.UserControls.Custom.Cccev.Web2.HasselhoffCalendarControlPanel" Inherits="Arena.Portal.PortalControl" %>
+﻿<%--<%@ Control Language="C#" ClassName="ArenaWeb.UserControls.Custom.Cccev.Web2.HasselhoffCalendarControlPanel" Inherits="Arena.Portal.PortalControl" %>
 
 <script runat="server">
     [ListFromSqlSetting("Primary Topic Area", "Set this to tie calendar to a specific topic or ministry.", false, "",
@@ -69,4 +69,4 @@
     } %>
     </ul>
     <input type="hidden" id="ihTopicAreas" name="ihTopicAreas" value="<%= TopicAreaSetting %>" />
-</div>
+</div>--%>

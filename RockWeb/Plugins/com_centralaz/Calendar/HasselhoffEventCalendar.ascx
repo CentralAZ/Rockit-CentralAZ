@@ -1,4 +1,4 @@
-﻿<%@ Control Language="C#" ClassName="ArenaWeb.UserControls.Custom.Cccev.Web2.HasselhoffEventCalendar" Inherits="Arena.Portal.PortalControl" %>
+﻿<%--<%@ Control Language="C#" ClassName="ArenaWeb.UserControls.Custom.Cccev.Web2.HasselhoffEventCalendar" Inherits="Arena.Portal.PortalControl" %>
 <%@ Import Namespace="Arena.Portal" %>
 
 <asp:ScriptManagerProxy ID="smpScripts" runat="server">
@@ -21,4 +21,4 @@
 
 <input type="hidden" id="ihCalendarEventDetails" value="<%= EventDetailPageSetting %>" />
 <div id="event-calendar" class="event-view"></div>
-<div id="calendar-overlay" class="spinner"></div>
+<div id="calendar-overlay" class="spinner"></div>--%>
