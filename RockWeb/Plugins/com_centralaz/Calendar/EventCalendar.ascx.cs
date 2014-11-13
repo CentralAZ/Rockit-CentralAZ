@@ -47,9 +47,13 @@ namespace RockWeb.Plugins.com_centralaz.Calendar
         {
             base.OnInit( e );
 
+            RockPage.AddCSSLink( ResolveRockUrl( "~/Plugins/com_centralaz/Calendar/Styles/fullcalendar.css" ) );
+            RockPage.AddCSSLink( ResolveRockUrl( "~/Plugins/com_centralaz/Calendar/Styles/calendar.css" ) );
+
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlContent );
+
         }
 
         /// <summary>
@@ -64,6 +68,7 @@ namespace RockWeb.Plugins.com_centralaz.Calendar
             {
                 // added for your convenience
             }
+            InsertTemplates();
         }
 
         #endregion
@@ -86,7 +91,34 @@ namespace RockWeb.Plugins.com_centralaz.Calendar
 
         #region Methods
 
-        // helper functional methods (like BindGrid(), etc.)
+        /// <summary>
+        /// Responsible for injecting the jQuery templates into the header.
+        /// </summary>
+        private void InsertTemplates()
+        {
+            if ( !Page.Header.Controls.OfType<LiteralControl>().Any( c => c.Text.Contains( "id=\"event-featured-list-template\"" ) ) )
+            {
+                string template = @"
+<script type=""text/html"" id=""event-featured-list-template"">
+<li class=""item"">
+	<div class=""date {%= className %}"">{%= date %}<div class=""month"">{%= month %}</div></div>
+	<div class=""photo""><a href=""{%= url %}""><img src=""{%= imageUrl %}"" /></a></div>
+	<h3><a href=""{%= url %}"">{%= title %}</a></h3>
+</li>
+</script>
+
+<script type=""text/html"" id=""event-list-template"">
+<li class=""item"">
+	<div class=""date {%= className %}"">{%= date %}<div class=""month"">{%= month %}</div></div>
+	<h3><a href=""{%= url %}"">{%= title %}</a></h3>
+	<h4>{%= title %}</h4>
+	<p class=""summary"">{%= description %}</p>
+</li>
+</script>";
+                Page.Header.Controls.Add( new LiteralControl( template ) );
+            }
+        }
+
 
         #endregion
     }

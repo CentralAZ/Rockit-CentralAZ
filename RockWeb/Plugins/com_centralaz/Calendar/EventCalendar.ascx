@@ -1,4 +1,8 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="EventCalendar.ascx.cs" Inherits="RockWeb.Plugins.com_centralaz.Calendar.EventCalendar" %>
+<script src="<%# ResolveRockUrl("~/Plugins/com_centralaz/Calendar/js/fullcalendar.js") %>"></script>
+<script src="<%# ResolveRockUrl("~/Plugins/com_centralaz/Calendar/js/eventcalendar.js") %>"></script>
+<script src="<%# ResolveRockUrl("~/Plugins/com_centralaz/Calendar/js/jquery.hoverIntent.js") %>"></script>
+
 <asp:UpdatePanel ID="upnlContent" runat="server">
     <ContentTemplate>
         <div class="col-md-3">
@@ -18,7 +22,7 @@
                         </Rock:RockRadioButtonList>
 
                         <Rock:RockCheckBoxList ID="cblCampus" runat="server" Label="<h3>Campus</h3>" />
-                        <Rock:NumberBox ID=" numbNumberOfItems" runat="server" Label="<h3>Number of Events</h3>" Visible="false" />
+                        <Rock:NumberBox ID="numbNumberOfItems" runat="server" Label="<h3>Number of Events</h3>" Visible="false" />
                     </div>
 
                 </div>
@@ -32,21 +36,9 @@
                 <div class="panel-body">
 
                     <div class="alert alert-info">
-                        <h4>Stark Template Block</h4>
-                        <p>This block serves as a starting point for creating new blocks. After copy/pasting it and renaming the resulting file be sure to make the following changes:</p>
-
-                        <strong>Changes to the Codebehind (ascx.cs) File</strong>
-                        <ul>
-                            <li>Update the namespace to match your directory</li>
-                            <li>Update the class name</li>
-                            <li>Fill in the DisplayName, Category and Description attributes</li>
-                        </ul>
-
-                        <strong>Changes to the Usercontrol (.ascx) File</strong>
-                        <ul>
-                            <li>Update the Inherhits to match the namespace and class file</li>
-                            <li>Remove this text... unless you really like it...</li>
-                        </ul>
+                        <input type="hidden" id="ihCalendarEventDetails" />
+                        <div id="event-calendar" class="event-view"></div>
+                        <div id="calendar-overlay" class="spinner"></div>
                     </div>
 
                 </div>
@@ -58,21 +50,12 @@
                 <div class="panel-body">
 
                     <div class="alert alert-info">
-                        <h4>Stark Template Block</h4>
-                        <p>This block serves as a starting point for creating new blocks. After copy/pasting it and renaming the resulting file be sure to make the following changes:</p>
-
-                        <strong>Changes to the Codebehind (ascx.cs) File</strong>
-                        <ul>
-                            <li>Update the namespace to match your directory</li>
-                            <li>Update the class name</li>
-                            <li>Fill in the DisplayName, Category and Description attributes</li>
-                        </ul>
-
-                        <strong>Changes to the Usercontrol (.ascx) File</strong>
-                        <ul>
-                            <li>Update the Inherhits to match the namespace and class file</li>
-                            <li>Remove this text... unless you really like it...</li>
-                        </ul>
+                        <input type="hidden" id="ihListEventDetails" />
+                        <div id="event-list-wrapper" class="event-view">
+                            <div id="event-featured-list"></div>
+                            <div id="event-list"></div>
+                            <div id="event-list-overlay" class="spinner"></div>
+                        </div>
                     </div>
 
                 </div>

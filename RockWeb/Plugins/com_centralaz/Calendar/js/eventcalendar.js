@@ -50,10 +50,6 @@ var central_eventCalendar = (function () {
                 $("#event-calendar").fadeIn("fast");
                 _initEventCalendar(central_calendarControls.getParams());
                 break;
-            case "cloud":
-                _initEventCloud(central_calendarControls.getParams());
-                $("#event-cloud").fadeIn("fast");
-                break;
             case "list":
                 _initEventList(central_calendarControls.getParams());
                 $("#event-list-wrapper").fadeIn("fast");
