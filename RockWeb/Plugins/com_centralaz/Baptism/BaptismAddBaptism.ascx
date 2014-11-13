@@ -17,9 +17,11 @@
                 <Rock:PersonPicker ID="ppBaptizer2" runat="server" Label="Secondary Baptizer (Optional)" />
                 <Rock:PersonPicker ID="ppApprover" runat="server" Label="Approved By" />
                 <Rock:RockCheckBox ID="cbIsConfirmed" runat="server" Label="Confirmed" />
-                <asp:Button ID="btnSave" runat="server" Text="Save" OnClick="btnSave_OnClick" />
-                <asp:Button ID="btnDelete" runat="server" Text="Delete" OnClick="btnDelete_OnClick" />
-                <asp:Button ID="btnCancel" runat="server" Text="Cancel" OnClick="btnCancel_OnClick" />
+
+                <asp:LinkButton ID="btnSave" runat="server" Text="Save" CssClass="btn btn-primary" OnClick="btnSave_OnClick" />
+                <asp:LinkButton ID="btnDelete" runat="server" Text="<i class='fa fa-trash-o'></i> Delete" CssClass="btn btn-link" OnClick="btnDelete_OnClick" />
+                <asp:LinkButton ID="btnCancel" runat="server" Text="Cancel" CssClass="btn btn-link" OnClick="btnCancel_OnClick" />
+                
             </div>
 
         </asp:Panel>

@@ -545,7 +545,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
             }
             phBaptismList.Controls.Add( new LiteralControl( "  </div>" ) );
-            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>>" ) );
+            phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
             phBaptismList.Controls.Add( lbEdit );
             phBaptismList.Controls.Add( new LiteralControl( "</div>" ) );
             phBaptismList.Controls.Add( new LiteralControl( "</div>" ) );

@@ -38,10 +38,10 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         #endregion
 
         #region Properties
-        List<DateTime> serviceTimes;
-        List<DateTime> specialEvents;
-        List<Schedule> blackoutDates;
-        Baptizee baptizee = null;
+        List<DateTime> _serviceTimes;
+        List<DateTime> _specialEvents;
+        List<Schedule> _blackoutDates;
+        Baptizee _baptizee = null;
 
         #endregion
 
@@ -142,7 +142,6 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void btnSave_OnClick( object sender, EventArgs e )
         {
-
             GetBlackoutDates();
             nbErrorWarning.Visible = false;
             if ( !dtpBaptismDate.SelectedDateTime.HasValue )
@@ -157,7 +156,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 nbErrorWarning.Visible = true;
                 return;
             }
-            if ( blackoutDates.Any( b => b.EffectiveStartDate.Value == dtpBaptismDate.SelectedDateTime.Value.Date ) )
+            if ( _blackoutDates.Any( b => b.EffectiveStartDate.Value == dtpBaptismDate.SelectedDateTime.Value.Date ) )
             {
                 nbErrorWarning.Text = "The date you selected is a blackout date";
                 nbErrorWarning.Visible = true;
@@ -167,11 +166,11 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             if ( GetAttributeValue( "LimitToValidServiceTimes" ).AsBoolean() )
             {
                 GetServiceTimes();
-                if ( !serviceTimes.Any( s => ( s.DayOfWeek == dtpBaptismDate.SelectedDateTime.Value.DayOfWeek ) && ( s.TimeOfDay == dtpBaptismDate.SelectedDateTime.Value.TimeOfDay ) ) )
+                if ( !_serviceTimes.Any( s => ( s.DayOfWeek == dtpBaptismDate.SelectedDateTime.Value.DayOfWeek ) && ( s.TimeOfDay == dtpBaptismDate.SelectedDateTime.Value.TimeOfDay ) ) )
                 {
-                    if ( !specialEvents.Any( s => s == dtpBaptismDate.SelectedDateTime.Value ) )
+                    if ( !_specialEvents.Any( s => s == dtpBaptismDate.SelectedDateTime.Value ) )
                     {
-                        nbErrorWarning.Title = "Please enter a valid service time: <br>";
+                        nbErrorWarning.Title = "Please enter a valid service time such as: <br>";
                         nbErrorWarning.Text = BuildInvalidServiceTimeString();
                         nbErrorWarning.Visible = true;
                         return;
@@ -179,45 +178,66 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 }
             }
 
-
+            var changes = new List<string>();
             BaptismContext baptismContext = new BaptismContext();
             BaptizeeService baptizeeService = new BaptizeeService( baptismContext );
+            RockContext rockContext = new RockContext();
+            PersonService personService = new PersonService( rockContext );
+            PersonAliasService personAliasService = new PersonAliasService( rockContext );
             if ( PageParameter( "BaptizeeId" ).AsIntegerOrNull() == null )
             {
-                baptizee = new Baptizee { Id = 0 };
-                baptizee.GroupId = PageParameter( "GroupId" ).AsInteger();
+                _baptizee = new Baptizee { Id = 0 };
+                _baptizee.GroupId = PageParameter( "GroupId" ).AsInteger();
+                History.EvaluateChange( changes, "Baptism Date/Time", "", dtpBaptismDate.SelectedDateTime.Value.ToString( "g" ) );
             }
             else
             {
-                baptizee = baptizeeService.Get( PageParameter( "BaptizeeId" ).AsInteger() );
+                _baptizee = baptizeeService.Get( PageParameter( "BaptizeeId" ).AsInteger() );
+                History.EvaluateChange( changes, "Baptism Date/Time", _baptizee.BaptismDateTime.ToString( "g" ), dtpBaptismDate.SelectedDateTime.Value.ToString( "g" ) );
             }
 
-            baptizee.BaptismDateTime = (DateTime)dtpBaptismDate.SelectedDateTime;
-            int theId = (int)new PersonAliasService( new RockContext() ).GetPrimaryAliasId( (int)ppBaptizee.PersonId );
-            baptizee.PersonAliasId = theId;
+            _baptizee.BaptismDateTime = (DateTime)dtpBaptismDate.SelectedDateTime;
+
+            int theId = (int)personAliasService.GetPrimaryAliasId( (int)ppBaptizee.PersonId );
+            _baptizee.PersonAliasId = theId;
 
             if ( ppBaptizer1.PersonId != null )
             {
-                theId = (int)new PersonAliasService( new RockContext() ).GetPrimaryAliasId( (int)ppBaptizer1.PersonId );
-                baptizee.Baptizer1AliasId = theId;
+
+                theId = (int)personAliasService.GetPrimaryAliasId( (int)ppBaptizer1.PersonId );
+                History.EvaluateChange( changes, "Baptizer 1", (_baptizee.Baptizer1 != null ) ? _baptizee.Baptizer1.FullName : "", ppBaptizer1.PersonName );
+                _baptizee.Baptizer1AliasId = theId;
             }
             if ( ppBaptizer2.PersonId != null )
             {
-                theId = (int)new PersonAliasService( new RockContext() ).GetPrimaryAliasId( (int)ppBaptizer2.PersonId );
-                baptizee.Baptizer2AliasId = theId;
+                theId = (int)personAliasService.GetPrimaryAliasId( (int)ppBaptizer2.PersonId );
+                History.EvaluateChange( changes, "Baptizer 2", ( _baptizee.Baptizer2 != null ) ? _baptizee.Baptizer2.FullName : "", ppBaptizer2.PersonName );
+                _baptizee.Baptizer2AliasId = theId;
             }
             if ( ppApprover.PersonId != null )
             {
-                theId = (int)new PersonAliasService( new RockContext() ).GetPrimaryAliasId( (int)ppApprover.PersonId );
-                baptizee.ApproverAliasId = theId;
+                theId = (int)personAliasService.GetPrimaryAliasId( (int)ppApprover.PersonId );
+                History.EvaluateChange( changes, "Approver", ( _baptizee.Approver != null ) ? _baptizee.Approver.FullName : "",  ppApprover.PersonName );
+                _baptizee.ApproverAliasId = theId;
             }
-            baptizee.IsConfirmed = cbIsConfirmed.Checked;
-            if ( baptizee.Id.Equals( 0 ) )
-            {
-            baptizeeService.Add( baptizee );
 
+            History.EvaluateChange( changes, "Confirmed", _baptizee.IsConfirmed, cbIsConfirmed.Checked );
+            _baptizee.IsConfirmed = cbIsConfirmed.Checked;
+            if ( _baptizee.Id.Equals( 0 ) )
+            {
+                baptizeeService.Add( _baptizee );
             }
+
             baptismContext.SaveChanges();
+
+            // Create the history records
+            if ( changes.Any() )
+            {
+                HistoryService.AddChanges( rockContext, typeof( Person ), com.centralaz.Baptism.SystemGuid.Category.HISTORY_PERSON_BAPTISM_CHANGES.AsGuid(),
+                    (int)ppBaptizee.PersonId, changes );
+                rockContext.SaveChanges();
+            }
+
             ReturnToParentPage();
         }
 
@@ -230,14 +250,29 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
             BaptismContext baptismContext = new BaptismContext();
             BaptizeeService baptizeeService = new BaptizeeService( baptismContext );
-            if ( baptizee == null )
+            if ( _baptizee == null )
             {
-                baptizee = baptizeeService.Get( PageParameter( "BaptizeeId" ).AsInteger() );
+                _baptizee = baptizeeService.Get( PageParameter( "BaptizeeId" ).AsInteger() );
             }
-            if ( baptizee != null )
+            if ( _baptizee != null )
             {
-                baptizeeService.Delete( baptizee );
+                baptizeeService.Delete( _baptizee );
                 baptismContext.SaveChanges();
+
+                // Create the history records
+                var changes = new List<string>();
+
+                History.EvaluateChange( changes, "Baptizer 1", ( _baptizee.Baptizer1 != null ) ? _baptizee.Baptizer1.FullName : "", "" );
+                History.EvaluateChange( changes, "Baptizer 2", ( _baptizee.Baptizer2 != null ) ? _baptizee.Baptizer2.FullName : "", "" );
+                History.EvaluateChange( changes, "Approver", ( _baptizee.Approver != null ) ? _baptizee.Approver.FullName : "", "" );
+                History.EvaluateChange( changes, "Confirmed", _baptizee.IsConfirmed, false );
+                History.EvaluateChange( changes, "Baptism Date/Time", _baptizee.BaptismDateTime.ToString("g") , "" );
+
+                RockContext rockContext = new RockContext();
+                HistoryService.AddChanges( rockContext, typeof( Person ), com.centralaz.Baptism.SystemGuid.Category.HISTORY_PERSON_BAPTISM_CHANGES.AsGuid(),
+                        (int)ppBaptizee.PersonId, changes );
+               rockContext.SaveChanges();
+                
             }
             ReturnToParentPage();
         }
@@ -260,8 +295,8 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         /// </summary>
         protected void GetServiceTimes()
         {
-            serviceTimes = new List<DateTime>();
-            specialEvents = new List<DateTime>();
+            _serviceTimes = new List<DateTime>();
+            _specialEvents = new List<DateTime>();
             Group group = new GroupService( new RockContext() ).Get( PageParameter( "GroupId" ).AsInteger() );
             group.LoadAttributes();
 
@@ -279,7 +314,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                     var specialEvent = calendar.Events[0].DTStart;
                     if ( calendar.Events[0].DTStart != null )
                     {
-                        specialEvents.Add( specialEvent.Value );
+                        _specialEvents.Add( specialEvent.Value );
                     }
                 }
                 else
@@ -290,10 +325,9 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                         DayOfWeek dayOfWeek = calendar.RecurringItems.FirstOrDefault().RecurrenceRules.FirstOrDefault().ByDay[0].DayOfWeek;
                         double daysToAdd = dayOfWeek - serviceTime.DayOfWeek;
                         serviceTime = serviceTime.AddDays( daysToAdd );
-                        serviceTimes.Add( serviceTime );
+                        _serviceTimes.Add( serviceTime );
                     }
                 }
-
             }
         }
 
@@ -306,7 +340,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             group.LoadAttributes();
             Guid categoryguid = group.GetAttributeValue( "BlackoutDates" ).AsGuid();
             CategoryCache category = CategoryCache.Read( categoryguid );
-            blackoutDates = new ScheduleService( new RockContext() ).Queryable()
+            _blackoutDates = new ScheduleService( new RockContext() ).Queryable()
                 .Where( s => s.CategoryId == category.Id )
                 .ToList();
         }
@@ -338,7 +372,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
             if ( baptizee.Baptizer2 != null )
             {
-                ppBaptizer2.SetValue(baptizee.Baptizer2);
+                ppBaptizer2.SetValue( baptizee.Baptizer2 );
 
             }
             if ( baptizee.Approver != null )
@@ -357,7 +391,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append( "<ul>" );
-            foreach ( DateTime d in serviceTimes )
+            foreach ( DateTime d in _serviceTimes )
             {
 
                 stringBuilder.AppendLine( String.Format( "<li>{0}</li>", d.ToString( "dddd h:mm tt" ) ) );
