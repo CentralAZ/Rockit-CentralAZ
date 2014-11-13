@@ -25,22 +25,39 @@ namespace com.centralaz.EventCalendar.Model
 
         #region Entity Properties
 
+        /// <summary>
+        /// The name
+        /// </summary>
         [DataMember]
         public String Name { get; set; }
 
+        /// <summary>
+        /// The start date time
+        /// </summary>
         [DataMember]
         public DateTime StartDateTime { get; set; }
 
+        /// <summary>
+        /// The end date time
+        /// </summary>
         [DataMember]
-        public DateTime EndDateTime { get; set; }
+        public DateTime? EndDateTime { get; set; }
 
+        /// <summary>
+        /// The campusId
+        /// </summary>
         [DataMember]
-        [DefinedValue( SystemGuid.DefinedType.CAMPUS )]
         public int? CampusId { get; set; }
 
+        /// <summary>
+        /// The description
+        /// </summary>
         [DataMember]
         public String Description { get; set; }
 
+        /// <summary>
+        /// The link to a detail page
+        /// </summary>
         [DataMember]
         public String EventLink { get; set; }
 
@@ -48,7 +65,10 @@ namespace com.centralaz.EventCalendar.Model
 
         #region Virtual Properties
 
-       
+        /// <summary>
+        /// The campus
+        /// </summary>
+        public virtual Campus Campus { get; set; }       
 
         #endregion
 
@@ -64,6 +84,7 @@ namespace com.centralaz.EventCalendar.Model
         /// </summary>
         public CalendarEventConfiguration()
         {
+            this.HasRequired( r => r.Campus ).WithMany().HasForeignKey( r => r.CampusId ).WillCascadeOnDelete( false );
         }
     }
 

@@ -20,6 +20,18 @@ namespace com.centralaz.EventCalendar.Model
         /// <param name="context">The context.</param>
         public CalendarEventService( EventCalendarContext context ) : base( context ) { }
 
+        public List<CalendarEvent> GetEvents(List<int> campusList){
+            return Queryable()
+                .Where( ce => campusList.Any( cl => cl == ce.CampusId ) || !ce.CampusId.HasValue )
+                .ToList();
+        }
+
+        public List<CalendarEvent> GetEvents()
+        {
+            return Queryable().ToList();
+        }
+
+
         
     }
 }
