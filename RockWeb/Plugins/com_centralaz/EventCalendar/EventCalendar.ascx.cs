@@ -97,6 +97,10 @@ namespace RockWeb.Plugins.com_centralaz.EventCalendar
         {
             pnlCalendar.Visible = !pnlCalendar.Visible;
             pnlList.Visible = !pnlList.Visible;
+            if ( pnlList.Visible )
+            {
+                LoadList();
+            }
         }
         #endregion
 
@@ -158,8 +162,24 @@ namespace RockWeb.Plugins.com_centralaz.EventCalendar
             calCalendar.ShowEventTooltips = true;
             calCalendar.ShowTodayButton = true;
             calCalendar.TodayFont = new System.Drawing.Font( "Arial", 10F, System.Drawing.FontStyle.Bold );
-            phCalendar.Controls.Add( calCalendar );
+            //phCalendar.Controls.Add( calCalendar );
 
+        }
+        private void LoadList()
+        {
+            List<Campus> campusList = new List<Campus>();
+            foreach ( var x in cblCampus.Controls )
+            {
+                if ( x )
+                {
+                    //if checkbox is enabled, get campus from value and add campus to list
+                }
+            }
+            //List<CalendarEvent> calendarEvents = GetEvents(campusList) elseif campusList == null GetEvents()
+            //for i in calendarEvents
+                //create list item
+            //add to placeholder phList
+            
         }
         #endregion
     }
