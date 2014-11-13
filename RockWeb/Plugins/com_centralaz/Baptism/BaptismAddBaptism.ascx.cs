@@ -104,7 +104,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 Baptizee baptizee = new BaptizeeService( new BaptismContext() ).Get( baptizeeId.Value );
                 if ( baptizee != null )
                 {
-                    breadCrumbs.Add( new BreadCrumb( String.Format( "Edit {0}", baptizee.Person.FullName ), pageReference ) );
+                    breadCrumbs.Add( new BreadCrumb( String.Format( "Edit {0}", baptizee.Person.Person.FullName ), pageReference ) );
                 }
                 else
                 {
@@ -205,19 +205,19 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             {
 
                 theId = (int)personAliasService.GetPrimaryAliasId( (int)ppBaptizer1.PersonId );
-                History.EvaluateChange( changes, "Baptizer 1", (_baptizee.Baptizer1 != null ) ? _baptizee.Baptizer1.FullName : "", ppBaptizer1.PersonName );
+                History.EvaluateChange( changes, "Baptizer 1", ( _baptizee.Baptizer1 != null ) ? _baptizee.Baptizer1.Person.FullName : "", ppBaptizer1.PersonName );
                 _baptizee.Baptizer1AliasId = theId;
             }
             if ( ppBaptizer2.PersonId != null )
             {
                 theId = (int)personAliasService.GetPrimaryAliasId( (int)ppBaptizer2.PersonId );
-                History.EvaluateChange( changes, "Baptizer 2", ( _baptizee.Baptizer2 != null ) ? _baptizee.Baptizer2.FullName : "", ppBaptizer2.PersonName );
+                History.EvaluateChange( changes, "Baptizer 2", ( _baptizee.Baptizer2 != null ) ? _baptizee.Baptizer2.Person.FullName : "", ppBaptizer2.PersonName );
                 _baptizee.Baptizer2AliasId = theId;
             }
             if ( ppApprover.PersonId != null )
             {
                 theId = (int)personAliasService.GetPrimaryAliasId( (int)ppApprover.PersonId );
-                History.EvaluateChange( changes, "Approver", ( _baptizee.Approver != null ) ? _baptizee.Approver.FullName : "",  ppApprover.PersonName );
+                History.EvaluateChange( changes, "Approver", ( _baptizee.Approver != null ) ? _baptizee.Approver.Person.FullName : "", ppApprover.PersonName );
                 _baptizee.ApproverAliasId = theId;
             }
 
@@ -262,17 +262,17 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 // Create the history records
                 var changes = new List<string>();
 
-                History.EvaluateChange( changes, "Baptizer 1", ( _baptizee.Baptizer1 != null ) ? _baptizee.Baptizer1.FullName : "", "" );
-                History.EvaluateChange( changes, "Baptizer 2", ( _baptizee.Baptizer2 != null ) ? _baptizee.Baptizer2.FullName : "", "" );
-                History.EvaluateChange( changes, "Approver", ( _baptizee.Approver != null ) ? _baptizee.Approver.FullName : "", "" );
+                History.EvaluateChange( changes, "Baptizer 1", ( _baptizee.Baptizer1 != null ) ? _baptizee.Baptizer1.Person.FullName : "", "" );
+                History.EvaluateChange( changes, "Baptizer 2", ( _baptizee.Baptizer2 != null ) ? _baptizee.Baptizer2.Person.FullName : "", "" );
+                History.EvaluateChange( changes, "Approver", ( _baptizee.Approver != null ) ? _baptizee.Approver.Person.FullName : "", "" );
                 History.EvaluateChange( changes, "Confirmed", _baptizee.IsConfirmed, false );
-                History.EvaluateChange( changes, "Baptism Date/Time", _baptizee.BaptismDateTime.ToString("g") , "" );
+                History.EvaluateChange( changes, "Baptism Date/Time", _baptizee.BaptismDateTime.ToString( "g" ), "" );
 
                 RockContext rockContext = new RockContext();
                 HistoryService.AddChanges( rockContext, typeof( Person ), com.centralaz.Baptism.SystemGuid.Category.HISTORY_PERSON_BAPTISM_CHANGES.AsGuid(),
                         (int)ppBaptizee.PersonId, changes );
-               rockContext.SaveChanges();
-                
+                rockContext.SaveChanges();
+
             }
             ReturnToParentPage();
         }
@@ -363,21 +363,20 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         protected void BindValues( int baptizeeId )
         {
             Baptizee baptizee = new BaptizeeService( new BaptismContext() ).Get( baptizeeId );
-            lPanelTitle.Text = String.Format( "Edit {0}", baptizee.Person.FullName.FormatAsHtmlTitle() );
+            lPanelTitle.Text = String.Format( "Edit {0}", baptizee.Person.Person.FullName.FormatAsHtmlTitle() );
             dtpBaptismDate.SelectedDateTime = baptizee.BaptismDateTime;
-            ppBaptizee.SetValue( baptizee.Person );
+            ppBaptizee.SetValue( baptizee.Person.Person );
             if ( baptizee.Baptizer1 != null )
             {
-                ppBaptizer1.SetValue( baptizee.Baptizer1 );
+                ppBaptizer1.SetValue( baptizee.Baptizer1.Person );
             }
             if ( baptizee.Baptizer2 != null )
             {
-                ppBaptizer2.SetValue( baptizee.Baptizer2 );
-
+                ppBaptizer2.SetValue( baptizee.Baptizer2.Person );
             }
             if ( baptizee.Approver != null )
             {
-                ppApprover.SetValue( baptizee.Approver );
+                ppApprover.SetValue( baptizee.Approver.Person );
 
             }
             cbIsConfirmed.Checked = baptizee.IsConfirmed;

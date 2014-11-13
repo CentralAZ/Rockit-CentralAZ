@@ -79,22 +79,22 @@ namespace com.centralaz.Baptism.Model
         /// <summary>
         /// The Baptizee
         /// </summary>
-        public virtual Person Person { get; set; }
+        public virtual PersonAlias Person { get; set; }
 
         /// <summary>
         /// The first baptizer of the baptizee
         /// </summary>
-        public virtual Person Baptizer1 { get; set; }
+        public virtual PersonAlias Baptizer1 { get; set; }
 
         /// <summary>
         /// The second baptizer of the baptizee
         /// </summary>
-        public virtual Person Baptizer2 { get; set; }
+        public virtual PersonAlias Baptizer2 { get; set; }
 
         /// <summary>
         /// The approver of the baptism
         /// </summary>
-        public virtual Person Approver { get; set; }
+        public virtual PersonAlias Approver { get; set; }
 
         #endregion
 

@@ -488,18 +488,18 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         protected void BuildListItem( Baptizee baptizee )
         {
             phBaptismList.Controls.Add( new LiteralControl( "<div class='row'>" ) );
-            string url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Person.Id ) );
-            String theString = String.Format( "<div class='col-md-2'><a href=\"{0}\">{1}</a></div>", url, baptizee.Person.FullName );
+            string url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Person.PersonId ) );
+            String theString = String.Format( "<div class='col-md-2'><a href=\"{0}\">{1}</a></div>", url, baptizee.Person.Person.FullName );
             phBaptismList.Controls.Add( new LiteralControl( theString ) );
 
-            theString = String.Format( "<div class='col-md-2'>{0}</div>", baptizee.Person.PhoneNumbers.FirstOrDefault() );
+            theString = String.Format( "<div class='col-md-2'>{0}</div>", baptizee.Person.Person.PhoneNumbers.FirstOrDefault() );
             phBaptismList.Controls.Add( new LiteralControl( theString ) );
 
             phBaptismList.Controls.Add( new LiteralControl( "<div class='col-md-2'>" ) );
             if ( baptizee.Baptizer1 != null )
             {
-                url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Baptizer1.Id ) );
-                phBaptismList.Controls.Add( new LiteralControl( string.Format( "<li><a href=\"{0}\">{1}</a></li>", url, baptizee.Baptizer1.FullName ?? "" ) ) );
+                url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Baptizer1.PersonId ) );
+                phBaptismList.Controls.Add( new LiteralControl( string.Format( "<li><a href=\"{0}\">{1}</a></li>", url, baptizee.Baptizer1.Person.FullName ?? "" ) ) );
             }
             else
             {
@@ -507,8 +507,8 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             }
             if ( baptizee.Baptizer2 != null )
             {
-                url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Baptizer2.Id ) );
-                phBaptismList.Controls.Add( new LiteralControl( string.Format( "<li><a href=\"{0}\">{1}</a></li>", url, baptizee.Baptizer2.FullName ?? "" ) ) );
+                url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Baptizer2.PersonId ) );
+                phBaptismList.Controls.Add( new LiteralControl( string.Format( "<li><a href=\"{0}\">{1}</a></li>", url, baptizee.Baptizer2.Person.FullName ?? "" ) ) );
             }
             else
             {
@@ -517,8 +517,8 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
             if ( baptizee.Approver != null )
             {
-                url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Approver.Id ) );
-                theString = String.Format( "<div class='col-md-2'><a href=\"{0}\">{1}</a></div>", url, baptizee.Approver.FullName ?? "" );
+                url = ResolveUrl( string.Format( "~/Person/{0}", baptizee.Approver.PersonId ) );
+                theString = String.Format( "<div class='col-md-2'><a href=\"{0}\">{1}</a></div>", url, baptizee.Approver.Person.FullName ?? "" );
             }
             else
             {
@@ -574,34 +574,34 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             listItemTable.DefaultCell.BorderWidth = 0;
 
             //Add the list items
-            listItemTable.AddCell( new Phrase( baptizee.Person.FullName, listItemFont ) );
+            listItemTable.AddCell( new Phrase( baptizee.Person.Person.FullName, listItemFont ) );
 
             String baptizeePhone = "";
-            if ( baptizee.Person.PhoneNumbers.FirstOrDefault() != null )
+            if ( baptizee.Person.Person.PhoneNumbers.FirstOrDefault() != null )
             {
-                baptizeePhone = baptizee.Person.PhoneNumbers.FirstOrDefault().ToString();
+                baptizeePhone = baptizee.Person.Person.PhoneNumbers.FirstOrDefault().ToString();
             }
             listItemTable.AddCell( new Phrase( baptizeePhone, listItemFont ) );
 
             String baptizerNames = "";
             if ( baptizee.Baptizer1 != null && baptizee.Baptizer2 != null )
             {
-                baptizerNames = String.Format( "{0}, {1}", baptizee.Baptizer1.FullName, baptizee.Baptizer2.FullName );
+                baptizerNames = String.Format( "{0}, {1}", baptizee.Baptizer1.Person.FullName, baptizee.Baptizer2.Person.FullName );
             }
             else if ( baptizee.Baptizer1 != null )
             {
-                baptizerNames = String.Format( "{0}", baptizee.Baptizer1.FullName );
+                baptizerNames = String.Format( "{0}", baptizee.Baptizer1.Person.FullName );
             }
             else if ( baptizee.Baptizer2 != null )
             {
-                baptizerNames = String.Format( "{0}", baptizee.Baptizer2.FullName );
+                baptizerNames = String.Format( "{0}", baptizee.Baptizer2.Person.FullName );
             }
             listItemTable.AddCell( new Phrase( baptizerNames, listItemFont ) );
 
             String approverName = "";
             if ( baptizee.Approver != null )
             {
-                approverName = baptizee.Approver.FullName;
+                approverName = baptizee.Approver.Person.FullName;
             }
 
             listItemTable.AddCell( new Phrase( approverName, listItemFont ) );
