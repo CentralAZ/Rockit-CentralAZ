@@ -6,6 +6,8 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
+using Calendar.NET;
+
 using Rock;
 using Rock.Data;
 using Rock.Model;
@@ -13,7 +15,7 @@ using Rock.Web.Cache;
 using Rock.Web.UI.Controls;
 using Rock.Attribute;
 
-namespace RockWeb.Plugins.com_centralaz.Calendar
+namespace RockWeb.Plugins.com_centralaz.EventCalendar
 {
     /// <summary>
     /// Template block for developers to use to start a new block.
@@ -47,8 +49,8 @@ namespace RockWeb.Plugins.com_centralaz.Calendar
         {
             base.OnInit( e );
 
-            RockPage.AddCSSLink( ResolveRockUrl( "~/Plugins/com_centralaz/Calendar/Styles/fullcalendar.css" ) );
-            RockPage.AddCSSLink( ResolveRockUrl( "~/Plugins/com_centralaz/Calendar/Styles/calendar.css" ) );
+            RockPage.AddCSSLink( ResolveRockUrl( "~/Plugins/com_centralaz/EventCalendar/Styles/fullcalendar.css" ) );
+            RockPage.AddCSSLink( ResolveRockUrl( "~/Plugins/com_centralaz/EventCalendar/Styles/calendar.css" ) );
 
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
@@ -67,8 +69,11 @@ namespace RockWeb.Plugins.com_centralaz.Calendar
             if ( !Page.IsPostBack )
             {
                 // added for your convenience
+                PopulateCampusList();
             }
             InsertTemplates();
+            
+            AddCalendar();
         }
 
         #endregion
@@ -87,6 +92,12 @@ namespace RockWeb.Plugins.com_centralaz.Calendar
 
         }
 
+
+        protected void rblView_ViewChange( object sender, EventArgs e )
+        {
+            pnlCalendar.Visible = !pnlCalendar.Visible;
+            pnlList.Visible = !pnlList.Visible;
+        }
         #endregion
 
         #region Methods
@@ -119,7 +130,37 @@ namespace RockWeb.Plugins.com_centralaz.Calendar
             }
         }
 
+        private void PopulateCampusList()
+        {
+            List<Campus> campusList = new CampusService( new RockContext() ).Queryable().ToList();
+            foreach ( Campus campus in campusList )
+            {
+                cblCampus.Items.Add( new ListItem( campus.Name, campus.Name ) );
+            }
+        }
 
+        private void AddCalendar()
+        {
+            Calendar.NET.Calendar calCalendar = new Calendar.NET.Calendar();
+            calCalendar.AllowEditingEvents = false;
+            calCalendar.CalendarDate = new System.DateTime( 2012, 4, 24, 13, 16, 0, 0 );
+            calCalendar.CalendarView = Calendar.NET.CalendarViews.Month;
+            calCalendar.DateHeaderFont = new System.Drawing.Font( "Arial", 12F, System.Drawing.FontStyle.Bold );
+            calCalendar.DayOfWeekFont = new System.Drawing.Font( "Arial", 10F );
+            calCalendar.DaysFont = new System.Drawing.Font( "Arial", 10F );
+            calCalendar.DimDisabledEvents = true;
+            calCalendar.HighlightCurrentDay = true;
+            calCalendar.LoadPresetHolidays = true;
+            calCalendar.ShowArrowControls = true;
+            calCalendar.ShowDashedBorderOnDisabledEvents = true;
+            calCalendar.ShowDateInHeader = true;
+            calCalendar.ShowDisabledEvents = false;
+            calCalendar.ShowEventTooltips = true;
+            calCalendar.ShowTodayButton = true;
+            calCalendar.TodayFont = new System.Drawing.Font( "Arial", 10F, System.Drawing.FontStyle.Bold );
+            phCalendar.Controls.Add( calCalendar );
+
+        }
         #endregion
     }
 }

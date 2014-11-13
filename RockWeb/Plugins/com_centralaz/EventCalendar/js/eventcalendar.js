@@ -65,8 +65,6 @@ var central_eventCalendar = (function () {
 
     function _getOverlay(view) {
         switch (view) {
-            case "cloud":
-                return $("#cloud-overlay");
             case "list":
                 return $("#event-list-overlay");
             case "calendar":

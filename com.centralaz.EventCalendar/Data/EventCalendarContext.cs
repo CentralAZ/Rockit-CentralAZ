@@ -19,7 +19,7 @@ namespace com.centralaz.EventCalendar.Data
 
         #region Models
 
-        public DbSet<Baptizee> Baptizees { get; set; }
+        public DbSet<CalendarEvent> CalendarEvents { get; set; }
 
         #endregion
 
