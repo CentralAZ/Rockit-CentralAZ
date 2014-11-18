@@ -170,7 +170,7 @@ namespace RockWeb.Plugins.com_centralaz.EventCalendar
             List<Campus> campusList = new List<Campus>();
             foreach ( var x in cblCampus.Controls )
             {
-                if ( x )
+                if ( true)
                 {
                     //if checkbox is enabled, get campus from value and add campus to list
                 }
