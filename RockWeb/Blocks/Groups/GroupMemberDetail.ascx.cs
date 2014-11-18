@@ -230,7 +230,7 @@ namespace RockWeb.Blocks.Groups
                     }
 
                     rockContext.SaveChanges();
-                    groupMember.SaveAttributeValues( rockContext );                  
+                    groupMember.SaveAttributeValues( rockContext );
                 } );
 
                 Group group = new GroupService( rockContext ).Get( groupMember.GroupId );

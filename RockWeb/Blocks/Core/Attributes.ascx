@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="Attributes.ascx.cs" Inherits="RockWeb.Blocks.Core.Attributes" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="Attributes.ascx.cs" Inherits="RockWeb.Blocks.Core.Attributes" %>
 
 <script type="text/javascript">
     function clearActiveDialog() {
@@ -86,7 +86,7 @@
             <Content>
                 <asp:HiddenField ID="hfIdValues" runat="server" />
                 <asp:ValidationSummary ID="ValidationSummaryValue" runat="server" HeaderText="Please Correct the Following" CssClass="alert alert-danger" ValidationGroup="AttributeValue" />
-                <fieldset id="fsEditControl" runat="server" />
+                <asp:PlaceHolder ID="phEditControls" runat="server" EnableViewState="false" />
             </Content>
         </Rock:ModalDialog>
 
