@@ -16,6 +16,7 @@ using Rock.Model;
 using Rock.Web.Cache;
 using Rock.Web.UI.Controls;
 using Rock.Attribute;
+using Rock.Security;
 
 namespace RockWeb.Plugins.com_centralaz.Accountability
 {
@@ -56,11 +57,25 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
         protected override void OnLoad( EventArgs e )
         {
-            base.OnLoad( e );
-
-            if ( !Page.IsPostBack )
+            if ( IsPersonMember( PageParameter( "GroupId" ).AsInteger() ) || IsUserAuthorized( Authorization.EDIT ) )
             {
-                ShowQuestions();
+                base.OnLoad( e );
+
+                if ( !Page.IsPostBack )
+                {
+                    ShowQuestions();
+                }
+            }
+            else
+            {
+                if ( CurrentPerson == null )
+                {
+                    RockPage.Layout.Site.RedirectToLoginPage( true );
+                }
+                else
+                {
+                    RockPage.Layout.Site.RedirectToPageNotFoundPage();
+                }
             }
         }
 
@@ -153,6 +168,29 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
                     phQuestionSummary.Controls.Add( questionRow );
                 }
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the current person is a group member.
+        /// </summary>
+        /// <param name="groupId">The group Id</param>
+        /// <returns>A boolean: true if the person is a member, false if not.</returns>
+        protected bool IsPersonMember( int groupId )
+        {
+            int count = new GroupMemberService( new RockContext() ).Queryable( "GroupTypeRole" )
+                .Where( m =>
+                    m.PersonId == CurrentPersonId &&
+                    m.GroupId == groupId
+                    )
+                 .Count();
+            if ( count == 1 )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
         #endregion

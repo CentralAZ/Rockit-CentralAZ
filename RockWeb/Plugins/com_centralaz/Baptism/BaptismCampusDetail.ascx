@@ -8,13 +8,13 @@
                 <asp:Panel ID="pnlHeaderBar" runat="server" CssClass="panel panel-block">
                     <div class="panel-body">
                         <div class="col-md-2 col-sm-4">
-                            <asp:LinkButton ID="lbAddBaptism" runat="server" OnClick="lbAddBaptism_Click"><h4>+Add Baptism</h4></asp:LinkButton>
+                            <asp:LinkButton ID="lbAddBaptism" runat="server" CssClass="btn btn-link" OnClick="lbAddBaptism_Click"><h4>+Add Baptism</h4></asp:LinkButton>
                         </div>
                         <div class="col-md-2 col-sm-4">
-                            <asp:LinkButton ID="lbAddBlackOut" runat="server" OnClick="lbAddBlackout_Click"><h4>Black Out a Day</h4></asp:LinkButton>
+                            <asp:LinkButton ID="lbAddBlackOut" runat="server" CssClass="btn btn-link" OnClick="lbAddBlackout_Click"><h4>Black Out a Day</h4></asp:LinkButton>
                         </div>
                         <div class="col-md-2 col-sm-4">
-                            <asp:LinkButton ID="lbPrintReport" runat="server" OnClick="lbPrintReport_Click"><h4>Print Report</h4></asp:LinkButton>
+                            <asp:LinkButton ID="lbPrintReport" runat="server" CssClass="btn btn-link" OnClick="lbPrintReport_Click"><h4>Print Report</h4></asp:LinkButton>
                         </div>
                     </div>
                 </asp:Panel>
@@ -59,7 +59,7 @@
                     <div class="panel-body">
                         <Rock:NotificationBox ID="nbNoBaptisms" NotificationBoxType="Info" runat="server"></Rock:NotificationBox>
                         <Rock:NotificationBox ID="nbBlackOutWeek" NotificationBoxType="Danger" runat="server"></Rock:NotificationBox>
-                        <asp:LinkButton ID='lbEditBlackout' runat='server' OnClick='lbEditBlackout_Click' Text='Edit' />
+                        <asp:LinkButton ID='lbEditBlackout' CssClass="btn btn-link" runat='server' OnClick='lbEditBlackout_Click' Text='Edit' />
                         <asp:PlaceHolder ID="phBaptismList" runat="server"></asp:PlaceHolder>
                     </div>
 

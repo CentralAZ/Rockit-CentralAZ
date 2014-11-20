@@ -41,10 +41,10 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
         #region Properties
 
-        protected List<Schedule> blackoutDates;
-        protected List<Baptizee> baptizeeList;
-        protected List<Baptizee> baptizees;
-        protected Schedule blackoutDate;
+        protected List<Schedule> _blackoutDates;
+        protected List<Baptizee> _baptizeeList;
+        protected List<Baptizee> _baptizees;
+        protected Schedule _blackoutDate;
 
         #endregion
 
@@ -182,11 +182,11 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void lbEditBlackout_Click( object sender, EventArgs e )
         {
-            blackoutDate = blackoutDates.Where( b => b.EffectiveStartDate.Value.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
+            _blackoutDate = _blackoutDates.Where( b => b.EffectiveStartDate.Value.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
             Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
             dictionaryInfo.Add( "GroupId", PageParameter( "GroupId" ) );
             dictionaryInfo.Add( "SelectedDate", calBaptism.SelectedDate.ToShortDateString() );
-            dictionaryInfo.Add( "BlackoutId", blackoutDate.Id.ToString() );
+            dictionaryInfo.Add( "BlackoutId", _blackoutDate.Id.ToString() );
             NavigateToLinkedPage( "AddBlackoutDayPage", dictionaryInfo );
         }
 
@@ -200,7 +200,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             //Get the data
             DateTime[] dateRange = GetTheDateRange( calBaptism.SelectedDate );
             Group group = new GroupService( new RockContext() ).Get( PageParameter( "GroupId" ).AsInteger() );
-            baptizeeList = new BaptizeeService( new BaptismContext() ).GetBaptizeesByDateRange( dateRange[0], dateRange[1], group.Id );
+            _baptizeeList = new BaptizeeService( new BaptismContext() ).GetBaptizeesByDateRange( dateRange[0], dateRange[1], group.Id );
             String font = GetAttributeValue( "ReportFont" );
 
             //Setup the document
@@ -230,7 +230,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
             //Populate the Lists
             DateTime current = DateTime.MinValue;
-            foreach ( Baptizee b in baptizeeList )
+            foreach ( Baptizee b in _baptizeeList )
             {
                 if ( current != b.BaptismDateTime )
                 {
@@ -273,15 +273,15 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         protected void calBaptisms_DayRender( object sender, DayRenderEventArgs e )
         {
             DateTime day = e.Day.Date;
-            if ( baptizees != null )
+            if ( _baptizees != null )
             {
-                if ( baptizees.Any( b => b.BaptismDateTime.Date == day.Date ) )
+                if ( _baptizees.Any( b => b.BaptismDateTime.Date == day.Date ) )
                 {
                     e.Cell.Style.Add( "font-weight", "bold" );
                     e.Cell.AddCssClass( "alert-success" );
                 }
             }
-            if ( blackoutDates.Any( b => b.EffectiveStartDate.Value.Date == day.Date ) )
+            if ( _blackoutDates.Any( b => b.EffectiveStartDate.Value.Date == day.Date ) )
             {
                 e.Cell.AddCssClass( "alert-danger" );
             }
@@ -297,7 +297,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         /// </summary>
         protected void UpdateBaptizees()
         {
-            baptizees = new BaptizeeService( new BaptismContext() ).GetAllBaptizees( PageParameter( "GroupId" ).AsInteger() );
+            _baptizees = new BaptizeeService( new BaptismContext() ).GetAllBaptizees( PageParameter( "GroupId" ).AsInteger() );
         }
 
         /// <summary>
@@ -309,7 +309,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             group.LoadAttributes();
             Guid categoryguid = group.GetAttributeValue( "BlackoutDates" ).AsGuid();
             CategoryCache category = CategoryCache.Read( categoryguid );
-            blackoutDates = new ScheduleService( new RockContext() ).Queryable()
+            _blackoutDates = new ScheduleService( new RockContext() ).Queryable()
                 .Where( s => s.CategoryId == category.Id )
                 .ToList();
         }
@@ -349,12 +349,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             else
             {
                 lPanelHeadingDateRange.Text = String.Format( "{0}: {1} - {2}", group.Name, dateRange[0].ToString( "MMMM d" ), dateRange[1].ToString( "MMMM d" ) );
-                blackoutDate = blackoutDates.Where( b => b.EffectiveStartDate.Value.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
+                _blackoutDate = _blackoutDates.Where( b => b.EffectiveStartDate.Value.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
                 nbNoBaptisms.Visible = false;
-                if ( blackoutDate != null )
+                if ( _blackoutDate != null )
                 {
                     nbBlackOutWeek.Title = String.Format( "{0} has been blacked out!</br>", calBaptism.SelectedDate.ToLongDateString() );
-                    nbBlackOutWeek.Text = String.Format( "{0}", blackoutDate.Description );
+                    nbBlackOutWeek.Text = String.Format( "{0}", _blackoutDate.Description );
                     lbEditBlackout.Visible = true;
                     nbBlackOutWeek.Visible = true;
                     //PopulateWithBlackoutMessage( blackoutDate );
@@ -363,8 +363,8 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 {
                     lbEditBlackout.Visible = false;
                     nbBlackOutWeek.Visible = false;
-                    baptizeeList = new BaptizeeService( new BaptismContext() ).GetBaptizeesByDateRange( dateRange[0], dateRange[1], group.Id );
-                    if ( baptizeeList.Count == 0 )
+                    _baptizeeList = new BaptizeeService( new BaptismContext() ).GetBaptizeesByDateRange( dateRange[0], dateRange[1], group.Id );
+                    if ( _baptizeeList.Count == 0 )
                     {
                         nbNoBaptisms.Text = "No baptisms scheduled for the selected week!";
                         nbNoBaptisms.Visible = true;
@@ -372,7 +372,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                     else
                     {
                         nbNoBaptisms.Visible = false;
-                        PopulateScheduleList( baptizeeList );
+                        PopulateScheduleList( _baptizeeList );
                     }
                 }
             }

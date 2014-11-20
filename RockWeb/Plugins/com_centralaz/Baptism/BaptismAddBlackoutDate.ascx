@@ -13,9 +13,9 @@
                 <Rock:NotificationBox ID="nbNotification" runat="server" NotificationBoxType="Danger" />
                 <Rock:DatePicker ID="dpBlackOutDate" runat="server" Label="Blackout Date" />
                 <Rock:RockTextBox ID="tbDescription" Label="Description" TextMode="MultiLine" Rows="5" runat="server" />
-                <asp:Button ID="btnSave" Text="Save" runat="server" OnClick="btnSave_OnClick" />
-                <asp:Button ID="btnDelete" Text="Delete" runat="server" OnClick="btnDelete_OnClick" />
-                <asp:Button ID="btnCancel" Text="Cancel" runat="server" OnClick="btnCancel_OnClick" />
+                <asp:LinkButton ID="btnSave" Text="Save" CssClass="btn btn-primary" runat="server" OnClick="btnSave_OnClick" />
+                <asp:LinkButton ID="btnDelete" Text="Delete" CssClass="btn btn-link" runat="server" OnClick="btnDelete_OnClick" />
+                <asp:LinkButton ID="btnCancel" Text="Cancel" CssClass="btn btn-link" runat="server" OnClick="btnCancel_OnClick" />
 
             </div>
 

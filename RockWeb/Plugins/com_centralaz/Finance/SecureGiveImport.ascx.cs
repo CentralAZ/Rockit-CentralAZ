@@ -40,8 +40,8 @@ namespace RockWeb.Plugins.com_centralaz.Finance
         #region Fields
 
         private FinancialBatch _financialBatch;
-        private List<string> errors = new List<string>();
-        private List<XElement> errorElements = new List<XElement>();
+        private List<string> _errors = new List<string>();
+        private List<XElement> _errorElements = new List<XElement>();
         private Dictionary<int, FinancialAccount> _financialAccountCache = new Dictionary<int, FinancialAccount>();
         private Dictionary<string, DefinedValue> _tenderTypeDefinedValueCache = new Dictionary<string, DefinedValue>();
         private int _anonymousPersonAliasId = 0;
@@ -144,7 +144,7 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                 
                 BindGrid();
 
-                if ( errors.Count > 0 )
+                if ( _errors.Count > 0 )
                 {
                     nbMessage.Text = "Errors found.";
                     BindErrorGrid();
@@ -301,8 +301,8 @@ namespace RockWeb.Plugins.com_centralaz.Finance
             }
             catch ( Exception )
             {
-                errors.Add( elemGift.Element( "ReferenceNumber" ).Value.ToString() );
-                errorElements.Add( elemGift );
+                _errors.Add( elemGift.Element( "ReferenceNumber" ).Value.ToString() );
+                _errorElements.Add( elemGift );
                 return;
             }
         }
@@ -335,9 +335,9 @@ namespace RockWeb.Plugins.com_centralaz.Finance
             RockContext rockContext = new RockContext();
             FinancialTransactionDetailService financialTransactionDetailService = new FinancialTransactionDetailService( rockContext );
 
-            if ( errorElements.Count > 0 )
+            if ( _errorElements.Count > 0 )
             {
-                gErrors.DataSource = errorElements;
+                gErrors.DataSource = _errorElements;
             }
             gErrors.DataBind();
 

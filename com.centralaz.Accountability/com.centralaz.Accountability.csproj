@@ -40,6 +40,9 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\RockWeb\Bin\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Quartz">
+      <HintPath>libs\Quartz\Quartz.dll</HintPath>
+    </Reference>
     <Reference Include="Rock">
       <HintPath>..\RockWeb\Bin\Rock.dll</HintPath>
     </Reference>
@@ -58,8 +61,10 @@
     <Compile Include="Data\AccountabilityContext.cs" />
     <Compile Include="Data\AccountabilityService.cs" />
     <Compile Include="Data\NamedModel.cs" />
+    <Compile Include="Jobs\SendAccountabilityReportReminder.cs" />
     <Compile Include="Migrations\001_CreateDb.cs" />
     <Compile Include="Migrations\002_AddSystemData.cs" />
+    <Compile Include="Migrations\004_AddAccountabilityJob.cs" />
     <Compile Include="Migrations\003_MemberStartDate.cs" />
     <Compile Include="Model\Question.cs" />
     <Compile Include="Model\QuestionService.cs" />

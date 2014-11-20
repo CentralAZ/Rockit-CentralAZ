@@ -18,6 +18,7 @@ using Rock.Web.Cache;
 using Rock.Web.UI.Controls;
 using Rock.Attribute;
 using Rock.Communication;
+using Rock.Security;
 
 namespace RockWeb.Plugins.com_centralaz.Accountability
 {
@@ -37,8 +38,8 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
 
         #region Properties
 
-        public string emailReportIntroduction = "<p> The following is an Accountability Group Report from your team member. </p>";
-        public string emailReportSubject = "Accountability Group Report";
+        public string _emailReportIntroduction = "<p> The following is an Accountability Group Report from your team member. </p>";
+        public string _emailReportSubject = "Accountability Group Report";
 
         #endregion
 
@@ -57,7 +58,21 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlContent );
-            ShowQuestions();
+            if ( IsPersonMember( PageParameter( "GroupId" ).AsInteger() ) || IsUserAuthorized( Authorization.EDIT ) )
+            {
+                ShowQuestions();
+            }
+            else
+            {
+                if ( CurrentPerson == null )
+                {
+                    RockPage.Layout.Site.RedirectToLoginPage( true );
+                }
+                else
+                {
+                    RockPage.Layout.Site.RedirectToPageNotFoundPage();
+                }
+            }
         }
 
         /// <summary>
@@ -71,7 +86,6 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             if ( !Page.IsPostBack )
             {
                 AssignReportDateOptions();
-
             }
         }
 
@@ -287,6 +301,29 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         }
 
         /// <summary>
+        /// Returns true if the current person is a group member.
+        /// </summary>
+        /// <param name="groupId">The group Id</param>
+        /// <returns>A boolean: true if the person is a member, false if not.</returns>
+        protected bool IsPersonMember( int groupId )
+        {
+            int count = new GroupMemberService( new RockContext() ).Queryable( "GroupTypeRole" )
+                .Where( m =>
+                    m.PersonId == CurrentPersonId &&
+                    m.GroupId == groupId
+                    )
+                 .Count();
+            if ( count == 1 )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Sends an email of the report to all group members
         /// </summary>
         protected void SendEmail()
@@ -295,7 +332,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
             if ( group.Members.Count > 0 )
             {
                 string fromAddress = CurrentPerson.Email;
-                string subject = string.Format( "{0} for {1} - ", emailReportSubject, group.Name, CurrentPerson.FullName );
+                string subject = string.Format( "{0} for {1} - ", _emailReportSubject, group.Name, CurrentPerson.FullName );
                 string body = CreateMessageBody( group );
                 foreach ( GroupMember member in group.Members )
                 {
@@ -349,7 +386,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
         protected string CreateMessageBody( Group group )
         {
             StringBuilder body = new StringBuilder();
-            body.Append( emailReportIntroduction );
+            body.Append( _emailReportIntroduction );
 
             // Start the HTML table...
             body.Append( "<table  width='75%' RULES='NONE'  cellpadding='1' cellspacing='3' style='font-family: Tahoma, Arial, Helvetica; font-size: 12px;'>" );

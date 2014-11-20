@@ -33,8 +33,8 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
 
         #region Properties
 
-        protected List<Schedule> blackoutDates;
-        protected Schedule blackoutDate;
+        protected List<Schedule> _blackoutDates;
+        protected Schedule _blackoutDate;
 
         #endregion
 
@@ -137,7 +137,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             //baptisms exist for blackout date
             //blackout date already exists
             GetBlackoutDates();
-            if ( blackoutDates.Any( b => ( b.EffectiveStartDate.Value.Date == dpBlackOutDate.SelectedDate.Value.Date ) && ( b.CategoryId == GetCategoryId() ) && ( b.Id != PageParameter( "BlackoutId" ).AsIntegerOrNull() ) ) )
+            if ( _blackoutDates.Any( b => ( b.EffectiveStartDate.Value.Date == dpBlackOutDate.SelectedDate.Value.Date ) && ( b.CategoryId == GetCategoryId() ) && ( b.Id != PageParameter( "BlackoutId" ).AsIntegerOrNull() ) ) )
             {
                 nbNotification.Text = "Blackout already exists for that date";
                 nbNotification.Visible = true;
@@ -156,12 +156,12 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             ScheduleService scheduleService = new ScheduleService( rockContext );
             if ( PageParameter( "BlackoutId" ).AsIntegerOrNull() == null )
             {
-                blackoutDate = new Schedule { Id = 0 };
-                blackoutDate.CategoryId = categoryId;
+                _blackoutDate = new Schedule { Id = 0 };
+                _blackoutDate.CategoryId = categoryId;
             }
             else
             {
-                blackoutDate = scheduleService.Get( PageParameter( "BlackoutId" ).AsInteger() );
+                _blackoutDate = scheduleService.Get( PageParameter( "BlackoutId" ).AsInteger() );
             }
             iCalendar calendar = new iCalendar();
             DDay.iCal.IDateTime datetime = new iCalDateTime();
@@ -169,15 +169,15 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             calendar.Events.Add( theEvent );
             var x1 = theEvent.DTStart;
             datetime.Value = dpBlackOutDate.SelectedDate.Value;
-            blackoutDate.Name = string.Format( "{0} blackout", dpBlackOutDate.SelectedDate.Value.ToShortDateString() );
+            _blackoutDate.Name = string.Format( "{0} blackout", dpBlackOutDate.SelectedDate.Value.ToShortDateString() );
 
             calendar.Events[0].DTStart = datetime;
             iCalendarSerializer calSerializer = new iCalendarSerializer( calendar );
-            blackoutDate.iCalendarContent = calSerializer.SerializeToString();
-            blackoutDate.Description = tbDescription.Text;
-            if ( blackoutDate.Id.Equals( 0 ) )
+            _blackoutDate.iCalendarContent = calSerializer.SerializeToString();
+            _blackoutDate.Description = tbDescription.Text;
+            if ( _blackoutDate.Id.Equals( 0 ) )
             {
-                scheduleService.Add( blackoutDate );
+                scheduleService.Add( _blackoutDate );
 
             }
             rockContext.SaveChanges();
@@ -193,13 +193,13 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         {
             RockContext rockContext = new RockContext();
             ScheduleService scheduleService = new ScheduleService( rockContext );
-            if ( blackoutDate == null )
+            if ( _blackoutDate == null )
             {
-                blackoutDate = scheduleService.Get( PageParameter( "BlackoutId" ).AsInteger() );
+                _blackoutDate = scheduleService.Get( PageParameter( "BlackoutId" ).AsInteger() );
             }
-            if ( blackoutDate != null )
+            if ( _blackoutDate != null )
             {
-                scheduleService.Delete( blackoutDate );
+                scheduleService.Delete( _blackoutDate );
                 rockContext.SaveChanges();
             }
             ReturnToParentPage();
@@ -225,7 +225,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         protected void GetBlackoutDates()
         {
             int categoryId = GetCategoryId();
-            blackoutDates = new ScheduleService( new RockContext() ).Queryable()
+            _blackoutDates = new ScheduleService( new RockContext() ).Queryable()
                 .Where( s => s.CategoryId == categoryId )
                 .ToList();
         }
