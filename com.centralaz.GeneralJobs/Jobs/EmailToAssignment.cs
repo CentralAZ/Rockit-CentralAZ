@@ -160,8 +160,11 @@ namespace com.centralaz.GeneralJobs.Jobs
                                             }
                                             catch ( Exception ex )
                                             {
-                                                LogToFile( String.Format( "Unable to delete message {0} from {1} with subject '{2}'.", i.ToString(), msg.Headers.From.MailAddress, msg.Headers.Subject ), pathName );
-                                                LogToFile( String.Format( "\n\nMessage\n------------------------\n{0}\n\nStack Trace\n------------------------\n{1}", ex.Message, ex.StackTrace ), pathName );
+                                                if ( _loggingActive )
+                                                {
+                                                    LogToFile( String.Format( "Unable to delete message {0} from {1} with subject '{2}'.", i.ToString(), msg.Headers.From.MailAddress, msg.Headers.Subject ), pathName );
+                                                    LogToFile( String.Format( "\n\nMessage\n------------------------\n{0}\n\nStack Trace\n------------------------\n{1}", ex.Message, ex.StackTrace ), pathName );
+                                                }
                                                 throw;
                                             }
                                         }
@@ -169,8 +172,11 @@ namespace com.centralaz.GeneralJobs.Jobs
                                 }
                                 catch ( Exception ex )
                                 {
-                                    LogToFile( String.Format( "Failed to read message {0}", i ), pathName );
-                                    LogToFile( String.Format( "\n\nMessage\n------------------------\n{0}\n\nStack Trace\n------------------------\n{1}", ex.Message, ex.StackTrace ), pathName );
+                                    if ( _loggingActive )
+                                    {
+                                        LogToFile( String.Format( "Failed to read message {0}", i ), pathName );
+                                        LogToFile( String.Format( "\n\nMessage\n------------------------\n{0}\n\nStack Trace\n------------------------\n{1}", ex.Message, ex.StackTrace ), pathName );
+                                    }
                                     throw;
                                 }
                             }
@@ -180,7 +186,10 @@ namespace com.centralaz.GeneralJobs.Jobs
             }
             catch ( Exception ex )
             {
-                LogToFile( String.Format( "An error occured while processing POP3 mail.\n\nMessage\n------------------------\n{0}\n\nStack Trace\n------------------------\n{1}", ex.Message, ex.StackTrace ), pathName );
+                if ( _loggingActive )
+                {
+                    LogToFile( String.Format( "An error occured while processing POP3 mail.\n\nMessage\n------------------------\n{0}\n\nStack Trace\n------------------------\n{1}", ex.Message, ex.StackTrace ), pathName );
+                }
                 throw;
             }
         }
@@ -278,9 +287,7 @@ namespace com.centralaz.GeneralJobs.Jobs
                             entity = new PersonService( rockContext ).GetByFullName( fromAddress.DisplayName, false ).FirstOrDefault();
                         }
                         catch
-                        {
-
-                        }
+                        { }
                     }
                     if ( entity == null )
                     {
@@ -348,8 +355,11 @@ namespace com.centralaz.GeneralJobs.Jobs
             }
             catch ( Exception ex )
             {
-                LogToFile( String.Format( "Error creating assignment for type {0}", _workflowType ), pathName );
-                LogToFile( String.Format( "\n\nMessage\n------------------------\n{0}\n\nStack Trace\n------------------------\n{1}", ex.Message, ex.StackTrace ), pathName );
+                if ( _loggingActive )
+                {
+                    LogToFile( String.Format( "Error creating assignment for type {0}", _workflowType ), pathName );
+                    LogToFile( String.Format( "\n\nMessage\n------------------------\n{0}\n\nStack Trace\n------------------------\n{1}", ex.Message, ex.StackTrace ), pathName );
+                }
                 throw;
             }
         }
