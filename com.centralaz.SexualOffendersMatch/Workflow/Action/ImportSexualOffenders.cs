@@ -4,11 +4,17 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 
+using Rock;
 using Rock.Attribute;
 using Rock.Data;
 using Rock.Model;
+using Rock.Web.Cache;
+
+using LumenWorks.Framework.IO.Csv;
+
 using com.centralaz.SexualOffendersMatch.Model;
 using com.centralaz.SexualOffendersMatch.Data;
+using System.IO;
 namespace com.centralaz.SexualOffendersMatch.Workflow.Action
 {
     /// <summary>
@@ -17,7 +23,6 @@ namespace com.centralaz.SexualOffendersMatch.Workflow.Action
     [Description( "Sets the name of the workflow" )]
     [Export( typeof( Rock.Workflow.ActionComponent ) )]
     [ExportMetadata( "ComponentName", "Set Workflow Name" )]
-
     [WorkflowAttribute( "DPS Excel File" )]
     public class ImportSexualOffenders : Rock.Workflow.ActionComponent
     {
@@ -29,20 +34,52 @@ namespace com.centralaz.SexualOffendersMatch.Workflow.Action
             Dictionary<string, SexualOffender> offenderList = new SexualOffenderService( new SexualOffendersMatchContext() ).Queryable().OrderBy( k => k.KeyString ).ToDictionary( k => k.KeyString );
 
             //Get the excel file
-            //For each row in excel file
-            while ( true )
+            string dps = GetAttributeValue( action, "DPS Excel File" );
+            Guid? dpsGuid = dps.AsGuidOrNull();
+            var attribute = AttributeCache.Read( dpsGuid.Value, rockContext );
+
+            using ( CsvReader csvReader = new CsvReader( new StreamReader( "dec_list.csv" ), true ) )
             {
-                SexualOffender excelRowSexualOffender = new SexualOffender();
-                if ( offenderList.ContainsKey( excelRowSexualOffender.KeyString ) )
+                int fieldCount = csvReader.FieldCount;
+
+                string[] headers = csvReader.GetFieldHeaders();
+                //For each row in excel file
+
+                while ( csvReader.ReadNextRecord() )
                 {
-                    offenderList[excelRowSexualOffender.KeyString] = excelRowSexualOffender;
-                }
-                else
-                {
-                    offenderList.Add( excelRowSexualOffender.KeyString, excelRowSexualOffender );
+                    //Build new SO Object
+                    SexualOffender excelRowSexualOffender = new SexualOffender();
+                    excelRowSexualOffender.LastName = csvReader[csvReader.GetFieldIndex( "Last Name" )];
+                    excelRowSexualOffender.FirstName = csvReader[csvReader.GetFieldIndex( "First Name" )];
+                    excelRowSexualOffender.MiddleInitial = csvReader[csvReader.GetFieldIndex( "MI" )].ElementAt(0);
+                    excelRowSexualOffender.Age = csvReader[csvReader.GetFieldIndex( "Age" )].AsInteger();
+                    excelRowSexualOffender.Height = csvReader[csvReader.GetFieldIndex( "HT" )].AsInteger();
+                    excelRowSexualOffender.Weight = csvReader[csvReader.GetFieldIndex( "WT" )].AsInteger();
+                    excelRowSexualOffender.Race = csvReader[csvReader.GetFieldIndex( "Race" )];
+                    excelRowSexualOffender.Sex = csvReader[csvReader.GetFieldIndex( "Sex" )];
+                    excelRowSexualOffender.Hair = csvReader[csvReader.GetFieldIndex( "Hair" )];
+                    excelRowSexualOffender.Eyes = csvReader[csvReader.GetFieldIndex( "Eyes" )];
+                    excelRowSexualOffender.ResidentialAddress = csvReader[csvReader.GetFieldIndex( "Res_Add" )];
+                    excelRowSexualOffender.ResidentialCity = csvReader[csvReader.GetFieldIndex( "Res_City" )];
+                    excelRowSexualOffender.ResidentialState = csvReader[csvReader.GetFieldIndex( "Res_State" )];
+                    excelRowSexualOffender.ResidentialZip = csvReader[csvReader.GetFieldIndex( "Res_Zip" )].AsInteger();
+                    excelRowSexualOffender.VerificationDate = csvReader[csvReader.GetFieldIndex( "Verification Date" )].AsDateTime().Value;
+                    excelRowSexualOffender.Offense = csvReader[csvReader.GetFieldIndex( "Offense" )];
+                    excelRowSexualOffender.OffenseLevel = csvReader[csvReader.GetFieldIndex( "Level" )].AsInteger();
+                    excelRowSexualOffender.Absconder = csvReader[csvReader.GetFieldIndex( "Absconder" )].AsBoolean();
+                    excelRowSexualOffender.ConvictingJurisdiction = csvReader[csvReader.GetFieldIndex( "Convicting Jurisdiction" )];
+                    excelRowSexualOffender.Unverified = csvReader[csvReader.GetFieldIndex( "Unverified" )].AsBoolean();
+
+                    if ( offenderList.ContainsKey( excelRowSexualOffender.KeyString ) )
+                    {
+                        offenderList[excelRowSexualOffender.KeyString] = excelRowSexualOffender;
+                    }
+                    else
+                    {
+                        offenderList.Add( excelRowSexualOffender.KeyString, excelRowSexualOffender );
+                    }
                 }
             }
-
 
             return true;
         }
