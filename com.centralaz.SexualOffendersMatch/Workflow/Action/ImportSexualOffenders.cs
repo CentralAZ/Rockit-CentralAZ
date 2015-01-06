@@ -34,9 +34,8 @@ namespace com.centralaz.SexualOffendersMatch.Workflow.Action
             Dictionary<string, SexualOffender> offenderList = new SexualOffenderService( new SexualOffendersMatchContext() ).Queryable().OrderBy( k => k.KeyString ).ToDictionary( k => k.KeyString );
 
             //Get the excel file
-            string dps = GetAttributeValue( action, "DPS Excel File" );
-            Guid? dpsGuid = dps.AsGuidOrNull();
-            var attribute = AttributeCache.Read( dpsGuid.Value, rockContext );
+            Guid dpsFileGuid = action.Activity.Workflow.GetAttributeValue( "DPSExcelFile" ).AsGuid();
+            BinaryFile binaryFile = new BinaryFileService( rockContext ).Get( dpsFileGuid );
 
             using ( CsvReader csvReader = new CsvReader( new StreamReader( "dec_list.csv" ), true ) )
             {
@@ -51,7 +50,7 @@ namespace com.centralaz.SexualOffendersMatch.Workflow.Action
                     SexualOffender excelRowSexualOffender = new SexualOffender();
                     excelRowSexualOffender.LastName = csvReader[csvReader.GetFieldIndex( "Last Name" )];
                     excelRowSexualOffender.FirstName = csvReader[csvReader.GetFieldIndex( "First Name" )];
-                    excelRowSexualOffender.MiddleInitial = csvReader[csvReader.GetFieldIndex( "MI" )].ElementAt(0);
+                    excelRowSexualOffender.MiddleInitial = csvReader[csvReader.GetFieldIndex( "MI" )].ElementAt( 0 );
                     excelRowSexualOffender.Age = csvReader[csvReader.GetFieldIndex( "Age" )].AsInteger();
                     excelRowSexualOffender.Height = csvReader[csvReader.GetFieldIndex( "HT" )].AsInteger();
                     excelRowSexualOffender.Weight = csvReader[csvReader.GetFieldIndex( "WT" )].AsInteger();
