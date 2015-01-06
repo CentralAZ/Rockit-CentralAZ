@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -100,7 +100,7 @@ namespace RockWeb.Blocks.WorkFlow
         /// <param name="e">The <see cref="RowEventArgs" /> instance containing the event data.</param>
         protected void gWorkflowTrigger_Edit( object sender, RowEventArgs e )
         {
-            NavigateToLinkedPage( "DetailPage", "WorkflowTriggerId", (int)e.RowKeyValue );
+            NavigateToLinkedPage( "DetailPage", "WorkflowTriggerId", e.RowKeyId );
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace RockWeb.Blocks.WorkFlow
         {
             var rockContext = new RockContext();
             WorkflowTriggerService WorkflowTriggerService = new WorkflowTriggerService( rockContext );
-            WorkflowTrigger WorkflowTrigger = WorkflowTriggerService.Get( (int)e.RowKeyValue );
+            WorkflowTrigger WorkflowTrigger = WorkflowTriggerService.Get( e.RowKeyId );
 
             if ( WorkflowTrigger != null )
             {

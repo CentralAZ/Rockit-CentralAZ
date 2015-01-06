@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -113,7 +113,7 @@ namespace RockWeb.Blocks.Cms
             if ( site != null )
             {
                 string errorMessage;
-                canDelete = siteService.CanDelete( site, out errorMessage );
+                canDelete = siteService.CanDelete( site, out errorMessage, includeSecondLvl: true );
                 if ( !canDelete )
                 {
                     mdDeleteWarning.Show( errorMessage, ModalAlertType.Alert );
