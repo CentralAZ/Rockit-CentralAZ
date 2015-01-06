@@ -37,7 +37,7 @@ namespace com.centralaz.SexualOffendersMatch.Workflow.Action
             Guid dpsFileGuid = action.Activity.Workflow.GetAttributeValue( "DPSExcelFile" ).AsGuid();
             BinaryFile binaryFile = new BinaryFileService( rockContext ).Get( dpsFileGuid );
 
-            using ( CsvReader csvReader = new CsvReader( new StreamReader( "dec_list.csv" ), true ) )
+            using ( CsvReader csvReader = new CsvReader( new StreamReader( binaryFile.Data.ContentStream ), true ) )
             {
                 int fieldCount = csvReader.FieldCount;
 

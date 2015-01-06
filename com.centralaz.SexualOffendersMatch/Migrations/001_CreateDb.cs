@@ -62,7 +62,7 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
 	                [VerifiedDate] [datetime] NULL,
 	                [Guid] [uniqueidentifier] NOT NULL,
 	                [CreatedDateTime] [datetime] NULL,
-	                [ModifedDateTime] [datetime] NULL,
+	                [ModifiedDateTime] [datetime] NULL,
 	                [CreatedByPersonAliasId] [datetime] NULL,
 	                [ModifiedByPersonAliasId] [datetime] NULL,
 	                [ForeignId] [nvarchar](50) NULL,
