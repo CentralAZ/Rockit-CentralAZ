@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -133,7 +133,7 @@ namespace RockWeb.Blocks.Cms
         /// <param name="e">The <see cref="RowEventArgs" /> instance containing the event data.</param>
         protected void gLayouts_Edit( object sender, RowEventArgs e )
         {
-            NavigateToLinkedPage( "DetailPage", "layoutId", (int)e.RowKeyValue );
+            NavigateToLinkedPage( "DetailPage", "layoutId", e.RowKeyId );
         }
 
         /// <summary>

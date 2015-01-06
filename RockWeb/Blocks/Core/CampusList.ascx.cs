@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -90,7 +90,7 @@ namespace RockWeb.Blocks.Core
         /// <param name="e">The <see cref="RowEventArgs" /> instance containing the event data.</param>
         protected void gCampuses_Edit( object sender, RowEventArgs e )
         {
-            NavigateToLinkedPage( "DetailPage", "campusId", (int)e.RowKeyValue );
+            NavigateToLinkedPage( "DetailPage", "campusId", e.RowKeyId );
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace RockWeb.Blocks.Core
         {
             var rockContext = new RockContext();
             CampusService campusService = new CampusService( rockContext );
-            Campus campus = campusService.Get( (int)e.RowKeyValue );
+            Campus campus = campusService.Get( e.RowKeyId );
             if ( campus != null )
             {
                 // Don't allow deleting the last campus

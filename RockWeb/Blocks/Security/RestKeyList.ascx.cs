@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -132,7 +132,7 @@ namespace RockWeb.Blocks.Security
         protected void gRestKeyList_RowSelected( object sender, RowEventArgs e )
         {
             var parms = new Dictionary<string, string>();
-            var restUserId = (int)e.RowKeyValue;
+            var restUserId = e.RowKeyId;
             parms.Add( "restUserId", restUserId.ToString() );
             NavigateToLinkedPage( "DetailPage", parms );
         }

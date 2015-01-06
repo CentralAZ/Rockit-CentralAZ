@@ -1,9 +1,11 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="AttributeCategories.ascx.cs" Inherits="RockWeb.Blocks.Core.AttributeCategories" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="AttributeCategories.ascx.cs" Inherits="RockWeb.Blocks.Core.AttributeCategories" %>
 
 <asp:UpdatePanel ID="upPanel" runat="server">
     <ContentTemplate>
         <asp:Panel ID="pnlList" runat="server">
 
+            <Rock:NotificationBox ID="nbOrdering" runat="server" NotificationBoxType="Info" Text="Note: Select a specific entity type filter in order to reorder categories." Dismissable="true" Visible="false" />
+                    
             <div class="panel panel-block">
                 <div class="panel-heading">
                     <h1 class="panel-title"><i class="fa fa-folder"></i> Attribute Categories</h1>
