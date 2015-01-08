@@ -7,9 +7,6 @@ using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-using com.centralaz.SampleProject.Data;
-using com.centralaz.SampleProject.Model;
-
 using Newtonsoft.Json;
 
 using Rock;
