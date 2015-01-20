@@ -63,8 +63,8 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
 	                [Guid] [uniqueidentifier] NOT NULL,
 	                [CreatedDateTime] [datetime] NULL,
 	                [ModifiedDateTime] [datetime] NULL,
-	                [CreatedByPersonAliasId] [datetime] NULL,
-	                [ModifiedByPersonAliasId] [datetime] NULL,
+	                [CreatedByPersonAliasId] [int] NULL,
+	                [ModifiedByPersonAliasId] [int] NULL,
 	                [ForeignId] [nvarchar](50) NULL,
                  CONSTRAINT [PK__com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch] PRIMARY KEY CLUSTERED 
                 (

@@ -16,15 +16,17 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
         /// </summary>
         public override void Up()
         {
+            RockMigrationHelper.UpdateFieldType( "System Email", "", "Rock", "Rock.Field.Types.SystemEmailFieldType", "34E4FB5E-C826-4391-8F32-C337C57936A6" );
+
             RockMigrationHelper.UpdateEntityType( "Rock.Model.Workflow", "3540E9A7-FE30-43A9-8B0A-A372B63DFC93", true, true );
 
             RockMigrationHelper.UpdateEntityType( "Rock.Model.WorkflowActivity", "2CB52ED0-CB06-4D62-9E2C-73B60AFA4C9F", true, true );
 
             RockMigrationHelper.UpdateEntityType( "Rock.Model.WorkflowActionType", "23E3273A-B137-48A3-9AFF-C8DC832DDCA6", true, true );
 
-            RockMigrationHelper.UpdateEntityType( "com.centralaz.SexualOffendersMatch.Workflow.Action.ImportSexualOffenders", "A95659E5-FF18-4587-8E29-9E4B393E917E", false, true );
+            RockMigrationHelper.UpdateEntityType( "com.centralaz.SexualOffendersMatch.Workflow.Action.ImportSexualOffenders", "3B7A0BFC-2976-4A51-AB2B-F4349DF41AD4", false, true );
 
-            RockMigrationHelper.UpdateEntityType( "com.centralaz.SexualOffendersMatch.Workflow.Action.PopulatePotentialMatchesTable", "D2B6E0A1-B5A7-4BD0-89FF-6BC5BA7E175B", false, true );
+            RockMigrationHelper.UpdateEntityType( "com.centralaz.SexualOffendersMatch.Workflow.Action.PopulatePotentialMatchesTable", "5EB31D9E-DCEC-48ED-9029-522E59629D14", false, true );
 
             RockMigrationHelper.UpdateEntityType( "Rock.Workflow.Action.CompleteWorkflow", "EEDA4318-F014-4A46-9C76-4C052EF81AA1", false, true );
 
@@ -52,33 +54,29 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
 
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "24B7D5E6-C30F-48F4-9D7E-AF45A342CF3A", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "89E9BCED-91AB-47B0-AD52-D78B0B7CB9E8" ); // Rock.Workflow.Action.SetAttributeToCurrentPerson:Order
 
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "3B7A0BFC-2976-4A51-AB2B-F4349DF41AD4", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "3430AA47-09AA-4D58-8333-9687D4B5FBE3" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.ImportSexualOffenders:Active
+
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "3B7A0BFC-2976-4A51-AB2B-F4349DF41AD4", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "3673E369-3FEE-4BB2-A8EC-E97FEEEDE2D2" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.ImportSexualOffenders:Order
+
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "486DC4FA-FCBC-425F-90B0-E606DA8A9F68", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "234910F2-A0DB-4D7D-BAF7-83C880EF30AE" ); // Rock.Workflow.Action.UserEntryForm:Active
 
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "486DC4FA-FCBC-425F-90B0-E606DA8A9F68", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "C178113D-7C86-4229-8424-C6D0CF4A7E23" ); // Rock.Workflow.Action.UserEntryForm:Order
 
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Body", "Body", "The body of the email that should be sent. <span class='tip tip-liquid'></span> <span class='tip tip-html'></span>", 3, @"", "4D245B9E-6B03-46E7-8482-A51FBA190E4D" ); // Rock.Workflow.Action.SendEmail:Body
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "5EB31D9E-DCEC-48ED-9029-522E59629D14", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "8832C0A6-F423-4267-A23C-618A228EC3FD" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.PopulatePotentialMatchesTable:Active
+
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "5EB31D9E-DCEC-48ED-9029-522E59629D14", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "00751452-897D-44E6-A23D-4245EF0F700E" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.PopulatePotentialMatchesTable:Order
+
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Body", "Body", "The body of the email that should be sent. <span class='tip tip-lava'></span> <span class='tip tip-html'></span>", 3, @"", "4D245B9E-6B03-46E7-8482-A51FBA190E4D" ); // Rock.Workflow.Action.SendEmail:Body
 
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "36197160-7D3D-490D-AB42-7E29105AFE91" ); // Rock.Workflow.Action.SendEmail:Active
 
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "3B1D93D7-9414-48F9-80E5-6A3FC8F94C20", "From Email Address|Attribute Value", "From", "The email address or an attribute that contains the person or email address that email should be sent from (will default to organization email). <span class='tip tip-liquid'></span>", 0, @"", "9F5F7CEC-F369-4FDF-802A-99074CE7A7FC" ); // Rock.Workflow.Action.SendEmail:From Email Address|Attribute Value
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "3B1D93D7-9414-48F9-80E5-6A3FC8F94C20", "From Email Address|Attribute Value", "From", "The email address or an attribute that contains the person or email address that email should be sent from (will default to organization email). <span class='tip tip-lava'></span>", 0, @"", "9F5F7CEC-F369-4FDF-802A-99074CE7A7FC" ); // Rock.Workflow.Action.SendEmail:From Email Address|Attribute Value
 
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "3B1D93D7-9414-48F9-80E5-6A3FC8F94C20", "Send To Email Address|Attribute Value", "To", "The email address or an attribute that contains the person or email address that email should be sent to", 1, @"", "0C4C13B8-7076-4872-925A-F950886B5E16" ); // Rock.Workflow.Action.SendEmail:Send To Email Address|Attribute Value
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "3B1D93D7-9414-48F9-80E5-6A3FC8F94C20", "Send To Email Address|Attribute Value", "To", "The email address or an attribute that contains the person or email address that email should be sent to. <span class='tip tip-lava'></span>", 1, @"", "0C4C13B8-7076-4872-925A-F950886B5E16" ); // Rock.Workflow.Action.SendEmail:Send To Email Address|Attribute Value
 
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "9C204CD0-1233-41C5-818A-C5DA439445AA", "Subject", "Subject", "The subject that should be used when sending email. <span class='tip tip-liquid'></span>", 2, @"", "5D9B13B6-CD96-4C7C-86FA-4512B9D28386" ); // Rock.Workflow.Action.SendEmail:Subject
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "9C204CD0-1233-41C5-818A-C5DA439445AA", "Subject", "Subject", "The subject that should be used when sending email. <span class='tip tip-lava'></span>", 2, @"", "5D9B13B6-CD96-4C7C-86FA-4512B9D28386" ); // Rock.Workflow.Action.SendEmail:Subject
 
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "D1269254-C15A-40BD-B784-ADCC231D3950" ); // Rock.Workflow.Action.SendEmail:Order
-
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "A95659E5-FF18-4587-8E29-9E4B393E917E", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "E4AD47F4-88EB-4A71-8288-A71C62A07F6D" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.ImportSexualOffenders:Active
-
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "A95659E5-FF18-4587-8E29-9E4B393E917E", "33E6DF69-BDFA-407A-9744-C175B60643AE", "DPS Excel File", "DPSExcelFile", "", 0, @"", "731D48EB-DF39-4B9E-9337-6DFD733053EF" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.ImportSexualOffenders:DPS Excel File
-
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "A95659E5-FF18-4587-8E29-9E4B393E917E", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "64924A19-DCF9-451B-85EE-99656CE9020E" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.ImportSexualOffenders:Order
-
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "D2B6E0A1-B5A7-4BD0-89FF-6BC5BA7E175B", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "C3ECEB73-6BA8-4268-9379-2A26C9378034" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.PopulatePotentialMatchesTable:Active
-
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "D2B6E0A1-B5A7-4BD0-89FF-6BC5BA7E175B", "33E6DF69-BDFA-407A-9744-C175B60643AE", "DPS Excel File", "DPSExcelFile", "", 0, @"", "4F28E746-629D-4D36-A3F1-71CFFE108250" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.PopulatePotentialMatchesTable:DPS Excel File
-
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "D2B6E0A1-B5A7-4BD0-89FF-6BC5BA7E175B", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "EC4E6399-6CE0-4899-A176-59F2DE562AAC" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.PopulatePotentialMatchesTable:Order
 
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "EEDA4318-F014-4A46-9C76-4C052EF81AA1", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "0CA0DDEF-48EF-4ABC-9822-A05E225DE26C" ); // Rock.Workflow.Action.CompleteWorkflow:Active
 
@@ -88,101 +86,97 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
 
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "F1A39347-6FE0-43D4-89FB-544195088ECF", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "86F795B0-0CB6-4DA4-9CE4-B11D0922F361" ); // Rock.Workflow.Action.PersistWorkflow:Order
 
-            RockMigrationHelper.UpdateWorkflowType( false, true, "DPS Matching Request", "", "78E38655-D951-41DB-A0FF-D6474775CFA1", "Work", "fa fa-list-ol", 0, false, 0, "1531D23C-2662-4CC2-9178-75CCDD332445" ); // DPS Matching Request
+            RockMigrationHelper.UpdateWorkflowType( false, true, "DPS Matching Request", "A request to run a comparison on the church's person database from the state's list of sexual predators.", "78E38655-D951-41DB-A0FF-D6474775CFA1", "Work", "fa fa-list-ol", 0, false, 0, "EDB241A0-FD88-4D75-966E-CF590C1D24AA" ); // DPS Matching Request
 
-            RockMigrationHelper.UpdateWorkflowTypeAttribute( "1531D23C-2662-4CC2-9178-75CCDD332445", "6F9E2DD0-E39E-4602-ADF9-EB710A75304A", "DPS Excel File", "DPSExcelFile", "", 0, @"", "0E790484-E68F-43EB-B717-74D7D332FBCC" ); // DPS Matching Request:DPS Excel File
+            RockMigrationHelper.UpdateWorkflowTypeAttribute( "EDB241A0-FD88-4D75-966E-CF590C1D24AA", "6F9E2DD0-E39E-4602-ADF9-EB710A75304A", "DPS File", "DPSFile", "The CSV file that lists the sexual predators and their information.", 0, @"", "E20E064A-80DF-4460-A7EE-476EC9F3CBDD" ); // DPS Matching Request:DPS File
 
-            RockMigrationHelper.UpdateWorkflowTypeAttribute( "1531D23C-2662-4CC2-9178-75CCDD332445", "E4EAB7B2-0B76-429B-AFE4-AD86D7428C70", "Requester", "Requester", "The person who made the request", 1, @"", "567C84A5-E6EE-489A-9993-73EECBFFAA10" ); // DPS Matching Request:Requester
+            RockMigrationHelper.UpdateWorkflowTypeAttribute( "EDB241A0-FD88-4D75-966E-CF590C1D24AA", "E4EAB7B2-0B76-429B-AFE4-AD86D7428C70", "Requester", "Requester", "The person who requested the DPS Match", 2, @"", "4DDE07B8-A0B9-4B15-B8B8-ABB38AF3F668" ); // DPS Matching Request:Requester
 
-            RockMigrationHelper.UpdateWorkflowTypeAttribute( "1531D23C-2662-4CC2-9178-75CCDD332445", "E4EAB7B2-0B76-429B-AFE4-AD86D7428C70", "Worker", "Worker", "", 2, @"", "C2E9EA22-7DBB-4B5F-8ABE-A7A078AB2949" ); // DPS Matching Request:Worker
+            RockMigrationHelper.UpdateWorkflowTypeAttribute( "EDB241A0-FD88-4D75-966E-CF590C1D24AA", "E4EAB7B2-0B76-429B-AFE4-AD86D7428C70", "Worker", "Worker", "The person assigned to the request.", 1, @"", "E357DDDC-F25D-4E0C-85D5-CF72E0761749" ); // DPS Matching Request:Worker
 
-            RockMigrationHelper.AddAttributeQualifier( "0E790484-E68F-43EB-B717-74D7D332FBCC", "binaryFileType", @"", "AD68C45A-587D-4F7B-AD01-56D4FF96CE38" ); // DPS Matching Request:DPS Excel File:binaryFileType
+            RockMigrationHelper.AddAttributeQualifier( "E20E064A-80DF-4460-A7EE-476EC9F3CBDD", "binaryFileType", @"c1142570-8cd6-4a20-83b1-acb47c1cd377", "FF3243AB-411C-45B7-9D69-DA3F36C566FC" ); // DPS Matching Request:DPS File:binaryFileType
 
-            RockMigrationHelper.UpdateWorkflowActivityType( "1531D23C-2662-4CC2-9178-75CCDD332445", true, "Request", "Prompt the user for the excel file.", true, 0, "71EA2494-21FB-49B1-A91A-FD22991D7B84" ); // DPS Matching Request:Request
+            RockMigrationHelper.UpdateWorkflowActivityType( "EDB241A0-FD88-4D75-966E-CF590C1D24AA", true, "Request", "Prompts the user for the DPS CSV file.", true, 0, "679C48B6-1962-4635-B21B-1EDB3FD61923" ); // DPS Matching Request:Request
 
-            RockMigrationHelper.UpdateWorkflowActivityType( "1531D23C-2662-4CC2-9178-75CCDD332445", true, "Process Excel File", "", false, 1, "DD721C86-7055-44AC-A315-0648E14E031A" ); // DPS Matching Request:Process Excel File
+            RockMigrationHelper.UpdateWorkflowActivityType( "EDB241A0-FD88-4D75-966E-CF590C1D24AA", true, "Process CSV File", "Processes the CSV file to find potential matches.", false, 1, "C4ACDF66-A296-4060-823F-E83C766ABFE0" ); // DPS Matching Request:Process CSV File
 
-            RockMigrationHelper.UpdateWorkflowActionForm( @"<h2>DPS Request</h2>
+            RockMigrationHelper.UpdateWorkflowActionForm( @"<h2>Request</h2>
 <p>
-Attach the Excel file below.
+Attach the DPS Sexual Offender file below. 
 </p>
-<br/>", @"", "Submit^fdc397cd-8b4a-436e-bea1-bce2e6717c03^DD721C86-7055-44AC-A315-0648E14E031A^Your information has been submitted successfully.|", "", true, "", "B740D7CE-5CB6-40FB-94DC-60C5608DDCE1" ); // DPS Matching Request:Request:Prompt User
+<br/>", @"", "Submit^fdc397cd-8b4a-436e-bea1-bce2e6717c03^C4ACDF66-A296-4060-823F-E83C766ABFE0^Your information has been submitted successfully.|", "88C7D1CC-3478-4562-A301-AE7D4D7FFF6D", true, "", "FF883052-A75F-44AA-A37F-B3D3DDD30732" ); // DPS Matching Request:Request:Prompt User
 
-            RockMigrationHelper.UpdateWorkflowActionFormAttribute( "B740D7CE-5CB6-40FB-94DC-60C5608DDCE1", "0E790484-E68F-43EB-B717-74D7D332FBCC", 0, true, false, true, "91871030-36FA-4838-B7FB-F36BA0A12199" ); // DPS Matching Request:Request:Prompt User:DPS Excel File
+            RockMigrationHelper.UpdateWorkflowActionFormAttribute( "FF883052-A75F-44AA-A37F-B3D3DDD30732", "E20E064A-80DF-4460-A7EE-476EC9F3CBDD", 0, true, false, true, "458CB4BF-0426-4881-8A0C-2B4BD2C94C39" ); // DPS Matching Request:Request:Prompt User:DPS File
 
-            RockMigrationHelper.UpdateWorkflowActionFormAttribute( "B740D7CE-5CB6-40FB-94DC-60C5608DDCE1", "567C84A5-E6EE-489A-9993-73EECBFFAA10", 1, false, true, false, "B9660A37-5882-40BA-8CA7-687D79CA68FB" ); // DPS Matching Request:Request:Prompt User:Requester
+            RockMigrationHelper.UpdateWorkflowActionFormAttribute( "FF883052-A75F-44AA-A37F-B3D3DDD30732", "E357DDDC-F25D-4E0C-85D5-CF72E0761749", 1, false, true, false, "F945BBBC-FAE2-4CC8-98CD-54A1BBEBDFB4" ); // DPS Matching Request:Request:Prompt User:Worker
 
-            RockMigrationHelper.UpdateWorkflowActionFormAttribute( "B740D7CE-5CB6-40FB-94DC-60C5608DDCE1", "C2E9EA22-7DBB-4B5F-8ABE-A7A078AB2949", 2, false, true, false, "FB7FDE38-BE1C-47CB-9DC2-C0D1E4C8EAF9" ); // DPS Matching Request:Request:Prompt User:Worker
+            RockMigrationHelper.UpdateWorkflowActionFormAttribute( "FF883052-A75F-44AA-A37F-B3D3DDD30732", "4DDE07B8-A0B9-4B15-B8B8-ABB38AF3F668", 2, false, true, false, "B73C080F-7567-46EC-812B-2A15B080B9F6" ); // DPS Matching Request:Request:Prompt User:Requester
 
-            RockMigrationHelper.UpdateWorkflowActionType( "71EA2494-21FB-49B1-A91A-FD22991D7B84", "Prompt User", 0, "486DC4FA-FCBC-425F-90B0-E606DA8A9F68", true, false, "B740D7CE-5CB6-40FB-94DC-60C5608DDCE1", "", 1, "", "26EF3DAD-865C-47D5-86B0-ABA68868C02A" ); // DPS Matching Request:Request:Prompt User
+            RockMigrationHelper.UpdateWorkflowActionType( "C4ACDF66-A296-4060-823F-E83C766ABFE0", "Complete Workflow", 3, "EEDA4318-F014-4A46-9C76-4C052EF81AA1", true, false, "", "", 1, "", "6720CB6A-1089-47D5-A996-E6854F66849A" ); // DPS Matching Request:Process CSV File:Complete Workflow
 
-            RockMigrationHelper.UpdateWorkflowActionType( "71EA2494-21FB-49B1-A91A-FD22991D7B84", "Set Requester", 1, "24B7D5E6-C30F-48F4-9D7E-AF45A342CF3A", true, false, "", "", 1, "", "79E993F9-2B54-4136-A729-E81EBDBAA374" ); // DPS Matching Request:Request:Set Requester
+            RockMigrationHelper.UpdateWorkflowActionType( "C4ACDF66-A296-4060-823F-E83C766ABFE0", "Notify Worker", 2, "66197B01-D1F0-4924-A315-47AD54E030DE", true, false, "", "", 1, "", "495BF896-2655-4EF2-9C3F-B23F4D038DE3" ); // DPS Matching Request:Process CSV File:Notify Worker
 
-            RockMigrationHelper.UpdateWorkflowActionType( "71EA2494-21FB-49B1-A91A-FD22991D7B84", "Set Worker", 2, "17962C23-2E94-4E06-8461-0FB8B94E2FEA", true, false, "", "", 1, "", "73038A7D-5626-45E0-913B-FA7C5566F7CF" ); // DPS Matching Request:Request:Set Worker
+            RockMigrationHelper.UpdateWorkflowActionType( "679C48B6-1962-4635-B21B-1EDB3FD61923", "Persist the Workflow", 3, "F1A39347-6FE0-43D4-89FB-544195088ECF", true, false, "", "", 1, "", "DD2517CE-C51B-472B-A7B4-EB3D25A0214B" ); // DPS Matching Request:Request:Persist the Workflow
 
-            RockMigrationHelper.UpdateWorkflowActionType( "71EA2494-21FB-49B1-A91A-FD22991D7B84", "Persist the Workflow", 3, "F1A39347-6FE0-43D4-89FB-544195088ECF", true, false, "", "", 1, "", "AD5FBED6-348D-46BE-9D79-1232B6D26656" ); // DPS Matching Request:Request:Persist the Workflow
+            RockMigrationHelper.UpdateWorkflowActionType( "679C48B6-1962-4635-B21B-1EDB3FD61923", "Set Requester", 1, "24B7D5E6-C30F-48F4-9D7E-AF45A342CF3A", true, false, "", "", 1, "", "585EC133-3949-4ED6-AF54-D39AA9745F64" ); // DPS Matching Request:Request:Set Requester
 
-            RockMigrationHelper.UpdateWorkflowActionType( "DD721C86-7055-44AC-A315-0648E14E031A", "Import Sexual Offenders", 0, "A95659E5-FF18-4587-8E29-9E4B393E917E", true, false, "", "", 1, "", "628A2316-025F-428C-85C6-3EE35E479A92" ); // DPS Matching Request:Process Excel File:Import Sexual Offenders
+            RockMigrationHelper.UpdateWorkflowActionType( "679C48B6-1962-4635-B21B-1EDB3FD61923", "Set Worker", 2, "17962C23-2E94-4E06-8461-0FB8B94E2FEA", true, false, "", "", 1, "", "3F06CF09-1D74-4AE1-BC20-33C56C482B80" ); // DPS Matching Request:Request:Set Worker
 
-            RockMigrationHelper.UpdateWorkflowActionType( "DD721C86-7055-44AC-A315-0648E14E031A", "Populate Potential Matches Table", 1, "D2B6E0A1-B5A7-4BD0-89FF-6BC5BA7E175B", true, false, "", "", 1, "", "F78EBACE-4F8D-466F-A311-B17587F1216D" ); // DPS Matching Request:Process Excel File:Populate Potential Matches Table
+            RockMigrationHelper.UpdateWorkflowActionType( "679C48B6-1962-4635-B21B-1EDB3FD61923", "Prompt User", 0, "486DC4FA-FCBC-425F-90B0-E606DA8A9F68", true, false, "FF883052-A75F-44AA-A37F-B3D3DDD30732", "", 1, "", "F8B8BF84-B40B-4E17-BA74-A842CEC8E1BB" ); // DPS Matching Request:Request:Prompt User
 
-            RockMigrationHelper.UpdateWorkflowActionType( "DD721C86-7055-44AC-A315-0648E14E031A", "Notify Worker", 2, "66197B01-D1F0-4924-A315-47AD54E030DE", true, false, "", "", 1, "", "8B9EC2CC-E62F-4E6D-A356-3827BEE344E4" ); // DPS Matching Request:Process Excel File:Notify Worker
+            RockMigrationHelper.UpdateWorkflowActionType( "C4ACDF66-A296-4060-823F-E83C766ABFE0", "Import Sexual Offenders", 0, "3B7A0BFC-2976-4A51-AB2B-F4349DF41AD4", true, false, "", "", 1, "", "01E028B2-0154-41E8-9BAD-99E88007945A" ); // DPS Matching Request:Process CSV File:Import Sexual Offenders
 
-            RockMigrationHelper.UpdateWorkflowActionType( "DD721C86-7055-44AC-A315-0648E14E031A", "Complete the Workflow", 3, "EEDA4318-F014-4A46-9C76-4C052EF81AA1", true, false, "", "", 1, "", "30C2F3FA-85D6-44CD-9150-75CA40451E09" ); // DPS Matching Request:Process Excel File:Complete the Workflow
+            RockMigrationHelper.UpdateWorkflowActionType( "C4ACDF66-A296-4060-823F-E83C766ABFE0", "Populate Potential Matches Table", 1, "5EB31D9E-DCEC-48ED-9029-522E59629D14", true, false, "", "", 1, "", "2B57A747-912C-42C6-B1AB-433506C2E9DA" ); // DPS Matching Request:Process CSV File:Populate Potential Matches Table
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "26EF3DAD-865C-47D5-86B0-ABA68868C02A", "234910F2-A0DB-4D7D-BAF7-83C880EF30AE", @"False" ); // DPS Matching Request:Request:Prompt User:Active
+            RockMigrationHelper.AddActionTypeAttributeValue( "F8B8BF84-B40B-4E17-BA74-A842CEC8E1BB", "234910F2-A0DB-4D7D-BAF7-83C880EF30AE", @"False" ); // DPS Matching Request:Request:Prompt User:Active
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "26EF3DAD-865C-47D5-86B0-ABA68868C02A", "C178113D-7C86-4229-8424-C6D0CF4A7E23", @"" ); // DPS Matching Request:Request:Prompt User:Order
+            RockMigrationHelper.AddActionTypeAttributeValue( "F8B8BF84-B40B-4E17-BA74-A842CEC8E1BB", "C178113D-7C86-4229-8424-C6D0CF4A7E23", @"" ); // DPS Matching Request:Request:Prompt User:Order
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "79E993F9-2B54-4136-A729-E81EBDBAA374", "DE9CB292-4785-4EA3-976D-3826F91E9E98", @"False" ); // DPS Matching Request:Request:Set Requester:Active
+            RockMigrationHelper.AddActionTypeAttributeValue( "585EC133-3949-4ED6-AF54-D39AA9745F64", "DE9CB292-4785-4EA3-976D-3826F91E9E98", @"False" ); // DPS Matching Request:Request:Set Requester:Active
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "79E993F9-2B54-4136-A729-E81EBDBAA374", "89E9BCED-91AB-47B0-AD52-D78B0B7CB9E8", @"" ); // DPS Matching Request:Request:Set Requester:Order
+            RockMigrationHelper.AddActionTypeAttributeValue( "585EC133-3949-4ED6-AF54-D39AA9745F64", "89E9BCED-91AB-47B0-AD52-D78B0B7CB9E8", @"" ); // DPS Matching Request:Request:Set Requester:Order
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "79E993F9-2B54-4136-A729-E81EBDBAA374", "BBED8A83-8BB2-4D35-BAFB-05F67DCAD112", @"567c84a5-e6ee-489a-9993-73eecbffaa10" ); // DPS Matching Request:Request:Set Requester:Person Attribute
+            RockMigrationHelper.AddActionTypeAttributeValue( "585EC133-3949-4ED6-AF54-D39AA9745F64", "BBED8A83-8BB2-4D35-BAFB-05F67DCAD112", @"4dde07b8-a0b9-4b15-b8b8-abb38af3f668" ); // DPS Matching Request:Request:Set Requester:Person Attribute
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "73038A7D-5626-45E0-913B-FA7C5566F7CF", "CE28B79D-FBC2-4894-9198-D923D0217549", @"False" ); // DPS Matching Request:Request:Set Worker:Active
+            RockMigrationHelper.AddActionTypeAttributeValue( "3F06CF09-1D74-4AE1-BC20-33C56C482B80", "CE28B79D-FBC2-4894-9198-D923D0217549", @"False" ); // DPS Matching Request:Request:Set Worker:Active
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "73038A7D-5626-45E0-913B-FA7C5566F7CF", "7AC47975-71AC-4A2F-BF1F-115CF5578D6F", @"c2e9ea22-7dbb-4b5f-8abe-a7a078ab2949" ); // DPS Matching Request:Request:Set Worker:Attribute
+            RockMigrationHelper.AddActionTypeAttributeValue( "3F06CF09-1D74-4AE1-BC20-33C56C482B80", "7AC47975-71AC-4A2F-BF1F-115CF5578D6F", @"e357dddc-f25d-4e0c-85d5-cf72e0761749" ); // DPS Matching Request:Request:Set Worker:Attribute
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "73038A7D-5626-45E0-913B-FA7C5566F7CF", "18EF907D-607E-4891-B034-7AA379D77854", @"" ); // DPS Matching Request:Request:Set Worker:Order
+            RockMigrationHelper.AddActionTypeAttributeValue( "3F06CF09-1D74-4AE1-BC20-33C56C482B80", "18EF907D-607E-4891-B034-7AA379D77854", @"" ); // DPS Matching Request:Request:Set Worker:Order
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "AD5FBED6-348D-46BE-9D79-1232B6D26656", "50B01639-4938-40D2-A791-AA0EB4F86847", @"False" ); // DPS Matching Request:Request:Persist the Workflow:Active
+            RockMigrationHelper.AddActionTypeAttributeValue( "DD2517CE-C51B-472B-A7B4-EB3D25A0214B", "50B01639-4938-40D2-A791-AA0EB4F86847", @"False" ); // DPS Matching Request:Request:Persist the Workflow:Active
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "AD5FBED6-348D-46BE-9D79-1232B6D26656", "86F795B0-0CB6-4DA4-9CE4-B11D0922F361", @"" ); // DPS Matching Request:Request:Persist the Workflow:Order
+            RockMigrationHelper.AddActionTypeAttributeValue( "DD2517CE-C51B-472B-A7B4-EB3D25A0214B", "86F795B0-0CB6-4DA4-9CE4-B11D0922F361", @"" ); // DPS Matching Request:Request:Persist the Workflow:Order
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "628A2316-025F-428C-85C6-3EE35E479A92", "E4AD47F4-88EB-4A71-8288-A71C62A07F6D", @"False" ); // DPS Matching Request:Process Excel File:Import Sexual Offenders:Active
+            RockMigrationHelper.AddActionTypeAttributeValue( "01E028B2-0154-41E8-9BAD-99E88007945A", "3430AA47-09AA-4D58-8333-9687D4B5FBE3", @"False" ); // DPS Matching Request:Process CSV File:Import Sexual Offenders:Active
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "628A2316-025F-428C-85C6-3EE35E479A92", "731D48EB-DF39-4B9E-9337-6DFD733053EF", @"0e790484-e68f-43eb-b717-74d7d332fbcc" ); // DPS Matching Request:Process Excel File:Import Sexual Offenders:DPS Excel File
+            RockMigrationHelper.AddActionTypeAttributeValue( "01E028B2-0154-41E8-9BAD-99E88007945A", "3673E369-3FEE-4BB2-A8EC-E97FEEEDE2D2", @"" ); // DPS Matching Request:Process CSV File:Import Sexual Offenders:Order
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "628A2316-025F-428C-85C6-3EE35E479A92", "64924A19-DCF9-451B-85EE-99656CE9020E", @"" ); // DPS Matching Request:Process Excel File:Import Sexual Offenders:Order
+            RockMigrationHelper.AddActionTypeAttributeValue( "2B57A747-912C-42C6-B1AB-433506C2E9DA", "8832C0A6-F423-4267-A23C-618A228EC3FD", @"False" ); // DPS Matching Request:Process CSV File:Populate Potential Matches Table:Active
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "F78EBACE-4F8D-466F-A311-B17587F1216D", "C3ECEB73-6BA8-4268-9379-2A26C9378034", @"False" ); // DPS Matching Request:Process Excel File:Populate Potential Matches Table:Active
+            RockMigrationHelper.AddActionTypeAttributeValue( "2B57A747-912C-42C6-B1AB-433506C2E9DA", "00751452-897D-44E6-A23D-4245EF0F700E", @"" ); // DPS Matching Request:Process CSV File:Populate Potential Matches Table:Order
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "F78EBACE-4F8D-466F-A311-B17587F1216D", "4F28E746-629D-4D36-A3F1-71CFFE108250", @"0e790484-e68f-43eb-b717-74d7d332fbcc" ); // DPS Matching Request:Process Excel File:Populate Potential Matches Table:DPS Excel File
+            RockMigrationHelper.AddActionTypeAttributeValue( "495BF896-2655-4EF2-9C3F-B23F4D038DE3", "36197160-7D3D-490D-AB42-7E29105AFE91", @"False" ); // DPS Matching Request:Process CSV File:Notify Worker:Active
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "F78EBACE-4F8D-466F-A311-B17587F1216D", "EC4E6399-6CE0-4899-A176-59F2DE562AAC", @"" ); // DPS Matching Request:Process Excel File:Populate Potential Matches Table:Order
+            RockMigrationHelper.AddActionTypeAttributeValue( "495BF896-2655-4EF2-9C3F-B23F4D038DE3", "9F5F7CEC-F369-4FDF-802A-99074CE7A7FC", @"" ); // DPS Matching Request:Process CSV File:Notify Worker:From Email Address|Attribute Value
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "8B9EC2CC-E62F-4E6D-A356-3827BEE344E4", "36197160-7D3D-490D-AB42-7E29105AFE91", @"False" ); // DPS Matching Request:Process Excel File:Notify Worker:Active
+            RockMigrationHelper.AddActionTypeAttributeValue( "495BF896-2655-4EF2-9C3F-B23F4D038DE3", "D1269254-C15A-40BD-B784-ADCC231D3950", @"" ); // DPS Matching Request:Process CSV File:Notify Worker:Order
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "8B9EC2CC-E62F-4E6D-A356-3827BEE344E4", "9F5F7CEC-F369-4FDF-802A-99074CE7A7FC", @"" ); // DPS Matching Request:Process Excel File:Notify Worker:From Email Address|Attribute Value
+            RockMigrationHelper.AddActionTypeAttributeValue( "495BF896-2655-4EF2-9C3F-B23F4D038DE3", "0C4C13B8-7076-4872-925A-F950886B5E16", @"e357dddc-f25d-4e0c-85d5-cf72e0761749" ); // DPS Matching Request:Process CSV File:Notify Worker:Send To Email Address|Attribute Value
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "8B9EC2CC-E62F-4E6D-A356-3827BEE344E4", "D1269254-C15A-40BD-B784-ADCC231D3950", @"" ); // DPS Matching Request:Process Excel File:Notify Worker:Order
+            RockMigrationHelper.AddActionTypeAttributeValue( "495BF896-2655-4EF2-9C3F-B23F4D038DE3", "5D9B13B6-CD96-4C7C-86FA-4512B9D28386", @"DPS Matching Request" ); // DPS Matching Request:Process CSV File:Notify Worker:Subject
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "8B9EC2CC-E62F-4E6D-A356-3827BEE344E4", "0C4C13B8-7076-4872-925A-F950886B5E16", @"c2e9ea22-7dbb-4b5f-8abe-a7a078ab2949" ); // DPS Matching Request:Process Excel File:Notify Worker:Send To Email Address|Attribute Value
+            RockMigrationHelper.AddActionTypeAttributeValue( "495BF896-2655-4EF2-9C3F-B23F4D038DE3", "4D245B9E-6B03-46E7-8482-A51FBA190E4D", @"{{ GlobalAttribute.EmailHeader }}
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "8B9EC2CC-E62F-4E6D-A356-3827BEE344E4", "5D9B13B6-CD96-4C7C-86FA-4512B9D28386", @"" ); // DPS Matching Request:Process Excel File:Notify Worker:Subject
+<p>The following DPS Matching Request has been submitted by {{ Workflow.Requester }}:</p>
 
-            RockMigrationHelper.AddActionTypeAttributeValue( "8B9EC2CC-E62F-4E6D-A356-3827BEE344E4", "4D245B9E-6B03-46E7-8482-A51FBA190E4D", @"{{ GlobalAttribute.EmailHeader }}
+<h4><a href='{{ GlobalAttribute.InternalApplicationRoot }}DPSMatching'>Process Request</a></h4>
 
-<p>A DPS Match Request has been submitted by {{ Workflow.Requester }}:</p>
-<h4><a href='{{ GlobalAttribute.InternalApplicationRoot }}DPSMatching'>Process DPS Request</a></h4>
+{{ GlobalAttribute.EmailFooter }}" ); // DPS Matching Request:Process CSV File:Notify Worker:Body
 
+            RockMigrationHelper.AddActionTypeAttributeValue( "6720CB6A-1089-47D5-A996-E6854F66849A", "0CA0DDEF-48EF-4ABC-9822-A05E225DE26C", @"False" ); // DPS Matching Request:Process CSV File:Complete Workflow:Active
 
-{{ GlobalAttribute.EmailFooter }}" ); // DPS Matching Request:Process Excel File:Notify Worker:Body
-
-            RockMigrationHelper.AddActionTypeAttributeValue( "30C2F3FA-85D6-44CD-9150-75CA40451E09", "0CA0DDEF-48EF-4ABC-9822-A05E225DE26C", @"False" ); // DPS Matching Request:Process Excel File:Complete the Workflow:Active
-
-            RockMigrationHelper.AddActionTypeAttributeValue( "30C2F3FA-85D6-44CD-9150-75CA40451E09", "25CAD4BE-5A00-409D-9BAB-E32518D89956", @"" ); // DPS Matching Request:Process Excel File:Complete the Workflow:Order
+            RockMigrationHelper.AddActionTypeAttributeValue( "6720CB6A-1089-47D5-A996-E6854F66849A", "25CAD4BE-5A00-409D-9BAB-E32518D89956", @"" ); // DPS Matching Request:Process CSV File:Complete Workflow:Order
 
         }
 

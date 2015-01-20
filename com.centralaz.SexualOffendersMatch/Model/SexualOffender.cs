@@ -38,16 +38,16 @@ namespace com.centralaz.SexualOffendersMatch.Model
         public String FirstName { get; set; }
 
         [DataMember]
-        public Char MiddleInitial { get; set; }
+        public Char? MiddleInitial { get; set; }
 
         [DataMember]
-        public int Age { get; set; }
+        public int? Age { get; set; }
 
         [DataMember]
-        public int Height { get; set; }
+        public int? Height { get; set; }
 
         [DataMember]
-        public int Weight { get; set; }
+        public int? Weight { get; set; }
 
         [DataMember]
         public String Race { get; set; }
@@ -71,25 +71,25 @@ namespace com.centralaz.SexualOffendersMatch.Model
         public String ResidentialState { get; set; }
 
         [DataMember]
-        public int ResidentialZip { get; set; }
+        public int? ResidentialZip { get; set; }
 
         [DataMember]
-        public DateTime VerificationDate { get; set; }
+        public DateTime? VerificationDate { get; set; }
 
         [DataMember]
         public String Offense { get; set; }
 
         [DataMember]
-        public int OffenseLevel { get; set; }
+        public int? OffenseLevel { get; set; }
 
         [DataMember]
-        public bool Absconder { get; set; }
+        public bool? Absconder { get; set; }
 
         [DataMember]
         public String ConvictingJurisdiction { get; set; }
 
         [DataMember]
-        public bool Unverified { get; set; }
+        public bool? Unverified { get; set; }
 
         #endregion
 
