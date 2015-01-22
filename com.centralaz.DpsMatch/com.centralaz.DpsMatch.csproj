@@ -59,18 +59,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\SexualOffendersMatchContext.cs" />
-    <Compile Include="Data\SexualOffendersMatchService.cs" />
+    <Compile Include="Data\DpsMatchContext.cs" />
+    <Compile Include="Data\DpsMatchService.cs" />
     <Compile Include="Migrations\003_DPSPageBlockRoute.cs" />
     <Compile Include="Migrations\002_WorkflowConfig.cs" />
     <Compile Include="Migrations\001_CreateDb.cs" />
-    <Compile Include="Model\SexualOffender.cs" />
-    <Compile Include="Model\SexualOffenderPotentialMatch.cs" />
-    <Compile Include="Model\SexualOffenderPotentialMatchService.cs" />
-    <Compile Include="Model\SexualOffenderService.cs" />
+    <Compile Include="Model\Offender.cs" />
+    <Compile Include="Model\Match.cs" />
+    <Compile Include="Model\MatchService.cs" />
+    <Compile Include="Model\OffenderService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Workflow\Action\ImportSexualOffenders.cs" />
-    <Compile Include="Workflow\Action\PopulatePotentialMatchesTable.cs" />
+    <Compile Include="Workflow\Action\ImportOffenders.cs" />
+    <Compile Include="Workflow\Action\PopulateMatchesTable.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

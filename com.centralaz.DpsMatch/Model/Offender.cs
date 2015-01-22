@@ -9,24 +9,24 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;
 using System.Linq;
 using System.Runtime.Serialization;
-using com.centralaz.SexualOffendersMatch.Data;
+using com.centralaz.DpsMatch.Data;
 using Rock;
 using Rock.Data;
 using Rock.Model;
-namespace com.centralaz.SexualOffendersMatch.Model
+namespace com.centralaz.DpsMatch.Model
 {
     /// <summary>
-    /// A SexualOffender
+    /// A Offender
     /// </summary>
-    [Table( "_com_centralaz_SexualOffendersMatch_SexualOffender" )]
+    [Table( "_com_centralaz_DpsMatch_Offender" )]
     [DataContract]
-    public class SexualOffender : Rock.Data.Model<SexualOffender>
+    public class Offender : Rock.Data.Model<Offender>
     {
 
         #region Entity Properties
 
         /// <summary>
-        /// The KeyString, the unique identifier. LastName+FirstName+Race+Sex+Hair+Eyes
+        /// The KeyString, the unique identifier. LastName+FirstName+Race+Sex+Hair+Eyes+PostalCode
         /// </summary>
         [DataMember]
         public String KeyString { get; set; }
@@ -98,12 +98,12 @@ namespace com.centralaz.SexualOffendersMatch.Model
     #region Entity Configuration
 
 
-    public partial class SexualOffenderConfiguration : EntityTypeConfiguration<SexualOffender>
+    public partial class OffenderConfiguration : EntityTypeConfiguration<Offender>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SexualOffenderConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="OffenderConfiguration"/> class.
         /// </summary>
-        public SexualOffenderConfiguration()
+        public OffenderConfiguration()
         {
         }
     }

@@ -9,18 +9,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;
 using System.Linq;
 using System.Runtime.Serialization;
-using com.centralaz.SexualOffendersMatch.Data;
+using com.centralaz.DpsMatch.Data;
 using Rock;
 using Rock.Data;
 using Rock.Model;
-namespace com.centralaz.SexualOffendersMatch.Model
+namespace com.centralaz.DpsMatch.Model
 {
     /// <summary>
-    /// A SexualOffenderPotentialMatch
+    /// A Match
     /// </summary>
-    [Table( "_com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch" )]
+    [Table( "_com_centralaz_DpsMatch_Match" )]
     [DataContract]
-    public class SexualOffenderPotentialMatch : Rock.Data.Model<SexualOffenderPotentialMatch>
+    public class Match : Rock.Data.Model<Match>
     {
 
         #region Entity Properties
@@ -32,10 +32,10 @@ namespace com.centralaz.SexualOffendersMatch.Model
         public int PersonAliasId { get; set; }
 
         /// <summary>
-        /// The Id of the potential Sexual Offender Match
+        /// The Keystring of the potential Offender Match
         /// </summary>
         [DataMember]
-        public int SexualOffenderId { get; set; }
+        public String KeyString { get; set; }
 
         /// <summary>
         /// The likelyhood of the match
@@ -73,7 +73,7 @@ namespace com.centralaz.SexualOffendersMatch.Model
         /// <summary>
         /// The sexual offender of the potential match
         /// </summary>
-        public virtual SexualOffender SexualOffender { get; set; }
+        public virtual Offender Offender { get; set; }
 
         #endregion
     }
@@ -81,15 +81,15 @@ namespace com.centralaz.SexualOffendersMatch.Model
     #region Entity Configuration
 
 
-    public partial class SexualOffenderPotentialMatchConfiguration : EntityTypeConfiguration<SexualOffenderPotentialMatch>
+    public partial class MatchConfiguration : EntityTypeConfiguration<Match>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SexualOffenderPotentialMatchConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="MatchConfiguration"/> class.
         /// </summary>
-        public SexualOffenderPotentialMatchConfiguration()
+        public MatchConfiguration()
         {
             this.HasRequired( r => r.PersonAlias ).WithMany().HasForeignKey( r => r.PersonAliasId ).WillCascadeOnDelete( false );
-            this.HasRequired( r => r.SexualOffender ).WithMany().HasForeignKey( r => r.SexualOffenderId ).WillCascadeOnDelete( false );
+            this.HasRequired( r => r.Offender ).WithMany().HasForeignKey( r => r.KeyString ).WillCascadeOnDelete( false );
         }
     }
 

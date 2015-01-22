@@ -7,26 +7,26 @@ using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Web;
 
-using com.centralaz.SexualOffendersMatch.Model;
+using com.centralaz.DpsMatch.Model;
 
-namespace com.centralaz.SexualOffendersMatch.Data
+namespace com.centralaz.DpsMatch.Data
 {
     /// <summary>
     /// 
     /// </summary>
-    public partial class SexualOffendersMatchContext : Rock.Data.DbContext
+    public partial class DpsMatchContext : Rock.Data.DbContext
     {
 
         #region Models
 
-        public DbSet<SexualOffender> SexualOffenders { get; set; }
-        public DbSet<SexualOffenderPotentialMatch> SexualOffenderPotentialMatchs { get; set; }
+        public DbSet<Offender> Offenders { get; set; }
+        public DbSet<Match> Matchs { get; set; }
         #endregion
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SampleProjectContext"/> class.
         /// </summary>
-        public SexualOffendersMatchContext()
+        public DpsMatchContext()
             : base("RockContext")
         {
             //intentionally left blank
@@ -50,7 +50,7 @@ namespace com.centralaz.SexualOffendersMatch.Data
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             // we don't want this context to create a database or look for EF Migrations, do set the Initializer to null
-            Database.SetInitializer<SexualOffendersMatchContext>(new NullDatabaseInitializer<SexualOffendersMatchContext>());
+            Database.SetInitializer<DpsMatchContext>(new NullDatabaseInitializer<DpsMatchContext>());
 
             Rock.Data.ContextHelper.AddConfigurations(modelBuilder);
             modelBuilder.Configurations.AddFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());

@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 using Rock.Data;
 
-namespace com.centralaz.SexualOffendersMatch.Data
+namespace com.centralaz.DpsMatch.Data
 {
      /// <summary>
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class SexualOffendersMatchService<T> : Rock.Data.Service<T> where T : Rock.Data.Entity<T>, new()
+    public class DpsMatchService<T> : Rock.Data.Service<T> where T : Rock.Data.Entity<T>, new()
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DocumentationService{T}"/> class.
         /// </summary>
-        public SexualOffendersMatchService( SexualOffendersMatchContext context )
+        public DpsMatchService( DpsMatchContext context )
             : base( context )
         {
         }

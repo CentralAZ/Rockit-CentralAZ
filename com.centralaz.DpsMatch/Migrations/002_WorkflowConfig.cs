@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Rock.Plugin;
 
-namespace com.centralaz.SexualOffendersMatch.Migrations
+namespace com.centralaz.DpsMatch.Migrations
 {
     [MigrationNumber( 2, "1.0.14" )]
     public class WorkflowConfig : Migration
@@ -24,9 +24,9 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
 
             RockMigrationHelper.UpdateEntityType( "Rock.Model.WorkflowActionType", "23E3273A-B137-48A3-9AFF-C8DC832DDCA6", true, true );
 
-            RockMigrationHelper.UpdateEntityType( "com.centralaz.SexualOffendersMatch.Workflow.Action.ImportSexualOffenders", "3B7A0BFC-2976-4A51-AB2B-F4349DF41AD4", false, true );
+            RockMigrationHelper.UpdateEntityType( "com.centralaz.DpsMatch.Workflow.Action.ImportOffenders", "3B7A0BFC-2976-4A51-AB2B-F4349DF41AD4", false, true );
 
-            RockMigrationHelper.UpdateEntityType( "com.centralaz.SexualOffendersMatch.Workflow.Action.PopulatePotentialMatchesTable", "5EB31D9E-DCEC-48ED-9029-522E59629D14", false, true );
+            RockMigrationHelper.UpdateEntityType( "com.centralaz.DpsMatch.Workflow.Action.PopulateMatchesTable", "5EB31D9E-DCEC-48ED-9029-522E59629D14", false, true );
 
             RockMigrationHelper.UpdateEntityType( "Rock.Workflow.Action.CompleteWorkflow", "EEDA4318-F014-4A46-9C76-4C052EF81AA1", false, true );
 
@@ -54,17 +54,17 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
 
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "24B7D5E6-C30F-48F4-9D7E-AF45A342CF3A", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "89E9BCED-91AB-47B0-AD52-D78B0B7CB9E8" ); // Rock.Workflow.Action.SetAttributeToCurrentPerson:Order
 
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "3B7A0BFC-2976-4A51-AB2B-F4349DF41AD4", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "3430AA47-09AA-4D58-8333-9687D4B5FBE3" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.ImportSexualOffenders:Active
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "3B7A0BFC-2976-4A51-AB2B-F4349DF41AD4", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "3430AA47-09AA-4D58-8333-9687D4B5FBE3" ); // com.centralaz.DpsMatch.Workflow.Action.ImportOffenders:Active
 
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "3B7A0BFC-2976-4A51-AB2B-F4349DF41AD4", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "3673E369-3FEE-4BB2-A8EC-E97FEEEDE2D2" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.ImportSexualOffenders:Order
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "3B7A0BFC-2976-4A51-AB2B-F4349DF41AD4", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "3673E369-3FEE-4BB2-A8EC-E97FEEEDE2D2" ); // com.centralaz.DpsMatch.Workflow.Action.ImportOffenders:Order
 
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "486DC4FA-FCBC-425F-90B0-E606DA8A9F68", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "234910F2-A0DB-4D7D-BAF7-83C880EF30AE" ); // Rock.Workflow.Action.UserEntryForm:Active
 
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "486DC4FA-FCBC-425F-90B0-E606DA8A9F68", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "C178113D-7C86-4229-8424-C6D0CF4A7E23" ); // Rock.Workflow.Action.UserEntryForm:Order
 
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "5EB31D9E-DCEC-48ED-9029-522E59629D14", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "8832C0A6-F423-4267-A23C-618A228EC3FD" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.PopulatePotentialMatchesTable:Active
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "5EB31D9E-DCEC-48ED-9029-522E59629D14", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Active", "Active", "Should Service be used?", 0, @"False", "8832C0A6-F423-4267-A23C-618A228EC3FD" ); // com.centralaz.DpsMatch.Workflow.Action.PopulateMatchesTable:Active
 
-            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "5EB31D9E-DCEC-48ED-9029-522E59629D14", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "00751452-897D-44E6-A23D-4245EF0F700E" ); // com.centralaz.SexualOffendersMatch.Workflow.Action.PopulatePotentialMatchesTable:Order
+            RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "5EB31D9E-DCEC-48ED-9029-522E59629D14", "A75DFC58-7A1B-4799-BF31-451B2BBE38FF", "Order", "Order", "The order that this service should be used (priority)", 0, @"", "00751452-897D-44E6-A23D-4245EF0F700E" ); // com.centralaz.DpsMatch.Workflow.Action.PopulateMatchesTable:Order
 
             RockMigrationHelper.UpdateWorkflowActionEntityAttribute( "66197B01-D1F0-4924-A315-47AD54E030DE", "1D0D3794-C210-48A8-8C68-3FBEC08A6BA5", "Body", "Body", "The body of the email that should be sent. <span class='tip tip-lava'></span> <span class='tip tip-html'></span>", 3, @"", "4D245B9E-6B03-46E7-8482-A51FBA190E4D" ); // Rock.Workflow.Action.SendEmail:Body
 

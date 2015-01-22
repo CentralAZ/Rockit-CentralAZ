@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Rock.Plugin;
 
-namespace com.centralaz.SexualOffendersMatch.Migrations
+namespace com.centralaz.DpsMatch.Migrations
 {
     [MigrationNumber( 1, "1.0.14" )]
     public class CreateDb : Migration
@@ -17,7 +17,7 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
         public override void Up()
         {
             Sql( @"
-                CREATE TABLE [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffender](
+                CREATE TABLE [dbo].[_com_centralaz_DpsMatch_Offender](
 	                [Id] [int] IDENTITY(1,1) NOT NULL,
 	                [KeyString] [nvarchar](100) NOT NULL,
 	                [LastName] [nvarchar](50) NOT NULL,
@@ -46,16 +46,22 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
 	                [CreatedByPersonAliasId] [int] NULL,
 	                [ModifiedByPersonAliasId] [int] NULL,
 	                [ForeignId] [nvarchar](50) NULL,
-                 CONSTRAINT [PK__com_centralaz_SexualOffendersMatch_SexualOffender] PRIMARY KEY CLUSTERED 
+                 CONSTRAINT [PK__com_centralaz_DpsMatch_Offender] PRIMARY KEY CLUSTERED 
                 (
 	                [Id] ASC
                 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
                 ) ON [PRIMARY]
+" );
 
-                CREATE TABLE [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch](
+            Sql( @"                     
+                CREATE UNIQUE INDEX IX_KeyString ON dbo._com_centralaz_DpsMatch_Offender ([KeyString]); 
+" );
+
+            Sql( @"
+                CREATE TABLE [dbo].[_com_centralaz_DpsMatch_Match](
 	                [Id] [int] IDENTITY(1,1) NOT NULL,
 	                [PersonAliasId] [int] NOT NULL,
-	                [SexualOffenderId] [int] NOT NULL,
+	                [OffenderId] [int] NOT NULL,
 	                [MatchPercentage] [int] NULL,
 	                [IsConfirmedAsNotMatch] [bit] NULL,
 	                [IsConfirmedAsMatch] [bit] NULL,
@@ -66,22 +72,21 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
 	                [CreatedByPersonAliasId] [int] NULL,
 	                [ModifiedByPersonAliasId] [int] NULL,
 	                [ForeignId] [nvarchar](50) NULL,
-                 CONSTRAINT [PK__com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch] PRIMARY KEY CLUSTERED 
+                 CONSTRAINT [PK__com_centralaz_DpsMatch_Match] PRIMARY KEY CLUSTERED 
                 (
 	                [Id] ASC
                 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
                 ) ON [PRIMARY]
 
-                ALTER TABLE [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch]  WITH CHECK ADD  CONSTRAINT [FK__com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch__com_centralaz_SexualOffendersMatch_SexualOffender] FOREIGN KEY([SexualOffenderId])
-                REFERENCES [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffender] ([Id])
+                ALTER TABLE [dbo].[_com_centralaz_DpsMatch_Match]  WITH CHECK ADD  CONSTRAINT [FK__com_centralaz_DpsMatch_Match__com_centralaz_DpsMatch_Offender] FOREIGN KEY([OffenderId])
+                REFERENCES [dbo].[_com_centralaz_DpsMatch_Offender] ([Id])
 
-                ALTER TABLE [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch] CHECK CONSTRAINT [FK__com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch__com_centralaz_SexualOffendersMatch_SexualOffender]
+                ALTER TABLE [dbo].[_com_centralaz_DpsMatch_Match] CHECK CONSTRAINT [FK__com_centralaz_DpsMatch_Match__com_centralaz_DpsMatch_Offender]
 
-                ALTER TABLE [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch]  WITH CHECK ADD  CONSTRAINT [FK__com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch_PersonAlias] FOREIGN KEY([PersonAliasId])
+                ALTER TABLE [dbo].[_com_centralaz_DpsMatch_Match]  WITH CHECK ADD  CONSTRAINT [FK__com_centralaz_DpsMatch_Match_PersonAlias] FOREIGN KEY([PersonAliasId])
                 REFERENCES [dbo].[PersonAlias] ([Id])
 
-                ALTER TABLE [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch] CHECK CONSTRAINT [FK__com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch_PersonAlias]
-
+                ALTER TABLE [dbo].[_com_centralaz_DpsMatch_Match] CHECK CONSTRAINT [FK__com_centralaz_DpsMatch_Match_PersonAlias]
 " );
         }
 
@@ -91,11 +96,11 @@ namespace com.centralaz.SexualOffendersMatch.Migrations
         public override void Down()
         {
             Sql( @"
-                ALTER TABLE [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch] DROP CONSTRAINT [FK__com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch_PersonAlias]
-                ALTER TABLE [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch] DROP CONSTRAINT [FK__com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch__com_centralaz_SexualOffendersMatch_SexualOffender]
-                DROP TABLE [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffenderPotentialMatch]
+                ALTER TABLE [dbo].[_com_centralaz_DpsMatch_Match] DROP CONSTRAINT [FK__com_centralaz_DpsMatch_Match_PersonAlias]
+                ALTER TABLE [dbo].[_com_centralaz_DpsMatch_Match] DROP CONSTRAINT [FK__com_centralaz_DpsMatch_Match__com_centralaz_DpsMatch_Offender]
+                DROP TABLE [dbo].[_com_centralaz_DpsMatch_Match]
 
-                DROP TABLE [dbo].[_com_centralaz_SexualOffendersMatch_SexualOffender]
+                DROP TABLE [dbo].[_com_centralaz_DpsMatch_Offender]
 " );
         }
     }
