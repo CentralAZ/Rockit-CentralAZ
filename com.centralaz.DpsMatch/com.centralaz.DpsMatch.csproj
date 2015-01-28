@@ -64,11 +64,14 @@
     <Compile Include="Migrations\003_DPSPageBlockRoute.cs" />
     <Compile Include="Migrations\002_WorkflowConfig.cs" />
     <Compile Include="Migrations\001_CreateDb.cs" />
+    <Compile Include="Migrations\004_AddStoredProcedures.cs" />
     <Compile Include="Model\Offender.cs" />
     <Compile Include="Model\Match.cs" />
     <Compile Include="Model\MatchService.cs" />
     <Compile Include="Model\OffenderService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Web\UI\Controls\Grid\MatchField.cs" />
+    <Compile Include="Web\UI\Controls\Grid\OffenderField.cs" />
     <Compile Include="Workflow\Action\ImportOffenders.cs" />
     <Compile Include="Workflow\Action\PopulateMatchesTable.cs" />
   </ItemGroup>

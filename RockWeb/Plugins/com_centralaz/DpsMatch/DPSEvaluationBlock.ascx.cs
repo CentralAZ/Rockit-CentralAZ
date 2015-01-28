@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Data;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -10,6 +11,7 @@ using System.Web.UI.WebControls;
 
 using com.centralaz.DpsMatch.Model;
 using com.centralaz.DpsMatch.Data;
+using com.centralaz.DpsMatch.Web.UI.Controls.Grid;
 
 using Rock;
 using Rock.Data;
@@ -30,7 +32,8 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
     {
         #region Fields
 
-        Dictionary<String, List<Match>> _matchList;
+        Dictionary<int, List<Match>> _matchList = new Dictionary<int, List<Match>>();
+        OffenderService _offenderService = new OffenderService( new DpsMatchContext() );
         int _dictionaryIndex = 0;
 
         #endregion
@@ -62,11 +65,12 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
 
             if ( !Page.IsPostBack )
             {
-                if ( _matchList == null )
+                if ( _matchList.Count == 0 )
                 {
                     PopulateMatchList();
                 }
                 BuildColumns();
+                BindGrid();
             }
         }
 
@@ -93,7 +97,18 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void lbNext_Click( object sender, EventArgs e )
         {
-
+            //Save changes to PMs
+            //Update any Person attributes
+            _dictionaryIndex++;
+            if ( ( _matchList.Count - 1 ) >= _dictionaryIndex )
+            {
+                BuildColumns();
+            }
+            else
+            {
+                _dictionaryIndex = 0;
+                //display "Completed" view
+            }
         }
         #endregion
 
@@ -105,30 +120,58 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
         private void BuildColumns()
         {
             gValues.Columns.Clear();
-
             if ( _matchList.ElementAt( _dictionaryIndex ).Value != null )
             {
-                var keyCol = new BoundField();
-                keyCol.DataField = "Key";
-                keyCol.Visible = false;
-                gValues.Columns.Add( keyCol );
 
-                //Set this as SO
-                var labelCol = new BoundField();
-                labelCol.DataField = "Label";
-                labelCol.HeaderStyle.CssClass = "merge-personselect";
-                gValues.Columns.Add( labelCol );
+                Offender offender = _offenderService.Get( _matchList.ElementAt( _dictionaryIndex ).Key );
+                var offenderCol = new MatchField();
+                offenderCol.SelectionMode = SelectionMode.Single;
+                offenderCol.PersonId = offender.Id;
+                offenderCol.PersonName = String.Format( "{0} {1}", offender.FirstName, offender.LastName );
+                gValues.Columns.Add( offenderCol );
 
                 var personService = new PersonService( new RockContext() );
+                List<Match> matchSubList = _matchList.ElementAt( _dictionaryIndex ).Value;
+                Person person = new Person();
                 foreach ( Match match in _matchList.ElementAt( _dictionaryIndex ).Value )
                 {
-                    var personCol = new BoundField();
-                    personCol.HeaderStyle.CssClass = "merge-personselect";
+                    person = match.PersonAlias.Person;
+                    var personCol = new MatchField();
+                    personCol.SelectionMode = SelectionMode.Single;
+                    personCol.PersonId = person.Id;
+                    if ( person.NickName != person.FirstName )
+                    {
+                        personCol.PersonName = String.Format( "{0}({1}) {2}", person.FirstName, person.NickName, person.LastName );
+                    }
+                    else
+                    {
+                        personCol.PersonName = person.FullName;
+                    }
+                    string imgTag = Rock.Model.Person.GetPhotoImageTag( person.PhotoId, person.Age, person.Gender, 200, 200 );
+                    if ( person.PhotoId.HasValue )
+                    {
+                        personCol.HeaderImage = string.Format( "<a href='{0}'>{1}</a>", person.PhotoUrl, imgTag );
+                    }
                     gValues.Columns.Add( personCol );
                 }
             }
         }
 
+
+        /// <summary>
+        /// Binds the values.
+        /// </summary>
+        private void BindGrid()
+        {
+            if ( _matchList.ElementAt( _dictionaryIndex ).Value != null )
+            {
+                Offender offender = _offenderService.Get( _matchList.ElementAt( _dictionaryIndex ).Key );
+                List<Match> matchSubList = _matchList.ElementAt( _dictionaryIndex ).Value;
+                DataTable dt = GetDataTable( offender, matchSubList );
+                gValues.DataSource = dt;
+                gValues.DataBind();
+            }
+        }
         /// <summary>
         /// Gets the values column header.
         /// </summary>
@@ -186,10 +229,61 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
             List<Match> matchList = new MatchService( new DpsMatchContext() ).Queryable().ToList();
             foreach ( Match match in matchList )
             {
-                _matchList[match.KeyString].Add( match );
+                if ( _matchList.ContainsKey( match.OffenderId ) )
+                {
+                    _matchList[match.OffenderId].Add( match );
+                }
+                else
+                {
+                    _matchList.Add( match.OffenderId, new List<Match>() );
+                    _matchList[match.OffenderId].Add( match );
+                }
             }
         }
 
+        /// <summary>
+        /// Gets the data table.
+        /// </summary>
+        /// <param name="headingKeys">The heading keys.</param>
+        /// <returns></returns>
+        public DataTable GetDataTable( Offender offender, List<Match> matchList )
+        {
+            var tbl = new DataTable();
+
+            tbl.Columns.Add( "Offender" );
+
+            foreach ( Match match in matchList )
+            {
+                tbl.Columns.Add( string.Format( "{0}", match.Id ) );
+            }
+
+            var rowValues = new List<object>();
+            //Address
+            rowValues.Add( String.Format( "{0} {1},{2} {3}", offender.ResidentialAddress, offender.ResidentialCity, offender.ResidentialState, offender.ResidentialZip ) );
+            foreach ( Match match in matchList )
+            {
+                rowValues.Add( match.PersonAlias.Person.GetFamilies().FirstOrDefault().GroupLocations.FirstOrDefault().Location.GetFullStreetAddress() );
+            }
+            tbl.Rows.Add( rowValues.ToArray() );
+
+            //Age
+            rowValues = new List<object>();
+            rowValues.Add( String.Format( "{0}", offender.Age ) );
+            foreach ( Match match in matchList )
+            {
+                rowValues.Add( String.Format( "{0}", match.PersonAlias.Person.Age ) );
+            }
+
+            //Gender
+            rowValues = new List<object>();
+            rowValues.Add( String.Format( "{0}", offender.Age ) );
+            foreach ( Match match in matchList )
+            {
+                rowValues.Add( String.Format( "{0}", match.PersonAlias.Person.Age ) );
+            }
+
+            return tbl;
+        }
         #endregion
     }
 }

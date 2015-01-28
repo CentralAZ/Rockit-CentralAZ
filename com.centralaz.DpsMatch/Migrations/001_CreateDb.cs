@@ -51,20 +51,13 @@ namespace com.centralaz.DpsMatch.Migrations
 	                [Id] ASC
                 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
                 ) ON [PRIMARY]
-" );
 
-            Sql( @"                     
-                CREATE UNIQUE INDEX IX_KeyString ON dbo._com_centralaz_DpsMatch_Offender ([KeyString]); 
-" );
-
-            Sql( @"
                 CREATE TABLE [dbo].[_com_centralaz_DpsMatch_Match](
 	                [Id] [int] IDENTITY(1,1) NOT NULL,
 	                [PersonAliasId] [int] NOT NULL,
 	                [OffenderId] [int] NOT NULL,
 	                [MatchPercentage] [int] NULL,
-	                [IsConfirmedAsNotMatch] [bit] NULL,
-	                [IsConfirmedAsMatch] [bit] NULL,
+	                [IsMatch] [bit] NULL,
 	                [VerifiedDate] [datetime] NULL,
 	                [Guid] [uniqueidentifier] NOT NULL,
 	                [CreatedDateTime] [datetime] NULL,

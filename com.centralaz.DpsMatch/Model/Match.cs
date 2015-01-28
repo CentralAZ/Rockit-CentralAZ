@@ -35,7 +35,7 @@ namespace com.centralaz.DpsMatch.Model
         /// The Keystring of the potential Offender Match
         /// </summary>
         [DataMember]
-        public String KeyString { get; set; }
+        public int OffenderId { get; set; }
 
         /// <summary>
         /// The likelyhood of the match
@@ -47,19 +47,13 @@ namespace com.centralaz.DpsMatch.Model
         /// Whether the potential match is confirmed as not a match
         /// </summary>
         [DataMember]
-        public bool IsConfirmedAsNotMatch { get; set; }
-
-        /// <summary>
-        /// Whether the potential match is confirmed as a match
-        /// </summary>
-        [DataMember]
-        public bool IsConfirmedAsMatch { get; set; }
+        public bool? IsMatch { get; set; }
 
         /// <summary>
         /// The date the potential match was confirmed as true or false
         /// </summary>
         [DataMember]
-        public DateTime VerifiedDate { get; set; }
+        public DateTime? VerifiedDate { get; set; }
 
         #endregion
 
@@ -89,7 +83,7 @@ namespace com.centralaz.DpsMatch.Model
         public MatchConfiguration()
         {
             this.HasRequired( r => r.PersonAlias ).WithMany().HasForeignKey( r => r.PersonAliasId ).WillCascadeOnDelete( false );
-            this.HasRequired( r => r.Offender ).WithMany().HasForeignKey( r => r.KeyString ).WillCascadeOnDelete( false );
+            this.HasRequired( r => r.Offender ).WithMany().HasForeignKey( r => r.OffenderId ).WillCascadeOnDelete( false );
         }
     }
 
