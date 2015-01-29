@@ -9,7 +9,7 @@ using Rock.Web.UI.Controls;
 
 namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
 {
-    public class MatchField : SelectField, INotRowSelectedField
+    public class MatchField : TemplateField, INotRowSelectedField
     {
 
         #region Properties
@@ -57,63 +57,6 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
             }
         }
 
-        public string PersonAddress
-        {
-            get
-            {
-                var personAddress = ViewState["PersonAddress"] as string;
-                if ( personAddress == null )
-                {
-                    personAddress = string.Empty;
-                    PersonAddress = personAddress;
-                }
-                return personAddress;
-            }
-
-            set
-            {
-                ViewState["PersonAddress"] = value;
-            }
-        }
-
-        public string PersonAge
-        {
-            get
-            {
-                var personAge = ViewState["PersonAge"] as string;
-                if ( personAge == null )
-                {
-                    personAge = string.Empty;
-                    PersonAge = personAge;
-                }
-                return personAge;
-            }
-
-            set
-            {
-                ViewState["PersonAge"] = value;
-            }
-        }
-
-        public int? PersonGender
-        {
-            get
-            {
-                var personGender = ViewState["PersonGender"] as int?;
-                if ( personGender == null )
-                {
-                    personGender = null;
-                    PersonGender = personGender;
-                }
-                return personGender;
-            }
-
-            set
-            {
-                ViewState["PersonGender"] = value;
-            }
-        }
-
         public int? MatchPercentage
         {
             get
@@ -153,6 +96,43 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
         }
 
         /// <summary>
+        /// Gets or sets the data field.
+        /// </summary>
+        /// <value>
+        /// The data field.
+        /// </value>
+        public string DataTextField
+        {
+            get
+            {
+                return ViewState["DataTextField"] as string;
+            }
+
+            set
+            {
+                ViewState["DataTextField"] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the index of the column.
+        /// </summary>
+        /// <value>
+        /// The index of the column.
+        /// </value>
+        public int ColumnIndex
+        {
+            get
+            {
+                return ViewState["ColumnIndex"] as int? ?? 0;
+            }
+            set
+            {
+                ViewState["ColumnIndex"] = value;
+            }
+        }
+
+        /// <summary>
         /// Gets the parent grid.
         /// </summary>
         /// <value>
@@ -175,16 +155,34 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
         public override bool Initialize( bool sortingEnabled, Control control )
         {
             base.Initialize( sortingEnabled, control );
-           // MatchFieldTemplate matchFieldTemplate = new MatchFieldTemplate();
-            MatchFieldHeaderTemplate headerTemplate = new MatchFieldHeaderTemplate();
-            this.HeaderTemplate = headerTemplate;
-           // this.ItemTemplate = matchFieldTemplate;
+            this.HeaderTemplate = new MatchFieldHeaderTemplate();
+            this.ItemTemplate = new MatchFieldTemplate();
+            MatchFieldFooterTemplate footerTemplate = new MatchFieldFooterTemplate();
+            footerTemplate.RadioButtonClick += FooterTemplate_RadioButtonClick;
+            this.FooterTemplate = footerTemplate;
+            this.ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+            this.HeaderStyle.HorizontalAlign = HorizontalAlign.Center;
             this.ParentGrid = control as Rock.Web.UI.Controls.Grid;
 
             return false;
         }
 
         #endregion
+
+        #region Events
+
+        /// <summary>
+        /// Handles the LinkButtonClick event of the HeaderTemplate control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        void FooterTemplate_RadioButtonClick( object sender, EventArgs e )
+        {
+            //Do Something
+        }
+
+        #endregion
+
     }
 
     /// <summary>
@@ -214,45 +212,159 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
             }
         }
     }
-    /*
+
     /// <summary>
-    /// Template used by the <see cref="DeleteField"/> control
+    /// 
     /// </summary>
     public class MatchFieldTemplate : ITemplate
     {
+
+        #region Properties
+
         /// <summary>
-        /// When implemented by a class, defines the <see cref="T:System.Web.UI.Control"/> object that child controls and templates belong to. These child controls are in turn defined within an inline template.
+        /// Gets the data text field.
         /// </summary>
-        /// <param name="container">The <see cref="T:System.Web.UI.Control"/> object to contain the instances of controls from the inline template.</param>
+        /// <value>
+        /// The data text field.
+        /// </value>
+        public string DataTextField { get; private set; }
+
+        /// <summary>
+        /// Gets the index of the column.
+        /// </summary>
+        /// <value>
+        /// The index of the column.
+        /// </value>
+        public int ColumnIndex { get; private set; }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// When implemented by a class, defines the <see cref="T:System.Web.UI.Control" /> object that child controls and templates belong to. These child controls are in turn defined within an inline template.
+        /// </summary>
+        /// <param name="container">The <see cref="T:System.Web.UI.Control" /> object to contain the instances of controls from the inline template.</param>
         public void InstantiateIn( Control container )
         {
-            DataControlFieldCell cell = container as DataControlFieldCell;
+            var cell = container as DataControlFieldCell;
             if ( cell != null )
             {
-                MatchField matchField = cell.ContainingField as MatchField;
-                ParentGrid = matchField.ParentGrid;
+                var matchField = cell.ContainingField as MatchField;
+                if ( matchField != null )
+                {
+                    DataTextField = matchField.DataTextField;
+                    ColumnIndex = matchField.ColumnIndex;
 
-                LiteralControl matchAddress = new LiteralControl();
-                matchAddress.Text = matchField.PersonAddress;
-                cell.Controls.Add( matchAddress );
+                    Literal lText = new Literal();
+                    lText.ID = "lText_" + ColumnIndex.ToString();
+                    lText.DataBinding += lText_DataBinding;
+                    lText.Visible = true;
+                    cell.Controls.Add( lText );
+                }
+            }
+        }
 
-                LiteralControl matchAge = new LiteralControl();
-                matchAge.Text = matchField.PersonAge;
-                cell.Controls.Add( matchAge );
+        #endregion
 
-                LiteralControl matchGender = new LiteralControl();
-                matchGender.Text = String.Format("{0}",matchField.PersonGender);
-                cell.Controls.Add( matchGender );
+        #region Events
+
+        /// <summary>
+        /// Handles the DataBinding event of the cb control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        void lText_DataBinding( object sender, EventArgs e )
+        {
+            var lText = sender as Literal;
+            if ( lText != null )
+            {
+                GridViewRow gridViewRow = lText.NamingContainer as GridViewRow;
+
+                if ( gridViewRow.DataItem != null )
+                {
+                    if ( !string.IsNullOrWhiteSpace( DataTextField ) )
+                    {
+                        object dataValue = DataBinder.Eval( gridViewRow.DataItem, DataTextField );
+                        lText.Text = dataValue.ToString();
+                    }
+                    else
+                    {
+                        lText.Text = "Something Went Wrong";
+                    }
+                    lText.Visible = true;
+                }
+            }
+        }
+
+        #endregion
+
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class MatchFieldFooterTemplate : ITemplate
+    {
+        /// <summary>
+        /// When implemented by a class, defines the <see cref="T:System.Web.UI.Control" /> object that child controls and templates belong to. These child controls are in turn defined within an inline template.
+        /// </summary>
+        /// <param name="container">The <see cref="T:System.Web.UI.Control" /> object to contain the instances of controls from the inline template.</param>
+        public void InstantiateIn( Control container )
+        {
+            var cell = container as DataControlFieldCell;
+            if ( cell != null )
+            {
+                var matchField = cell.ContainingField as MatchField;
+                if ( matchField != null )
+                {
+                    //Percentage
+                    HtmlGenericContainer footerSummary = new HtmlGenericContainer( "div", "merge-header-summary" );
+                    footerSummary.Attributes.Add( "data-col", matchField.ColumnIndex.ToString() );
+
+                    LiteralControl lcPercentage = new LiteralControl();
+                    lcPercentage.Text = String.Format( "<div class='alert alert-info'><center><h1>{0}</h1></center></div>", matchField.MatchPercentage.Value.ToString( "0.0%" ) );
+
+                    footerSummary.Controls.Add( lcPercentage );
+                    cell.Controls.Add( footerSummary );
+
+                   // //Radio Button List
+                   // var lbDelete = new LinkButton();
+                   // lbDelete.CausesValidation = false;
+                   // lbDelete.CssClass = "btn btn-danger btn-xs pull-right";
+                   // lbDelete.ToolTip = "Remove Person";
+                   // cell.Controls.Add( lbDelete );
+
+                   // HtmlGenericControl buttonIcon = new HtmlGenericControl( "i" );
+                   // buttonIcon.Attributes.Add( "class", "fa fa-times" );
+                   // lbDelete.Controls.Add( buttonIcon );
+
+                   // lbDelete.Click += lbDelete_Click;
+
+                   // // make sure delete button is registered for async postback (needed just in case the grid was created at runtime)
+                   // //var sm = ScriptManager.GetCurrent( matchField.ParentGrid.Page );
+                   //// sm.RegisterAsyncPostBackControl( lbDelete );
+                }
             }
         }
 
         /// <summary>
-        /// Gets or sets the parent grid.
+        /// Handles the Click event of the lbDelete control.
         /// </summary>
-        /// <value>
-        /// The parent grid.
-        /// </value>
-        private Rock.Web.UI.Controls.Grid ParentGrid { get; set; }
-    }*/
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        protected void lbDelete_Click( object sender, EventArgs e )
+        {
+            if ( RadioButtonClick != null )
+            {
+                RadioButtonClick( sender, e );
+            }
+        }
+
+        /// <summary>
+        /// Occurs when [link button click].
+        /// </summary>
+        internal event EventHandler RadioButtonClick;
+    }
 
 }

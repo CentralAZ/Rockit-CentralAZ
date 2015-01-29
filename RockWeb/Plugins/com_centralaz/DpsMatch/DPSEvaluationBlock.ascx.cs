@@ -32,9 +32,9 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
     {
         #region Fields
 
-        Dictionary<int, List<Match>> _matchList = new Dictionary<int, List<Match>>();
+        static Dictionary<int, List<Match>> _matchList;
         OffenderService _offenderService = new OffenderService( new DpsMatchContext() );
-        int _dictionaryIndex = 0;
+        static int _dictionaryIndex = 0;
 
         #endregion
 
@@ -65,7 +65,7 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
 
             if ( !Page.IsPostBack )
             {
-                if ( _matchList.Count == 0 )
+                if ( _matchList == null )
                 {
                     PopulateMatchList();
                 }
@@ -103,6 +103,7 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
             if ( ( _matchList.Count - 1 ) >= _dictionaryIndex )
             {
                 BuildColumns();
+                BindGrid();
             }
             else
             {
@@ -124,9 +125,11 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
             {
 
                 Offender offender = _offenderService.Get( _matchList.ElementAt( _dictionaryIndex ).Key );
-                var offenderCol = new MatchField();
-                offenderCol.SelectionMode = SelectionMode.Single;
+                var offenderCol = new OffenderField();
+                offenderCol.HeaderStyle.CssClass = "merge-personselect";
+                offenderCol.DataTextField = string.Format( "property_{0}", offender.Id );
                 offenderCol.PersonId = offender.Id;
+
                 offenderCol.PersonName = String.Format( "{0} {1}", offender.FirstName, offender.LastName );
                 gValues.Columns.Add( offenderCol );
 
@@ -137,7 +140,6 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
                 {
                     person = match.PersonAlias.Person;
                     var personCol = new MatchField();
-                    personCol.SelectionMode = SelectionMode.Single;
                     personCol.PersonId = person.Id;
                     if ( person.NickName != person.FirstName )
                     {
@@ -152,6 +154,10 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
                     {
                         personCol.HeaderImage = string.Format( "<a href='{0}'>{1}</a>", person.PhotoUrl, imgTag );
                     }
+                    personCol.HeaderStyle.CssClass = "merge-personselect";
+                    personCol.DataTextField = string.Format( "property_{0}", person.Id );
+                    personCol.MatchPercentage = match.MatchPercentage;
+                    personCol.MatchIsMatch = match.IsMatch;
                     gValues.Columns.Add( personCol );
                 }
             }
@@ -172,60 +178,10 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
                 gValues.DataBind();
             }
         }
-        /// <summary>
-        /// Gets the values column header.
-        /// </summary>
-        /// <param name="personId">The person identifier.</param>
-        /// <returns></returns>
-        private string GetValuesColumnHeader( int personId )
-        {
-            Guid familyGuid = new Guid( Rock.SystemGuid.GroupType.GROUPTYPE_FAMILY );
-
-            var groupMemberService = new GroupMemberService( new RockContext() );
-            var families = groupMemberService.Queryable()
-                .Where( m => m.PersonId == personId && m.Group.GroupType.Guid == familyGuid )
-                .Select( m => m.Group )
-                .Distinct();
-
-            StringBuilder sbHeaderData = new StringBuilder();
-
-            foreach ( var family in families )
-            {
-                sbHeaderData.Append( "<div class='merge-heading-family'>" );
-
-                var nickNames = groupMemberService.Queryable( "Person" )
-                    .Where( m => m.GroupId == family.Id )
-                    .OrderBy( m => m.GroupRole.Order )
-                    .ThenBy( m => m.Person.BirthDate ?? DateTime.MinValue )
-                    .ThenByDescending( m => m.Person.Gender )
-                    .Select( m => m.Person.NickName )
-                    .ToList();
-                if ( nickNames.Any() )
-                {
-                    sbHeaderData.AppendFormat( "{0} ({1})", family.Name, nickNames.AsDelimited( ", " ) );
-                }
-                else
-                {
-                    sbHeaderData.Append( family.Name );
-                }
-
-                bool showType = family.GroupLocations.Count() > 1;
-                foreach ( var loc in family.GroupLocations )
-                {
-                    sbHeaderData.AppendFormat( " <span class='merge-heading-location'>{0}{1}</span>",
-                        loc.Location.ToStringSafe(),
-                        ( showType ? " (" + loc.GroupLocationTypeValue.Value + ")" : "" ) );
-                }
-
-                sbHeaderData.Append( "</div>" );
-            }
-
-            return sbHeaderData.ToString();
-
-        }
 
         protected void PopulateMatchList()
         {
+            _matchList = new Dictionary<int, List<Match>>();
             List<Match> matchList = new MatchService( new DpsMatchContext() ).Queryable().ToList();
             foreach ( Match match in matchList )
             {
@@ -250,16 +206,45 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
         {
             var tbl = new DataTable();
 
-            tbl.Columns.Add( "Offender" );
+            //Offender
+            tbl.Columns.Add( string.Format( "property_{0}", offender.Id ) );
 
             foreach ( Match match in matchList )
             {
-                tbl.Columns.Add( string.Format( "{0}", match.Id ) );
+                tbl.Columns.Add( string.Format( "property_{0}", match.PersonAlias.Person.Id ) );
             }
 
             var rowValues = new List<object>();
+
+            //Name
+            rowValues = new List<object>();
+            rowValues.Add( String.Format( "{0} {1}", offender.FirstName, offender.LastName ) );
+            foreach ( Match match in matchList )
+            {
+                var person = match.PersonAlias.Person;
+                if ( person.NickName != person.FirstName )
+                {
+                    rowValues.Add( String.Format( "{0}({1}) {2}", person.FirstName, person.NickName, person.LastName ) );
+                }
+                else
+                {
+                    rowValues.Add( person.FullName );
+                }
+            }
+            tbl.Rows.Add( rowValues.ToArray() );
+
+            //Physical Description
+            rowValues = new List<object>();
+            rowValues.Add( String.Format( "Hair: {0}    Eyes: {1}   Race: {2}", offender.Hair, offender.Eyes, offender.Race ) );
+            foreach ( Match match in matchList )
+            {
+                var person = match.PersonAlias.Person;
+                rowValues.Add( Person.GetPhotoImageTag( match.PersonAlias.Person, 65, 65, "merge-photo" ) );
+            }
+            tbl.Rows.Add( rowValues.ToArray() );
+
             //Address
-            rowValues.Add( String.Format( "{0} {1},{2} {3}", offender.ResidentialAddress, offender.ResidentialCity, offender.ResidentialState, offender.ResidentialZip ) );
+            rowValues.Add( String.Format( "{0}, {1},{2} {3}", offender.ResidentialAddress, offender.ResidentialCity, offender.ResidentialState, offender.ResidentialZip ) );
             foreach ( Match match in matchList )
             {
                 rowValues.Add( match.PersonAlias.Person.GetFamilies().FirstOrDefault().GroupLocations.FirstOrDefault().Location.GetFullStreetAddress() );
@@ -273,14 +258,27 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
             {
                 rowValues.Add( String.Format( "{0}", match.PersonAlias.Person.Age ) );
             }
+            tbl.Rows.Add( rowValues.ToArray() );
 
             //Gender
             rowValues = new List<object>();
-            rowValues.Add( String.Format( "{0}", offender.Age ) );
+            rowValues.Add( String.Format( "{0}", offender.Sex ) );
             foreach ( Match match in matchList )
             {
-                rowValues.Add( String.Format( "{0}", match.PersonAlias.Person.Age ) );
+                if ( match.PersonAlias.Person.Gender == Gender.Male )
+                {
+                    rowValues.Add( "M" );
+                }
+                else
+                {
+                    rowValues.Add( "F" );
+                }
             }
+            tbl.Rows.Add( rowValues.ToArray() );
+
+
+
+
 
             return tbl;
         }

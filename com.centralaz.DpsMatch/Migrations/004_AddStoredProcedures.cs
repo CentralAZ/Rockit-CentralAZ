@@ -195,10 +195,12 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
                 FROM (
                     SELECT [a].[First2]
                         ,[a].[LastName]
+                        ,[a].[Sex]
 			            , [a].[OffenderId]
                     FROM (
                         SELECT SUBSTRING([FirstName], 1, 2) [First2]
                             ,[LastName]
+                            ,[Sex]
 				            , [Id] [OffenderId]
                         FROM [_com_centralaz_DpsMatch_Offender] [p]
                         WHERE isnull([LastName], '') != ''
@@ -207,10 +209,12 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
                         GROUP BY [LastName]
                             ,SUBSTRING([FirstName], 1, 2)
 				            , [Id]
+                            ,[Sex]
                         ) [a]
                     ) [e]
                 JOIN [Person] [p] ON [p].[LastName] = [e].[LastName]
                     AND [p].[FirstName] LIKE (e.First2 + '%')
+                    AND ( (p.Gender=1 and e.Sex='M') or (p.Gender=2 and e.Sex='F'))
                 JOIN [PersonAlias] [pa] ON [pa].[PersonId] = [p].[Id]
                 WHERE [pa].[AliasPersonId] = [pa].[PersonId] -- limit to only the primary alias
                     AND @compareByPartialName = 1
@@ -234,6 +238,7 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
                 FROM (
                     SELECT [l].[PostalCode]
 						,[p].[LastName]
+                        ,[p].[Gender]
 			            ,[pa].[Id]
                     FROM [Person] [p]
                     JOIN [GroupMember] [gm] ON [gm].[PersonId] = [p].[Id]
@@ -251,6 +256,7 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
                     ) [a]
                 JOIN [_com_centralaz_DpsMatch_Offender] [so] ON [so].[ResidentialZip] = [a].[PostalCode]
 				and [so].[LastName] = [a].[LastName]
+                    AND ( (p.Gender=1 and so.Sex='M') or (p.Gender=2 and so.Sex='F'))
 	            WHERE @compareByPostalCode = 1
 
                 -- get the original ConfidenceScore of the IgnoreUntilScoreChanges records so that we can un-ignore the ones that have a changed score
