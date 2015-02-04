@@ -5,6 +5,8 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using Rock.Web.UI.Controls;
+using com.centralaz.DpsMatch.Data;
+using com.centralaz.DpsMatch.Model;
 
 
 namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
@@ -20,41 +22,10 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
         /// <value>
         /// The person identifier.
         /// </value>
-        public int PersonId
+        public int MatchId
         {
-            get { return ViewState["PersonId"] as int? ?? 0; }
-            set { ViewState["PersonId"] = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the name of the person.
-        /// </summary>
-        /// <value>
-        /// The name of the person.
-        /// </value>
-        public string PersonName
-        {
-            get { return ViewState["PersonName"] as string; }
-            set { ViewState["PersonName"] = value; }
-        }
-
-        public string HeaderImage
-        {
-            get
-            {
-                var headerImage = ViewState["HeaderImage"] as string;
-                if ( headerImage == null )
-                {
-                    headerImage = String.Empty;
-                    HeaderImage = headerImage;
-                }
-                return headerImage;
-            }
-
-            set
-            {
-                ViewState["HeaderImage"] = value;
-            }
+            get { return ViewState["MatchId"] as int? ?? 0; }
+            set { ViewState["MatchId"] = value; }
         }
 
         public int? MatchPercentage
@@ -155,30 +126,14 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
         public override bool Initialize( bool sortingEnabled, Control control )
         {
             base.Initialize( sortingEnabled, control );
-            this.HeaderTemplate = new MatchFieldHeaderTemplate();
             this.ItemTemplate = new MatchFieldTemplate();
-            MatchFieldFooterTemplate footerTemplate = new MatchFieldFooterTemplate();
-            footerTemplate.RadioButtonClick += FooterTemplate_RadioButtonClick;
-            this.FooterTemplate = footerTemplate;
+            MatchFieldHeaderTemplate headerTemplate = new MatchFieldHeaderTemplate();
+            this.HeaderTemplate = headerTemplate;
             this.ItemStyle.HorizontalAlign = HorizontalAlign.Center;
             this.HeaderStyle.HorizontalAlign = HorizontalAlign.Center;
             this.ParentGrid = control as Rock.Web.UI.Controls.Grid;
 
             return false;
-        }
-
-        #endregion
-
-        #region Events
-
-        /// <summary>
-        /// Handles the LinkButtonClick event of the HeaderTemplate control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        void FooterTemplate_RadioButtonClick( object sender, EventArgs e )
-        {
-            //Do Something
         }
 
         #endregion
@@ -204,12 +159,69 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
                 {
                     HtmlGenericContainer headerSummary = new HtmlGenericContainer( "div", "merge-header-summary" );
                     headerSummary.Attributes.Add( "data-col", matchField.ColumnIndex.ToString() );
-                    headerSummary.Controls.Add( new LiteralControl(matchField.HeaderImage ));
-                    headerSummary.Controls.Add( new LiteralControl( String.Format( "<div class='merge-heading-family'>{0}</div>", matchField.PersonName ) ) );
+                    double percentage = matchField.MatchPercentage.Value / 100.0;
+                    headerSummary.Controls.Add( new LiteralControl( String.Format( "<div class='col-md-6'><div class='merge-heading-family'><h3>{0:0%}</h3></div></div><div class='col-md-6'>", percentage ) ) );
+
+                    var rbList = new RadioButtonList();
+                    rbList.Items.Add( new ListItem( "Is Match" ) );
+                    rbList.Items.Add( new ListItem( "Is Not Match" ) );
+                    rbList.Items.Add( new ListItem( "Unknown" ) );
+
+                    if ( matchField.MatchIsMatch == true )
+                    {
+                        rbList.SelectedIndex = 0;
+                    }
+                    if ( matchField.MatchIsMatch == false )
+                    {
+                        rbList.SelectedIndex = 1;
+                    }
+                    if ( matchField.MatchIsMatch == null )
+                    {
+                        rbList.SelectedIndex = 2;
+                    }
+                    rbList.CausesValidation = false;
+                    rbList.AutoPostBack = true;
+                    headerSummary.Controls.Add( rbList );
+                    headerSummary.Controls.Add( new LiteralControl( "</div>" ) );
+
+                    cell.Controls.Add( headerSummary );
+
+                    rbList.SelectedIndexChanged += rbList_SelectedIndexChanged;
+
+                    // make sure delete button is registered for async postback (needed just in case the grid was created at runtime)
+                    //var sm = ScriptManager.GetCurrent( matchField.ParentGrid.Page );
+                    //sm.RegisterAsyncPostBackControl( rbList );
 
                     cell.Controls.Add( headerSummary );
                 }
             }
+        }
+
+        /// <summary>
+        /// Handles the SelectedIndexChanged event of the rbList control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        protected void rbList_SelectedIndexChanged( object sender, EventArgs e )
+        {
+            RadioButtonList rbList = sender as RadioButtonList;
+            var cell = rbList.Parent.Parent as DataControlFieldCell;
+            var matchField = cell.ContainingField as MatchField;
+            DpsMatchContext dpsMatchContext = new DpsMatchContext();
+            Match match = new MatchService( dpsMatchContext ).Queryable().Where( m => m.Id == matchField.MatchId ).FirstOrDefault();
+            if ( rbList.SelectedIndex == 0 )
+            {
+                match.IsMatch=true;
+            }
+            if ( rbList.SelectedIndex == 1 )
+            {
+                match.IsMatch = false;
+            }
+            if ( rbList.SelectedIndex == 2 )
+            {
+                match.IsMatch = null;
+            }
+            dpsMatchContext.SaveChanges();
         }
     }
 
@@ -299,72 +311,6 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
 
         #endregion
 
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public class MatchFieldFooterTemplate : ITemplate
-    {
-        /// <summary>
-        /// When implemented by a class, defines the <see cref="T:System.Web.UI.Control" /> object that child controls and templates belong to. These child controls are in turn defined within an inline template.
-        /// </summary>
-        /// <param name="container">The <see cref="T:System.Web.UI.Control" /> object to contain the instances of controls from the inline template.</param>
-        public void InstantiateIn( Control container )
-        {
-            var cell = container as DataControlFieldCell;
-            if ( cell != null )
-            {
-                var matchField = cell.ContainingField as MatchField;
-                if ( matchField != null )
-                {
-                    //Percentage
-                    HtmlGenericContainer footerSummary = new HtmlGenericContainer( "div", "merge-header-summary" );
-                    footerSummary.Attributes.Add( "data-col", matchField.ColumnIndex.ToString() );
-
-                    LiteralControl lcPercentage = new LiteralControl();
-                    lcPercentage.Text = String.Format( "<div class='alert alert-info'><center><h1>{0}</h1></center></div>", matchField.MatchPercentage.Value.ToString( "0.0%" ) );
-
-                    footerSummary.Controls.Add( lcPercentage );
-                    cell.Controls.Add( footerSummary );
-
-                   // //Radio Button List
-                   // var lbDelete = new LinkButton();
-                   // lbDelete.CausesValidation = false;
-                   // lbDelete.CssClass = "btn btn-danger btn-xs pull-right";
-                   // lbDelete.ToolTip = "Remove Person";
-                   // cell.Controls.Add( lbDelete );
-
-                   // HtmlGenericControl buttonIcon = new HtmlGenericControl( "i" );
-                   // buttonIcon.Attributes.Add( "class", "fa fa-times" );
-                   // lbDelete.Controls.Add( buttonIcon );
-
-                   // lbDelete.Click += lbDelete_Click;
-
-                   // // make sure delete button is registered for async postback (needed just in case the grid was created at runtime)
-                   // //var sm = ScriptManager.GetCurrent( matchField.ParentGrid.Page );
-                   //// sm.RegisterAsyncPostBackControl( lbDelete );
-                }
-            }
-        }
-
-        /// <summary>
-        /// Handles the Click event of the lbDelete control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void lbDelete_Click( object sender, EventArgs e )
-        {
-            if ( RadioButtonClick != null )
-            {
-                RadioButtonClick( sender, e );
-            }
-        }
-
-        /// <summary>
-        /// Occurs when [link button click].
-        /// </summary>
-        internal event EventHandler RadioButtonClick;
     }
 
 }

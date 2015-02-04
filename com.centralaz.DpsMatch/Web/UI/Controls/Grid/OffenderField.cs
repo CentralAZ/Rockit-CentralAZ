@@ -27,18 +27,6 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
         }
 
         /// <summary>
-        /// Gets or sets the name of the person.
-        /// </summary>
-        /// <value>
-        /// The name of the person.
-        /// </value>
-        public string PersonName
-        {
-            get { return ViewState["PersonName"] as string; }
-            set { ViewState["PersonName"] = value; }
-        }
-
-        /// <summary>
         /// Gets or sets the data field.
         /// </summary>
         /// <value>
@@ -130,7 +118,7 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
                 {
                     HtmlGenericContainer headerSummary = new HtmlGenericContainer( "div", "merge-header-summary" );
                     headerSummary.Attributes.Add( "data-col", offenderField.ColumnIndex.ToString() );
-                    headerSummary.Controls.Add( new LiteralControl( String.Format( "<div class='merge-heading-family'>{0} (Offender)</div>", offenderField.PersonName ) ) );
+                    headerSummary.Controls.Add( new LiteralControl( "<div class='merge-heading-family'>Offender</div>" ) );
 
                     cell.Controls.Add( headerSummary );
                 }

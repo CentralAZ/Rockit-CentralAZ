@@ -28,12 +28,21 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
     [DisplayName( "DPS Evaluation Block" )]
     [Category( "com_centralaz > DpsMatch" )]
     [Description( "Block to manually evaluate Person entries similar to known sexual offenders" )]
+    [TextField("Note Text", "The text for the alert note that is placed on the person's timeline", true, "Known Sex Offender")]
     public partial class DPSEvaluationBlock : Rock.Web.UI.RockBlock
     {
         #region Fields
 
         static Dictionary<int, List<Match>> _matchList;
-        OffenderService _offenderService = new OffenderService( new DpsMatchContext() );
+        DpsMatchContext _dpsMatchContext = new DpsMatchContext();
+        RockContext _rockContext = new RockContext();
+        OffenderService _offenderService = new OffenderService( _dpsMatchContext );
+        MatchService _matchService = new MatchService( _dpsMatchContext );
+        TaggedItemService _taggedItemService = new TaggedItemService( _rockContext );
+        NoteService _noteService = new NoteService( _rockContext );
+        static Tag _offenderTag = new TagService( _rockContext ).Get( new Guid( "A585EC28-64D7-463F-98E9-B0D957D0DBBC" ) );
+        static NoteType _noteType = new NoteTypeService( _rockContext ).Get( new Guid( "7E53487C-D650-4D85-97E2-350EB8332763" ) );
+
         static int _dictionaryIndex = 0;
 
         #endregion
@@ -97,8 +106,32 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void lbNext_Click( object sender, EventArgs e )
         {
-            //Save changes to PMs
-            //Update any Person attributes
+            Tag offenderTag = new TagService( new RockContext() ).Get( new Guid( "A585EC28-64D7-463F-98E9-B0D957D0DBBC" ) );
+            foreach ( MatchField matchfield in gValues.Controls )
+            {
+                Match match = _matchService.Queryable().Where( m => m.Id == matchfield.MatchId ).FirstOrDefault();
+                if ( match.IsMatch == true )
+                {
+                    if ( _taggedItemService.Get( offenderTag.Id, match.PersonAlias.Person.Guid ) == null )
+                    {
+                        TaggedItem taggedOffender = new TaggedItem();
+                        taggedOffender.EntityGuid = match.PersonAlias.Person.Guid;
+                        taggedOffender.Tag = offenderTag;
+                        _taggedItemService.Add( taggedOffender );
+                    }
+                    Note note = new Note();
+                    note.NoteTypeId = _noteType.Id;
+                    note.EntityId = match.PersonAlias.PersonId;
+                    note.IsAlert = true;
+                    //TODO
+                    note.Text = String.Format( "<a href='https://az.gov/app/sows/SowsOffendersList.xhtml?lastName={0}'>{1}</a>", match.Offender.LastName, GetAttributeValue( "NoteText" ) );
+                    _noteService.Add( note );
+
+                }
+                match.VerifiedDate = DateTime.Now;
+                _dpsMatchContext.SaveChanges();
+            }
+
             _dictionaryIndex++;
             if ( ( _matchList.Count - 1 ) >= _dictionaryIndex )
             {
@@ -107,8 +140,13 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
             }
             else
             {
+                _matchList = null;
                 _dictionaryIndex = 0;
-                //display "Completed" view
+                //TODO display "Completed" view
+            }
+            if ( ( _matchList.Count - 2 ) >= _dictionaryIndex )
+            {
+                lbNext.Text = "Finish";
             }
         }
         #endregion
@@ -129,8 +167,7 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
                 offenderCol.HeaderStyle.CssClass = "merge-personselect";
                 offenderCol.DataTextField = string.Format( "property_{0}", offender.Id );
                 offenderCol.PersonId = offender.Id;
-
-                offenderCol.PersonName = String.Format( "{0} {1}", offender.FirstName, offender.LastName );
+                // TODO Add (x out of Y) to header
                 gValues.Columns.Add( offenderCol );
 
                 var personService = new PersonService( new RockContext() );
@@ -140,20 +177,7 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
                 {
                     person = match.PersonAlias.Person;
                     var personCol = new MatchField();
-                    personCol.PersonId = person.Id;
-                    if ( person.NickName != person.FirstName )
-                    {
-                        personCol.PersonName = String.Format( "{0}({1}) {2}", person.FirstName, person.NickName, person.LastName );
-                    }
-                    else
-                    {
-                        personCol.PersonName = person.FullName;
-                    }
-                    string imgTag = Rock.Model.Person.GetPhotoImageTag( person.PhotoId, person.Age, person.Gender, 200, 200 );
-                    if ( person.PhotoId.HasValue )
-                    {
-                        personCol.HeaderImage = string.Format( "<a href='{0}'>{1}</a>", person.PhotoUrl, imgTag );
-                    }
+                    personCol.MatchId = match.Id;
                     personCol.HeaderStyle.CssClass = "merge-personselect";
                     personCol.DataTextField = string.Format( "property_{0}", person.Id );
                     personCol.MatchPercentage = match.MatchPercentage;
@@ -185,6 +209,8 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
             List<Match> matchList = new MatchService( new DpsMatchContext() ).Queryable().ToList();
             foreach ( Match match in matchList )
             {
+                //if ( !match.VerifiedDate.HasValue || !match.Offender.VerificationDate.HasValue || match.VerifiedDate < match.Offender.VerificationDate )
+                //{
                 if ( _matchList.ContainsKey( match.OffenderId ) )
                 {
                     _matchList[match.OffenderId].Add( match );
@@ -194,7 +220,16 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
                     _matchList.Add( match.OffenderId, new List<Match>() );
                     _matchList[match.OffenderId].Add( match );
                 }
+                // }
             }
+            //Remove any that already have matches
+            //foreach ( KeyValuePair<int,List<Match>> offenderMatchList in _matchList )
+            //{
+            //    if ( offenderMatchList.Value.Where( o => o.IsMatch == true ).Count() > 0 )
+            //    {
+            //        _matchList.Remove( offenderMatchList.Key );
+            //    }
+            //}
         }
 
         /// <summary>
@@ -244,6 +279,7 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
             tbl.Rows.Add( rowValues.ToArray() );
 
             //Address
+            rowValues = new List<object>();
             rowValues.Add( String.Format( "{0}, {1},{2} {3}", offender.ResidentialAddress, offender.ResidentialCity, offender.ResidentialState, offender.ResidentialZip ) );
             foreach ( Match match in matchList )
             {
