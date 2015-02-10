@@ -24,7 +24,7 @@ namespace com.centralaz.DpsMatch.Data
         #endregion
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SampleProjectContext"/> class.
+        /// Initializes a new instance of the <see cref="DpsMatchContext"/> class.
         /// </summary>
         public DpsMatchContext()
             : base("RockContext")

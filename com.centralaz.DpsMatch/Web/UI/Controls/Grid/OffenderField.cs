@@ -27,6 +27,30 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
         }
 
         /// <summary>
+        /// Gets or sets the current index.
+        /// </summary>
+        /// <value>
+        /// The current index.
+        /// </value>
+        public int CurrentIndex
+        {
+            get { return ViewState["CurrentIndex"] as int? ?? 0; }
+            set { ViewState["CurrentIndex"] = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the list size.
+        /// </summary>
+        /// <value>
+        /// The list size.
+        /// </value>
+        public int ListCount
+        {
+            get { return ViewState["ListCount"] as int? ?? 0; }
+            set { ViewState["ListCount"] = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the data field.
         /// </summary>
         /// <value>
@@ -118,7 +142,7 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
                 {
                     HtmlGenericContainer headerSummary = new HtmlGenericContainer( "div", "merge-header-summary" );
                     headerSummary.Attributes.Add( "data-col", offenderField.ColumnIndex.ToString() );
-                    headerSummary.Controls.Add( new LiteralControl( "<div class='merge-heading-family'>Offender</div>" ) );
+                    headerSummary.Controls.Add( new LiteralControl( String.Format("<div class='merge-heading-family'><h3>Offender</h3>({0} out of {1})</div>", offenderField.CurrentIndex, offenderField.ListCount) ) );
 
                     cell.Controls.Add( headerSummary );
                 }
@@ -203,7 +227,7 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
                     }
                     else
                     {
-                        lText.Text = "Something Went Wrong";
+                        lText.Text = String.Empty;
                     }
                     lText.Visible = true;
                 }

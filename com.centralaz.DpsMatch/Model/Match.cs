@@ -32,7 +32,7 @@ namespace com.centralaz.DpsMatch.Model
         public int PersonAliasId { get; set; }
 
         /// <summary>
-        /// The Keystring of the potential Offender Match
+        /// The OffenderId of the potential Offender Match
         /// </summary>
         [DataMember]
         public int OffenderId { get; set; }

@@ -61,7 +61,7 @@
   <ItemGroup>
     <Compile Include="Data\DpsMatchContext.cs" />
     <Compile Include="Data\DpsMatchService.cs" />
-    <Compile Include="Migrations\003_DPSPageBlockRoute.cs" />
+    <Compile Include="Migrations\003_OffenderPageAndTag.cs" />
     <Compile Include="Migrations\002_WorkflowConfig.cs" />
     <Compile Include="Migrations\001_CreateDb.cs" />
     <Compile Include="Migrations\004_AddStoredProcedures.cs" />

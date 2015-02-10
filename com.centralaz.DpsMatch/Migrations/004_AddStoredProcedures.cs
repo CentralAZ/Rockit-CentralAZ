@@ -144,18 +144,16 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
                     ,@compareByFullFirstName BIT = 1
                     ,@compareByFullLastName BIT = 1
                     ,@compareByPostalCode BIT = 1
-                    ,@compareByBirthDate BIT = 1
                     ,@compareByGender BIT = 1
                 --
                 -- Scores
                 -- ones marked /**/ only added to score if already a potential match
-                DECLARE @cScoreWeightPartialName INT = 1
-                    ,@cScoreWeightFullFirstName INT = 3 /**/
-                    ,@cScoreWeightFullLastName INT = 3 /**/
-                    ,@cScoreWeightPostalCode INT = 2
-                    ,@cScoreWeightBirthdate INT = 3 /**/
-                    ,@cScoreWeightGender INT = 1 /**/
-                DECLARE @TotalCapacity INT = @cScoreWeightPartialName + @cScoreWeightFullFirstName + @cScoreWeightFullLastName + @cScoreWeightPostalCode + @cScoreWeightBirthdate + @cScoreWeightGender
+                DECLARE @cScoreWeightPartialName INT = 10
+                    ,@cScoreWeightFullFirstName INT = 15 /**/
+			        ,@cScoreWeightFullLastName INT = 20 /**/
+                    ,@cScoreWeightPostalCode INT = 20
+                    ,@cScoreWeightGender INT = 30 /**/
+                DECLARE @TotalCapacity INT = @cScoreWeightPartialName + @cScoreWeightFullFirstName + @cScoreWeightFullFirstName + @cScoreWeightPostalCode + @cScoreWeightGender
                 --
                 -- Guids that this proc uses
                 DECLARE @cGROUPTYPE_FAMILY_GUID UNIQUEIDENTIFIER = '790E3215-3B10-442B-AF69-616C0DCB998E'
@@ -195,26 +193,26 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
                 FROM (
                     SELECT [a].[First2]
                         ,[a].[LastName]
-                        ,[a].[Sex]
 			            , [a].[OffenderId]
+						,[a].[Sex]
                     FROM (
                         SELECT SUBSTRING([FirstName], 1, 2) [First2]
                             ,[LastName]
-                            ,[Sex]
 				            , [Id] [OffenderId]
+							,[Sex]
                         FROM [_com_centralaz_DpsMatch_Offender] [p]
                         WHERE isnull([LastName], '') != ''
                             AND [FirstName] IS NOT NULL
                             AND LEN([FirstName]) >= 2
                         GROUP BY [LastName]
                             ,SUBSTRING([FirstName], 1, 2)
+							,[Sex]
 				            , [Id]
-                            ,[Sex]
                         ) [a]
                     ) [e]
                 JOIN [Person] [p] ON [p].[LastName] = [e].[LastName]
+				AND (([p].[Gender]=1 and [e].[Sex]='M') or ([p].[Gender]=2 and [e].[Sex]='F'))
                     AND [p].[FirstName] LIKE (e.First2 + '%')
-                    AND ( (p.Gender=1 and e.Sex='M') or (p.Gender=2 and e.Sex='F'))
                 JOIN [PersonAlias] [pa] ON [pa].[PersonId] = [p].[Id]
                 WHERE [pa].[AliasPersonId] = [pa].[PersonId] -- limit to only the primary alias
                     AND @compareByPartialName = 1
@@ -238,7 +236,7 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
                 FROM (
                     SELECT [l].[PostalCode]
 						,[p].[LastName]
-                        ,[p].[Gender]
+						,[p].[Gender]
 			            ,[pa].[Id]
                     FROM [Person] [p]
                     JOIN [GroupMember] [gm] ON [gm].[PersonId] = [p].[Id]
@@ -252,11 +250,12 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
                     GROUP BY [gl].[LocationID]
 			            ,[l].[PostalCode]
 						,[p].[LastName]
+						,[p].[Gender]
 			            ,[pa].[Id]
                     ) [a]
                 JOIN [_com_centralaz_DpsMatch_Offender] [so] ON [so].[ResidentialZip] = [a].[PostalCode]
+				AND (([a].[Gender]=1 and [so].[Sex]='M') or ([a].[Gender]=2 and [so].[Sex]='F'))
 				and [so].[LastName] = [a].[LastName]
-                    AND ( (p.Gender=1 and so.Sex='M') or (p.Gender=2 and so.Sex='F'))
 	            WHERE @compareByPostalCode = 1
 
                 -- get the original ConfidenceScore of the IgnoreUntilScoreChanges records so that we can un-ignore the ones that have a changed score
@@ -393,7 +392,7 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
                     AND @compareByFullLastName = 1
 
                 UPDATE [_com_centralaz_DpsMatch_Match]
-                SET [MatchPercentage] = [MatchPercentage] + @cScoreWeightFullFirstName
+                SET [MatchPercentage] = [MatchPercentage] + @cScoreWeightFullLastName
                 WHERE Id IN (
                         SELECT Id
                         FROM @updatedIdsLastName
@@ -409,7 +408,7 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
 					JOIN PersonAlias pa ON pa.Id = pm.PersonAliasId
 					JOIN _com_centralaz_DpsMatch_Offender so ON so.Id = pm.OffenderId
 					JOIN Person p ON p.Id = pa.PersonId
-					WHERE (p.Gender=1 and so.Sex='M') or (p.Gender=2 and so.Sex='F')
+					WHERE ((p.Gender=1 and so.Sex='M') or (p.Gender=2 and so.Sex='F'))
 						AND @compareByGender = 1
 
                 UPDATE [_com_centralaz_DpsMatch_Match]

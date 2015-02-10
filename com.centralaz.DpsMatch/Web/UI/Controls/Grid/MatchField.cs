@@ -17,10 +17,10 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
         #region Properties
 
         /// <summary>
-        /// Gets or sets the person identifier.
+        /// Gets or sets the match identifier.
         /// </summary>
         /// <value>
-        /// The person identifier.
+        /// The match identifier.
         /// </value>
         public int MatchId
         {
@@ -28,6 +28,9 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
             set { ViewState["MatchId"] = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the match likelyhood percentage
+        /// </summary>
         public int? MatchPercentage
         {
             get
@@ -47,6 +50,9 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
             }
         }
 
+        /// <summary>
+        /// Gets or sets the match positive identifier
+        /// </summary>
         public bool? MatchIsMatch
         {
             get
@@ -188,10 +194,6 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
 
                     rbList.SelectedIndexChanged += rbList_SelectedIndexChanged;
 
-                    // make sure delete button is registered for async postback (needed just in case the grid was created at runtime)
-                    //var sm = ScriptManager.GetCurrent( matchField.ParentGrid.Page );
-                    //sm.RegisterAsyncPostBackControl( rbList );
-
                     cell.Controls.Add( headerSummary );
                 }
             }
@@ -302,7 +304,7 @@ namespace com.centralaz.DpsMatch.Web.UI.Controls.Grid
                     }
                     else
                     {
-                        lText.Text = "Something Went Wrong";
+                        lText.Text = String.Empty;
                     }
                     lText.Visible = true;
                 }
