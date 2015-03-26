@@ -6,7 +6,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "RockWeb(Central)", "http://
 	ProjectSection(WebsiteProperties) = preProject
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5.1"
-		ProjectReferences = "{1d63ac63-bcfa-4026-8715-74acd19d3fbe}|com.centralaz.Accountability.dll;{c30559e1-5d82-401f-a463-dd6759c2c1e9}|com.centralaz.Baptism.dll;{e3656a25-42dc-4ce8-8c7f-4f6514408735}|com.centralaz.Finance.dll;{088218a4-19e5-4431-b5ac-f3a3e6ae624b}|com.centralaz.GeneralJobs.dll;{8b59417e-689d-4caa-abcc-163f8f907d9b}|com.centralaz.DpsMatch.dll;{f3cdac54-735e-415d-a875-b10fa6cc6687}|com.centralaz.Prayerbook.dll;"
+		ProjectReferences = "{1d63ac63-bcfa-4026-8715-74acd19d3fbe}|com.centralaz.Accountability.dll;{c30559e1-5d82-401f-a463-dd6759c2c1e9}|com.centralaz.Baptism.dll;{e3656a25-42dc-4ce8-8c7f-4f6514408735}|com.centralaz.Finance.dll;{088218a4-19e5-4431-b5ac-f3a3e6ae624b}|com.centralaz.GeneralJobs.dll;{8b59417e-689d-4caa-abcc-163f8f907d9b}|com.centralaz.SexualOffendersMatch.dll;{f3cdac54-735e-415d-a875-b10fa6cc6687}|com.centralaz.Prayerbook.dll;{2252252c-25b9-40b3-891e-0e5f0cfb263f}|com.centralaz.CentralGroupFinder.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_50345"
 		Debug.AspNetCompiler.PhysicalPath = "RockWeb\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_50345\"
@@ -39,6 +39,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.centralaz.DpsMatch", "com.centralaz.DpsMatch\com.centralaz.DpsMatch.csproj", "{8B59417E-689D-4CAA-ABCC-163F8F907D9B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.centralaz.PrayerBook", "com.centralaz.PrayerBook\com.centralaz.PrayerBook.csproj", "{F3CDAC54-735E-415D-A875-B10FA6CC6687}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.centralaz.LifeGroupFinder", "com.centralaz.LifeGroupFinder\com.centralaz.LifeGroupFinder.csproj", "{2252252C-25B9-40B3-891E-0E5F0CFB263F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -82,6 +84,10 @@ Global
 		{F3CDAC54-735E-415D-A875-B10FA6CC6687}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3CDAC54-735E-415D-A875-B10FA6CC6687}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3CDAC54-735E-415D-A875-B10FA6CC6687}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2252252C-25B9-40B3-891E-0E5F0CFB263F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2252252C-25B9-40B3-891E-0E5F0CFB263F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2252252C-25B9-40B3-891E-0E5F0CFB263F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2252252C-25B9-40B3-891E-0E5F0CFB263F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
