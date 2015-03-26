@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,7 +51,7 @@ namespace RockWeb.Blocks.Examples
             base.OnInit( e );
             InitSyntaxHighlighting();
 
-            gExample.DataKeyNames = new string[] { "id" };
+            gExample.DataKeyNames = new string[] { "Id" };
             gExample.GridRebind += gExample_GridRebind;
 
             geopExamplePoint.SelectGeography += geoPicker_SelectGeography;
@@ -381,5 +381,5 @@ namespace RockWeb.Blocks.Examples
             string physicalFileName = this.Request.MapPath( fuprExampleContentFile.UploadedContentFilePath );
             lblPhysicalFileName.Text = "Uploaded File: " + physicalFileName;
         }
-    }
+}
 }

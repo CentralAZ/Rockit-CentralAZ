@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="Components.ascx.cs" Inherits="RockWeb.Blocks.Core.Components" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="Components.ascx.cs" Inherits="RockWeb.Blocks.Core.Components" %>
 
 <script type="text/javascript">
     function clearActiveDialog() {
@@ -31,16 +31,16 @@
                     <Rock:Grid ID="rGrid" runat="server" EmptyDataText="No Components Found" OnRowSelected="rGrid_Edit">
                         <Columns>
                             <Rock:ReorderField />
-                            <asp:BoundField DataField="Name" HeaderText="Name" />
-                            <asp:BoundField DataField="Description" HeaderText="Description" />
+                            <Rock:RockBoundField DataField="Name" HeaderText="Name" />
+                            <Rock:RockBoundField DataField="Description" HeaderText="Description" />
                             <Rock:BoolField DataField="IsActive" HeaderText="Active" />
-                            <asp:TemplateField>
+                            <Rock:RockTemplateField>
                                 <HeaderStyle CssClass="span1" />
                                 <ItemStyle HorizontalAlign="Center" />
                                 <ItemTemplate>
                                     <a id="aSecure" runat="server" class="btn btn-sm btn-security" height="500px"><i class="fa fa-lock"></i></a>
                                 </ItemTemplate>
-                            </asp:TemplateField>
+                            </Rock:RockTemplateField>
                         </Columns>
                     </Rock:Grid>
                 </div>

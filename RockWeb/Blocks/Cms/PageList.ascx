@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="PageList.ascx.cs" Inherits="RockWeb.Blocks.Cms.PageList" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="PageList.ascx.cs" Inherits="RockWeb.Blocks.Cms.PageList" %>
 
 <asp:UpdatePanel ID="upList" runat="server">
     <ContentTemplate>
@@ -20,9 +20,9 @@
                         </Rock:GridFilter>
                         <Rock:Grid ID="gPages" runat="server" DisplayType="Full" AllowSorting="true" >
                             <Columns>
-                                <asp:BoundField DataField="InternalName" HeaderText="Name" SortExpression="InternalName" />
-                                <asp:BoundField DataField="Description" HeaderText="Description" SortExpression="Description" />
-                                <asp:BoundField DataField="Layout" HeaderText="Layout" SortExpression="Layout" />
+                                <Rock:RockBoundField DataField="InternalName" HeaderText="Name" SortExpression="InternalName" />
+                                <Rock:RockBoundField DataField="Description" HeaderText="Description" SortExpression="Description" />
+                                <Rock:RockBoundField DataField="Layout" HeaderText="Layout" SortExpression="Layout" />
                                 <Rock:DeleteField OnClick="gPages_Delete"/>
                             </Columns>
                         </Rock:Grid>

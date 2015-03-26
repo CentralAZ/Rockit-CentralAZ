@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,7 +51,7 @@ namespace RockWeb.Blocks.CheckIn
         {
             base.OnInit( e );
 
-            gGroupType.DataKeyNames = new string[] { "id" };
+            gGroupType.DataKeyNames = new string[] { "Id" };
             gGroupType.Actions.ShowAdd = true;
             gGroupType.Actions.AddClick += gGroupType_Add;
             gGroupType.GridRebind += gGroupType_GridRebind;

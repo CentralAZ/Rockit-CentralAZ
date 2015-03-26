@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="DeviceDetail.ascx.cs" Inherits="RockWeb.Blocks.Core.DeviceDetail" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="DeviceDetail.ascx.cs" Inherits="RockWeb.Blocks.Core.DeviceDetail" %>
 
 <script type="text/javascript">
     function clearActiveDialog() {
@@ -71,7 +71,7 @@
                     <h3>Locations</h3>
                     <Rock:Grid ID="gLocations" runat="server" DisplayType="Light" RowItemText="Location" ShowConfirmDeleteDialog="false">
                         <Columns>
-                            <asp:BoundField DataField="LocationPath" HeaderText="Name" />
+                            <Rock:RockBoundField DataField="LocationPath" HeaderText="Name" />
                             <Rock:DeleteField OnClick="gLocations_Delete" />
                         </Columns>
                     </Rock:Grid>
@@ -79,8 +79,8 @@
                 </fieldset>
 
                 <div class="actions">
-                    <asp:LinkButton ID="btnSave" runat="server" Text="Save" CssClass="btn btn-primary" OnClick="btnSave_Click" />
-                    <asp:LinkButton ID="btnCancel" runat="server" Text="Cancel" CssClass="btn btn-link" CausesValidation="false" OnClick="btnCancel_Click" />
+                    <asp:LinkButton ID="btnSave" runat="server" AccessKey="s" Text="Save" CssClass="btn btn-primary" OnClick="btnSave_Click" />
+                    <asp:LinkButton ID="btnCancel" runat="server" AccessKey="c" Text="Cancel" CssClass="btn btn-link" CausesValidation="false" OnClick="btnCancel_Click" />
                 </div>
 
             </div>

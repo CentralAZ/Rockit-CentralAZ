@@ -33,7 +33,7 @@ namespace com.centralaz.DpsMatch.Workflow.Action
 
             //For each row in excel file
             Dictionary<string, object> parameters;
-            using ( CsvReader csvReader = new CsvReader( new StreamReader( binaryFile.Data.ContentStream ), true ) )
+            using ( CsvReader csvReader = new CsvReader( new StreamReader( binaryFile.ContentStream ), true ) )
             {
                 while ( csvReader.ReadNextRecord() )
                 {

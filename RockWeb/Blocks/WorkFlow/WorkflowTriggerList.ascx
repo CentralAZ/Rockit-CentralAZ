@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeFile="WorkflowTriggerList.ascx.cs" Inherits="RockWeb.Blocks.WorkFlow.WorkflowTriggerList" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="WorkflowTriggerList.ascx.cs" Inherits="RockWeb.Blocks.WorkFlow.WorkflowTriggerList" %>
 
 <asp:UpdatePanel ID="upWorkflowTrigger" runat="server">
     <ContentTemplate>
@@ -15,11 +15,11 @@
                     </Rock:GridFilter>
                     <Rock:Grid ID="gWorkflowTrigger" runat="server" AllowSorting="false" OnRowSelected="gWorkflowTrigger_Edit">
                         <Columns>
-                            <asp:BoundField DataField="EntityTypeFriendlyName" HeaderText="Entity" />
+                            <Rock:RockBoundField DataField="EntityTypeFriendlyName" HeaderText="Entity" />
                             <Rock:EnumField DataField="WorkflowTriggerType" HeaderText="Type" />
-                            <asp:BoundField DataField="EntityTypeQualifierColumn" HeaderText="Qualifier Column" />
-                            <asp:BoundField DataField="EntityTypeQualifierValue" HeaderText="Qualifier Value"  />
-                            <asp:BoundField DataField="WorkflowTypeName" HeaderText="Workflow"  />
+                            <Rock:RockBoundField DataField="EntityTypeQualifierColumn" HeaderText="Qualifier Column" />
+                            <Rock:RockBoundField DataField="EntityTypeQualifierValue" HeaderText="Qualifier Value"  />
+                            <Rock:RockBoundField DataField="WorkflowTypeName" HeaderText="Workflow"  />
                             <Rock:BoolField DataField="IsSystem" HeaderText="System" SortExpression="IsSystem" />
                             <Rock:BoolField DataField="IsActive" HeaderText="Active" SortExpression="IsActive" />
                             <Rock:DeleteField OnClick="gWorkflowTrigger_Delete" />

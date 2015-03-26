@@ -908,7 +908,7 @@ namespace RockWeb.Blocks.Reporting
                 if ( isPersonDataSet )
                 {
                     gReport.PersonIdField = "Id";
-                    gReport.DataKeyNames = new string[] { "id" };
+                    gReport.DataKeyNames = new string[] { "Id" };
                 }
                 else
                 {
@@ -926,12 +926,15 @@ namespace RockWeb.Blocks.Reporting
                 var selectedAttributes = new Dictionary<int, AttributeCache>();
                 var selectedComponents = new Dictionary<int, ReportField>();
 
+                // if there is a selectField, keep it to preserve which items are checked
+                var selectField = gReport.Columns.OfType<SelectField>().FirstOrDefault();
                 gReport.Columns.Clear();
                 int columnIndex = 0;
 
                 if ( !string.IsNullOrWhiteSpace( gReport.PersonIdField ) )
                 {
-                    gReport.Columns.Add( new SelectField() );
+                    // if we already had a selectField, use it (to preserve checkbox state)
+                    gReport.Columns.Add( selectField ?? new SelectField() );
                     columnIndex++;
                 }
 
@@ -948,7 +951,7 @@ namespace RockWeb.Blocks.Reporting
                             selectedEntityFields.Add( columnIndex, entityField );
 
                             BoundField boundField;
-                            if ( entityField.DefinedTypeGuid.HasValue )
+                            if ( entityField.FieldType.Guid.Equals( Rock.SystemGuid.FieldType.DEFINED_VALUE.AsGuid() ) )
                             {
                                 boundField = new DefinedValueField();
                             }
@@ -1045,7 +1048,7 @@ namespace RockWeb.Blocks.Reporting
                         selectedEntityFields.Add( columnIndex, entityField );
 
                         BoundField boundField;
-                        if ( entityField.DefinedTypeGuid.HasValue )
+                        if ( entityField.FieldType.Guid.Equals( Rock.SystemGuid.FieldType.DEFINED_VALUE.AsGuid() ) )
                         {
                             boundField = new DefinedValueField();
                         }
@@ -1066,7 +1069,6 @@ namespace RockWeb.Blocks.Reporting
                 {
                     gReport.Visible = true;
                     gReport.ExportFilename = report.Name;
-                    rockContext.Database.CommandTimeout = GetAttributeValue( "DatabaseTimeout" ).AsIntegerOrNull() ?? 180;
                     SortProperty sortProperty = gReport.SortProperty;
                     if ( sortProperty == null )
                     {
@@ -1091,7 +1093,7 @@ namespace RockWeb.Blocks.Reporting
                         }
                     }
 
-                    gReport.DataSource = report.GetDataSource( entityType, selectedEntityFields, selectedAttributes, selectedComponents, sortProperty, out errors );
+                    gReport.DataSource = report.GetDataSource( entityType, selectedEntityFields, selectedAttributes, selectedComponents, sortProperty, GetAttributeValue( "DatabaseTimeout" ).AsIntegerOrNull() ?? 180, out errors );
                     gReport.DataBind();
                 }
                 catch ( Exception ex )

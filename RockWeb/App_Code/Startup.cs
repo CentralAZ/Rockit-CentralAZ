@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +19,14 @@ using Microsoft.Owin;
 using Owin;
 using System.Web;
 
-
-public class Startup
+[assembly: OwinStartup(typeof(RockWeb.Startup))]
+namespace RockWeb
 {
-    public void Configuration( IAppBuilder app )
+    public class Startup
     {
-        app.MapSignalR();
+        public void Configuration( IAppBuilder app )
+        {
+            app.MapSignalR();
+        }
     }
 }

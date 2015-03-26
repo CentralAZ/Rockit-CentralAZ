@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,8 +55,8 @@ namespace RockWeb.Blocks.Security
         protected override void OnInit( EventArgs e )
         {
             base.OnInit( e );
-            gViewed.DataKeyNames = new string[] { "id" };
-            gViewedBy.DataKeyNames = new string[] { "id" };
+            gViewed.DataKeyNames = new string[] { "Id" };
+            gViewedBy.DataKeyNames = new string[] { "Id" };
             var person = ContextEntity<Person>();
             if ( person != null )
             {
