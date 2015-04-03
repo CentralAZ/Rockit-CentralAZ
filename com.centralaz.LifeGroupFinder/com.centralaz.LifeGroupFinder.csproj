@@ -55,10 +55,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Migrations\003_LifeGroupWorkflow.cs" />
     <Compile Include="Migrations\002_LifeGroupFinderPages.cs" />
     <Compile Include="Migrations\001_LifeGroupFinder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Web\UI\Controls\GroupFinder\GroupSearchFilter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

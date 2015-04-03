@@ -22,8 +22,6 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-using com.centralaz.LifeGroupFinder.Web.UI.Controls.GroupFinder;
-
 using Rock;
 using Rock.Data;
 using Rock.Model;
@@ -46,23 +44,38 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
     public partial class LifeGroupSearch : Rock.Web.UI.RockBlock
     {
         #region ViewState and Dynamic Controls
-
-        public GroupSearchFilter GroupSearchFilterState
+        public Dictionary<string, string> ParameterState
         {
             get
             {
-                GroupSearchFilter groupSearchFilter = ViewState["GroupSearchFilterState"] as GroupSearchFilter;
-                if ( groupSearchFilter == null )
+                var parameterState = Session["ParameterState"] as Dictionary<string, string>;
+                if ( parameterState == null )
                 {
-                    groupSearchFilter = new GroupSearchFilter();
-                    groupSearchFilter.ID = "_groupSearchFilter";
-                    groupSearchFilter.SearchClick += btnSearch_Click;
+                    parameterState = new Dictionary<string, string>();
+
+                    Session["ParameterState"] = parameterState;
                 }
-                return groupSearchFilter;
+                return parameterState;
             }
+
             set
             {
-                ViewState["GroupSearchFilterState"] = value;
+                Session["ParameterState"] = value;
+            }
+        }
+
+        public bool Expanded
+        {
+            get
+            {
+                EnsureChildControls();
+                return _hfExpanded.Value.AsBooleanOrNull() ?? false;
+            }
+
+            set
+            {
+                EnsureChildControls();
+                _hfExpanded.Value = value.ToString();
             }
         }
 
@@ -83,9 +96,39 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlContent );
-            phSearchFilter.Controls.Add( GroupSearchFilterState );
-            //ScriptManager.GetCurrent( this.Page ).RegisterAsyncPostBackControl( groupSearchFilter );
-            //ScriptManager scriptManager = ScriptManager.GetCurrent( Page );
+            string script = @"
+// groupsearch-filter animation
+$('.groupsearch-filter > header').click(function () {
+    $(this).siblings('.panel-body').slideToggle();
+
+    $expanded = $(this).children('input.filter-expanded');
+    $expanded.val($expanded.val() == 'True' ? 'False' : 'True');
+
+    $('i.groupsearch-filter-state', this).toggleClass('fa-chevron-right');
+    $('i.groupsearch-filter-state', this).toggleClass('fa-chevron-down');
+});
+
+// fix so that the Remove button will fire its event, but not the parent event 
+$('.groupsearch-filter a.btn-danger').click(function (event) {
+    event.stopImmediatePropagation();
+});
+
+$('.groupsearch-filter > .panel-body').on('validation-error', function() {
+    var $header = $(this).siblings('header');
+    $(this).slideDown();
+
+    $expanded = $header.children('input.filter-expanded');
+    $expanded.val('True');
+
+    $('i.groupsearch-filter-state', $header).removeClass('fa-chevron-right');
+    $('i.groupsearch-filter-state', $header).addClass('fa-chevron-down');
+
+    return false;
+});
+
+";
+
+            ScriptManager.RegisterStartupScript( this.Page, this.Page.GetType(), "GroupSearchFilterScript", script, true );
         }
 
         /// <summary>
@@ -98,17 +141,15 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
 
             if ( !Page.IsPostBack )
             {
-
                 if ( CurrentPerson != null )
                 {
                     pnlLogin.Visible = false;
+                    lTitle.Text = String.Format( "Hello {0}, Looking for a Life Group?", CurrentPerson.NickName );
+                    acAddress.SetValues( CurrentPerson.GetHomeLocation() );
                 }
-                ddlCampus.DataSource = CampusCache.All();
-                ddlCampus.DataBind();
+                LoadDropDowns();
             }
         }
-
-
 
         #endregion
 
@@ -128,33 +169,17 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
 
         protected void btnSearch_Click( object sender, EventArgs e )
         {
-            //GroupSearchFilter groupSearchFilter = (GroupSearchFilter)phSearchFilter.FindControl( "_groupSearchFilter_section" );
-            Dictionary<string, string> param = new Dictionary<string, string>();
-            param.Add( "Children",  GroupSearchFilterState.ChildrenState);
-            param.Add( "Days", GroupSearchFilterState.DaysState );
-            param.Add( "Pets", GroupSearchFilterState.PetsState.ToTrueFalse() );
-            param.Add( "Campus", ddlCampus.SelectedValue );
-            param.Add( "StreetAddress1", acAddress.Street1 );
-            param.Add( "StreetAddress2", acAddress.Street2 );
-            param.Add( "City", acAddress.City );
-            param.Add( "State", acAddress.State );
-            param.Add( "PostalCode", acAddress.PostalCode );
-            param.Add( "Country", acAddress.Country );
-            NavigateToLinkedPage( "LifeGroupListPage", queryParams: param );
-        }
-        void cblChildren_SelectedIndexChanged( object sender, EventArgs e )
-        {
-            GroupSearchFilterState.ChildrenState = ( sender as RockCheckBoxList ).SelectedValues.AsDelimited( ";" );
-        }
-
-        void cblDays_SelectedIndexChanged( object sender, EventArgs e )
-        {
-            GroupSearchFilterState.DaysState = ( sender as RockCheckBoxList ).SelectedValues.AsDelimited( ";" );
-        }
-
-        void cbPets_CheckedChanged( object sender, EventArgs e )
-        {
-            GroupSearchFilterState.PetsState = ( sender as RockCheckBox ).Checked;
+            ParameterState.Add( "Children", cblChildren.SelectedValues.AsDelimited( ";" ) );
+            ParameterState.Add( "Days", cblDays.SelectedValues.AsDelimited( ";" ) );
+            ParameterState.Add( "Pets", cbPets.Checked.ToTrueFalse() );
+            ParameterState.Add( "Campus", ddlCampus.SelectedValue );
+            ParameterState.Add( "StreetAddress1", acAddress.Street1 );
+            ParameterState.Add( "StreetAddress2", acAddress.Street2 );
+            ParameterState.Add( "City", acAddress.City );
+            ParameterState.Add( "State", acAddress.State );
+            ParameterState.Add( "PostalCode", acAddress.PostalCode );
+            ParameterState.Add( "Country", acAddress.Country );
+            NavigateToLinkedPage( "LifeGroupListPage" );
         }
 
         protected void lbLogin_Click( object sender, EventArgs e )
@@ -162,7 +187,7 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             var site = RockPage.Layout.Site;
             if ( site.LoginPageId.HasValue )
             {
-                site.RedirectToLoginPage( true );           
+                site.RedirectToLoginPage( true );
             }
         }
 
@@ -176,6 +201,33 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             NavigateToLinkedPage( "InformationSecurityPage" );
         }
 
+        #endregion
+
+        #region Private Methods
+        private void LoadDropDowns()
+        {
+            if ( ParameterState.ContainsKey("Pets") )
+            {
+                cbPets.Checked = ParameterState["Pets"].AsBoolean();
+            }
+            cblDays.Items.Clear();
+            foreach ( var dow in Enum.GetValues( typeof( DayOfWeek ) ).OfType<DayOfWeek>().ToList() )
+            {
+                cblDays.Items.Add( new ListItem( dow.ConvertToString().Substring( 0, 3 ), dow.ConvertToInt().ToString() ) );
+            }
+            if ( ParameterState.ContainsKey( "Days" ) )
+            {
+                cblDays.SetValues( ParameterState["Days"].Split( ';' ).ToList() );
+            }
+            cblChildren.Items.Clear();
+            cblChildren.BindToDefinedType( DefinedTypeCache.Read( "512F355E-9441-4C47-BE47-7FFE19209496".AsGuid() ) );
+            if ( ParameterState.ContainsKey( "Children" ) )
+            {
+                cblChildren.SetValues( ParameterState["Children"].Split( ';' ).ToList() );
+            }
+            ddlCampus.DataSource = CampusCache.All();
+            ddlCampus.DataBind();
+        }
         #endregion
 
     }

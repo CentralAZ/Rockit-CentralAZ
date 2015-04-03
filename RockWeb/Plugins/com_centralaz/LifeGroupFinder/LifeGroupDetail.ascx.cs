@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Entity;
 using System.Linq;
+using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Rock;
@@ -45,6 +46,7 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
     [DefinedValueField( "2E6540EA-63F0-40FE-BE50-F2A84735E600", "Connection Status", "The connection status to use for new individuals (default: 'Web Prospect'.)", true, false, "368DD475-242C-49C4-A42C-7278BE690CC2", "", 2 )]
     [DefinedValueField( "8522BADD-2871-45A5-81DD-C76DA07E2E7E", "Record Status", "The record status to use for new individuals (default: 'Pending'.)", true, false, "283999EC-7346-42E3-B807-BCE9B2BABB49", "", 3 )]
     [WorkflowTypeField( "Workflow", "An optional workflow to start when registration is created. The GroupMember will set as the workflow 'Entity' when processing is started.", false, false, "", "", 4 )]
+    [WorkflowTypeField( "Email Workflow", "An optional workflow to start when an email request is created. The GroupMember will set as the workflow 'Entity' when processing is started.", false, false, "", "", 4 )]
     [BooleanField( "Enable Debug", "Shows the fields available to merge in lava.", false, "", 5 )]
     [CodeEditorField( "Lava Template", "The lava template to use to format the group details.", CodeEditorMode.Liquid, CodeEditorTheme.Rock, 400, true, @"
 ", "", 6 )]
@@ -99,12 +101,11 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             else
             {
                 nbNotice.Visible = false;
-                pnlView.Visible = true;
-
                 if ( !Page.IsPostBack )
                 {
                     ShowDetails();
                 }
+                BuildMap();
             }
         }
 
@@ -263,10 +264,10 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
 
                 // Save the registrations ( and launch workflows )
                 var newGroupMembers = new List<GroupMember>();
-                AddPersonToGroup( rockContext, person, workflowType, newGroupMembers );
+                AddPersonToGroup( rockContext, person, workflowType, newGroupMembers, false );
                 if ( secondPerson != null )
                 {
-                    AddPersonToGroup( rockContext, secondPerson, workflowType, newGroupMembers );
+                    AddPersonToGroup( rockContext, secondPerson, workflowType, newGroupMembers, false );
                 }
 
                 // Show the results
@@ -275,9 +276,17 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
                 pnlSignup.Visible = false;
 
                 pnlResult.Visible = true;
+                tbResultEmail.Text = tbEmail.Text;
+                tbResultFirstName.Text = tbFirstName.Text;
+                pnResultHome.Text = pnHome.Text;
+                tbResultLastName.Text = tbLastName.Text;
                 if ( secondPerson != null )
                 {
                     pnlSecondResult.Visible = true;
+                    tbSecondResultEmail.Text = tbSecondEmail.Text;
+                    tbSecondResultFirstName.Text = tbSecondFirstName.Text;
+                    pnSecondResultHome.Text = pnSecondHome.Text;
+                    tbSecondResultLastName.Text = tbSecondLastName.Text;
                 }
 
                 // Show lava content
@@ -288,17 +297,24 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
                 bool showDebug = UserCanEdit && GetAttributeValue( "EnableDebug" ).AsBoolean();
 
                 string template = GetAttributeValue( "ResultLavaTemplate" );
-
-                // Will only redirect if a value is specifed
-                NavigateToLinkedPage( "ResultPage" );
             }
         }
         protected void lbGoBack_Click( object sender, EventArgs e )
         {
-
+            NavigateToParentPage();
         }
         protected void lbRegister_Click( object sender, EventArgs e )
         {
+            pnHome.Visible = true;
+            pnSecondHome.Visible = true;
+            btnEmail.Visible = false;
+            btnRegister.Visible = true;
+            cbSecondSignup.Visible = true;
+            lLastName.Visible = true;
+            lHome.Visible = true;
+            lEmail.Visible = true;
+            lSecondSignup.Visible = true;
+            lFirstName.Text = "We treat Life Groups like family, and to us family uses real names.";
             tbFirstName.Focus();
         }
         protected void lbPhone_Click( object sender, EventArgs e )
@@ -307,7 +323,17 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
         }
         protected void lbEmail_Click( object sender, EventArgs e )
         {
-
+            pnHome.Visible = false;
+            pnSecondHome.Visible = false;
+            btnEmail.Visible = true;
+            btnRegister.Visible = false;
+            cbSecondSignup.Visible = false;
+            lLastName.Visible = false;
+            lHome.Visible = false;
+            lEmail.Visible = false;
+            lSecondSignup.Visible = false;
+            lFirstName.Text = "For more information about this group, please fill out your first name, last name, and email.";
+            tbFirstName.Focus();
         }
         protected void cbSecondSignup_CheckedChanged( object sender, EventArgs e )
         {
@@ -323,7 +349,7 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
 
         protected void lbExit_Click( object sender, EventArgs e )
         {
-
+            NavigateToParentPage();
         }
         protected void lbChange_Click( object sender, EventArgs e )
         {
@@ -336,6 +362,94 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
                 pnlSecondResult.Visible = false;
             }
             btnRegister.Text = "Correct it!";
+        }
+
+        protected void btnEmail_Click( object sender, EventArgs e )
+        {
+            if ( Page.IsValid )
+            {
+                var rockContext = new RockContext();
+                var personService = new PersonService( rockContext );
+
+                Person person = null;
+                Group family = null;
+
+                var changes = new List<string>();
+                var familyChanges = new List<string>();
+
+                // Only use current person if the name entered matches the current person's name
+                if ( CurrentPerson != null &&
+                    tbFirstName.Text.Trim().Equals( CurrentPerson.FirstName.Trim(), StringComparison.OrdinalIgnoreCase ) &&
+                    tbLastName.Text.Trim().Equals( CurrentPerson.LastName.Trim(), StringComparison.OrdinalIgnoreCase ) )
+                {
+                    person = personService.Get( CurrentPerson.Id );
+                }
+
+                // Try to find person by name/email 
+                if ( person == null )
+                {
+                    var matches = personService.GetByMatch( tbFirstName.Text.Trim(), tbLastName.Text.Trim(), tbEmail.Text.Trim() );
+                    if ( matches.Count() == 1 )
+                    {
+                        person = matches.First();
+                    }
+                }
+
+                // Check to see if this is a new person
+                if ( person == null )
+                {
+                    // If so, create the person and family record for the new person
+                    person = new Person();
+                    person.FirstName = tbFirstName.Text.Trim();
+                    person.LastName = tbLastName.Text.Trim();
+                    person.Email = tbEmail.Text.Trim();
+                    person.IsEmailActive = true;
+                    person.EmailPreference = EmailPreference.EmailAllowed;
+                    person.RecordTypeValueId = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.PERSON_RECORD_TYPE_PERSON.AsGuid() ).Id;
+                    person.ConnectionStatusValueId = _dvcConnectionStatus.Id;
+                    person.RecordStatusValueId = _dvcRecordStatus.Id;
+                    person.Gender = Gender.Unknown;
+
+                    family = PersonService.SaveNewPerson( person, rockContext, _group.CampusId, false );
+                }
+                else
+                {
+                    // updating current existing person
+                    History.EvaluateChange( changes, "Email", person.Email, tbEmail.Text );
+                    person.Email = tbEmail.Text;
+
+                    // Get the current person's families
+                    var families = person.GetFamilies( rockContext );
+                    family = families.FirstOrDefault();
+
+                }
+
+                SetPhoneNumber( rockContext, person, pnHome, null, Rock.SystemGuid.DefinedValue.PERSON_PHONE_TYPE_HOME.AsGuid(), changes );
+
+                // Save the person and change history 
+                rockContext.SaveChanges();
+                HistoryService.SaveChanges( rockContext, typeof( Person ),
+                    Rock.SystemGuid.Category.HISTORY_PERSON_DEMOGRAPHIC_CHANGES.AsGuid(), person.Id, changes );
+                HistoryService.SaveChanges( rockContext, typeof( Person ),
+                    Rock.SystemGuid.Category.HISTORY_PERSON_FAMILY_CHANGES.AsGuid(), person.Id, familyChanges );
+
+                // Check to see if a workflow should be launched for each person
+                WorkflowType workflowType = null;
+                Guid? workflowTypeGuid = GetAttributeValue( "EmailWorkflow" ).AsGuidOrNull();
+                if ( workflowTypeGuid.HasValue )
+                {
+                    var workflowTypeService = new WorkflowTypeService( rockContext );
+                    workflowType = workflowTypeService.Get( workflowTypeGuid.Value );
+                }
+
+                // Save the registrations ( and launch workflows )
+                var newGroupMembers = new List<GroupMember>();
+                AddPersonToGroup( rockContext, person, workflowType, newGroupMembers, true );
+
+                // Show the results            
+                // NavigateToLinkedPage( "ResultPage" );
+                NavigateToParentPage();
+            }
         }
 
         #endregion
@@ -351,68 +465,62 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
 
             if ( _group != null )
             {
-                GroupMember leader = _group.Members.FirstOrDefault( m => m.GroupRole.IsLeader == true );
-                if ( leader != null )
+                _group.LoadAttributes();
+                string vidTag = GetVideoTag( _group.GetAttributeValue( "MainVideo" ), 350, 200 );
+                if ( !string.IsNullOrWhiteSpace( _group.GetAttributeValue( "MainVideo" ) ) )
                 {
-                    Person person = leader.Person;
-                    string imgTag = Rock.Model.Person.GetPhotoImageTag( person.PhotoId, person.Age, person.Gender, 200, 200 );
-                    if ( person.PhotoId.HasValue )
+                    string videoUrl = ResolveRockUrl( String.Format( "~/GetFile.ashx?guid={0}", _group.GetAttributeValue( "MainVideo" ) ) );
+                    lMainMedia.Text = vidTag;
+                }
+                else
+                {
+                    string imgTag = GetImageTag( _group.GetAttributeValue( "MainPhoto" ), 350, 200 );
+                    if ( !string.IsNullOrWhiteSpace( _group.GetAttributeValue( "MainPhoto" ) ) )
                     {
-                        lImage.Text = string.Format( "<a href='{0}'>{1}</a>", person.PhotoUrl, imgTag );
+                        string imageUrl = ResolveRockUrl( String.Format( "~/GetImage.ashx?guid={0}", _group.GetAttributeValue( "MainPhoto" ) ) );
+                        lMainMedia.Text = string.Format( "<a href='{0}'>{1}</a>", imageUrl, imgTag );
                     }
                     else
                     {
-                        lImage.Text = imgTag;
-                    }
-                }
-                lDescription.Text = _group.Description;
-                // Get Map Style
-                phMaps.Controls.Clear();
-                var mapStyleValue = DefinedValueCache.Read( GetAttributeValue( "MapStyle" ) );
-                if ( mapStyleValue == null )
-                {
-                    mapStyleValue = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.MAP_STYLE_ROCK );
-                }
-
-                if ( mapStyleValue != null )
-                {
-                    string mapStyle = mapStyleValue.GetAttributeValue( "StaticMapStyle" );
-                    if ( !string.IsNullOrWhiteSpace( mapStyle ) )
-                    {
-                        foreach ( GroupLocation groupLocation in _group.GroupLocations.OrderBy( gl => ( gl.GroupLocationTypeValue != null ) ? gl.GroupLocationTypeValue.Order : int.MaxValue ) )
+                        GroupMember leader = _group.Members.FirstOrDefault( m => m.GroupRole.IsLeader == true );
+                        if ( leader != null )
                         {
-                            if ( groupLocation.Location != null )
+
+                            Person person = leader.Person;
+                            string imgPersonTag = Rock.Model.Person.GetPhotoImageTag( person.PhotoId, person.Age, person.Gender, 200, 200 );
+                            if ( person.PhotoId.HasValue )
                             {
-                                if ( groupLocation.Location.GeoPoint != null )
-                                {
-                                    string markerPoints = string.Format( "{0},{1}", groupLocation.Location.GeoPoint.Latitude, groupLocation.Location.GeoPoint.Longitude );
-                                    string mapLink = System.Text.RegularExpressions.Regex.Replace( mapStyle, @"\{\s*MarkerPoints\s*\}", markerPoints );
-                                    mapLink = System.Text.RegularExpressions.Regex.Replace( mapLink, @"\{\s*PolygonPoints\s*\}", string.Empty );
-                                    mapLink += "&sensor=false&size=350x200&zoom=13&format=png";
-                                    var literalcontrol = new Literal()
-                                    {
-                                        Text = string.Format(
-                                        "<div class='group-location-map'><img src='{0}'/></div>",
-                                        mapLink ),
-                                        Mode = LiteralMode.PassThrough
-                                    };
-                                    phMaps.Controls.Add( literalcontrol );
-                                }
-                                else if ( groupLocation.Location.GeoFence != null )
-                                {
-                                    string polygonPoints = "enc:" + groupLocation.Location.EncodeGooglePolygon();
-                                    string mapLink = System.Text.RegularExpressions.Regex.Replace( mapStyle, @"\{\s*MarkerPoints\s*\}", string.Empty );
-                                    mapLink = System.Text.RegularExpressions.Regex.Replace( mapLink, @"\{\s*PolygonPoints\s*\}", polygonPoints );
-                                    mapLink += "&sensor=false&size=350x200&format=png";
-                                    phMaps.Controls.Add(
-                                        new LiteralControl( string.Format(
-                                            "<div class='group-location-map'><img src='{0}'/></div>",
-                                            mapLink ) ) );
-                                }
+                                lMainMedia.Text = string.Format( "<a href='{0}'>{1}</a>", person.PhotoUrl, imgTag );
+                            }
+                            else
+                            {
+                                lMainMedia.Text = imgTag;
                             }
                         }
                     }
                 }
+                string groupPhotoTag1 = GetImageTag( _group.GetAttributeValue( "GroupPhoto1" ), 350, 200 );
+                if ( !string.IsNullOrWhiteSpace( _group.GetAttributeValue( "GroupPhoto1" ) ) )
+                {
+                    string imageUrl = ResolveRockUrl( String.Format( "~/GetImage.ashx?guid={0}", _group.GetAttributeValue( "GroupPhoto1" ) ) );
+                    lGroupPhoto1.Text = string.Format( "<a href='{0}'>{1}</a>", imageUrl, groupPhotoTag1 );
+                }
+                string groupPhotoTag2 = GetImageTag( _group.GetAttributeValue( "GroupPhoto2" ), 350, 200 );
+                if ( !string.IsNullOrWhiteSpace( _group.GetAttributeValue( "GroupPhoto2" ) ) )
+                {
+                    string imageUrl = ResolveRockUrl( String.Format( "~/GetImage.ashx?guid={0}", _group.GetAttributeValue( "GroupPhoto2" ) ) );
+                    lGroupPhoto2.Text = string.Format( "<a href='{0}'>{1}</a>", imageUrl, groupPhotoTag2 );
+                }
+                string groupPhotoTag3 = GetImageTag( _group.GetAttributeValue( "GroupPhoto3" ), 350, 200 );
+                if ( !string.IsNullOrWhiteSpace( _group.GetAttributeValue( "GroupPhoto3" ) ) )
+                {
+                    string imageUrl = ResolveRockUrl( String.Format( "~/GetImage.ashx?guid={0}", _group.GetAttributeValue( "GroupPhoto3" ) ) );
+                    lGroupPhoto3.Text = string.Format( "<a href='{0}'>{1}</a>", imageUrl, groupPhotoTag3 );
+                }
+
+
+                lDescription.Text = _group.Description;
+                BuildMap();
 
                 // Show lava content
                 var mergeFields = new Dictionary<string, object>();
@@ -454,6 +562,129 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             }
         }
 
+        public string GetImageTag( String imageGuid, int? maxWidth = null, int? maxHeight = null )
+        {
+            var photoUrl = new StringBuilder();
+
+            photoUrl.Append( System.Web.VirtualPathUtility.ToAbsolute( "~/" ) );
+
+            string styleString = string.Empty;
+
+            if ( !String.IsNullOrWhiteSpace( imageGuid ) )
+            {
+                photoUrl.AppendFormat( "GetImage.ashx?guid={0}", imageGuid );
+
+                if ( maxWidth.HasValue )
+                {
+                    photoUrl.AppendFormat( "&width={0}", maxWidth.Value );
+                }
+                if ( maxHeight.HasValue )
+                {
+                    photoUrl.AppendFormat( "&height={0}", maxHeight.Value );
+                }
+            }
+            else
+            {
+                photoUrl.Append( "Assets/Images/no-picture.svg?" );
+
+                if ( maxWidth.HasValue || maxHeight.HasValue )
+                {
+                    styleString = string.Format( " style='{0}{1}'",
+                        maxWidth.HasValue ? "max-width:" + maxWidth.Value.ToString() + "px; " : "",
+                        maxHeight.HasValue ? "max-height:" + maxHeight.Value.ToString() + "px;" : "" );
+                }
+            }
+
+            return string.Format( "<img src='{0}'{1}/>", photoUrl.ToString(), styleString );
+        }
+        public string GetVideoTag( String videoGuid, int? maxWidth = null, int? maxHeight = null )
+        {
+            var videoUrl = new StringBuilder();
+            var videoSize = new StringBuilder();
+
+            videoUrl.Append( RockPage.ResolveRockUrlIncludeRoot( "~/" ) );
+
+            string styleString = string.Empty;
+
+            if ( !String.IsNullOrWhiteSpace( videoGuid ) )
+            {
+                videoUrl.AppendFormat( "GetFile.ashx?guid={0}", videoGuid );
+
+                if ( maxWidth.HasValue )
+                {
+                    videoSize.AppendFormat( "width='{0}'", maxWidth.Value );
+                }
+                if ( maxHeight.HasValue )
+                {
+                    videoSize.AppendFormat( "height='{0}'", maxHeight.Value );
+                }
+            }
+            else
+            {
+                videoUrl.Append( "Assets/Images/no-picture.svg?" );
+
+                if ( maxWidth.HasValue || maxHeight.HasValue )
+                {
+                    styleString = string.Format( " style='{0}{1}'",
+                        maxWidth.HasValue ? "max-width:" + maxWidth.Value.ToString() + "px; " : "",
+                        maxHeight.HasValue ? "max-height:" + maxHeight.Value.ToString() + "px;" : "" );
+                }
+            }
+
+            return string.Format( "<video controls {0} name='media'><source src='{1}'{2} type='video/mp4'></video>",videoSize.ToString(), videoUrl.ToString(), styleString );
+        }
+
+        private void BuildMap()
+        {
+            // Get Map Style
+            phMaps.Controls.Clear();
+            var mapStyleValue = DefinedValueCache.Read( GetAttributeValue( "MapStyle" ) );
+            if ( mapStyleValue == null )
+            {
+                mapStyleValue = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.MAP_STYLE_ROCK );
+            }
+
+            if ( mapStyleValue != null )
+            {
+                string mapStyle = mapStyleValue.GetAttributeValue( "StaticMapStyle" );
+                if ( !string.IsNullOrWhiteSpace( mapStyle ) )
+                {
+                    foreach ( GroupLocation groupLocation in _group.GroupLocations.OrderBy( gl => ( gl.GroupLocationTypeValue != null ) ? gl.GroupLocationTypeValue.Order : int.MaxValue ) )
+                    {
+                        if ( groupLocation.Location != null )
+                        {
+                            if ( groupLocation.Location.GeoPoint != null )
+                            {
+                                string markerPoints = string.Format( "{0},{1}", groupLocation.Location.GeoPoint.Latitude, groupLocation.Location.GeoPoint.Longitude );
+                                string mapLink = System.Text.RegularExpressions.Regex.Replace( mapStyle, @"\{\s*MarkerPoints\s*\}", markerPoints );
+                                mapLink = System.Text.RegularExpressions.Regex.Replace( mapLink, @"\{\s*PolygonPoints\s*\}", string.Empty );
+                                mapLink += "&sensor=false&size=350x200&zoom=13&format=png";
+                                var literalcontrol = new Literal()
+                                {
+                                    Text = string.Format(
+                                    "<div class='group-location-map'><img src='{0}'/></div>",
+                                    mapLink ),
+                                    Mode = LiteralMode.PassThrough
+                                };
+                                phMaps.Controls.Add( literalcontrol );
+                            }
+                            else if ( groupLocation.Location.GeoFence != null )
+                            {
+                                string polygonPoints = "enc:" + groupLocation.Location.EncodeGooglePolygon();
+                                string mapLink = System.Text.RegularExpressions.Regex.Replace( mapStyle, @"\{\s*MarkerPoints\s*\}", string.Empty );
+                                mapLink = System.Text.RegularExpressions.Regex.Replace( mapLink, @"\{\s*PolygonPoints\s*\}", polygonPoints );
+                                mapLink += "&sensor=false&size=350x200&format=png";
+                                phMaps.Controls.Add(
+                                    new LiteralControl( string.Format(
+                                        "<div class='group-location-map'><img src='{0}'/></div>",
+                                        mapLink ) ) );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Adds the person to group.
         /// </summary>
@@ -461,7 +692,7 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
         /// <param name="person">The person.</param>
         /// <param name="workflowType">Type of the workflow.</param>
         /// <param name="groupMembers">The group members.</param>
-        private void AddPersonToGroup( RockContext rockContext, Person person, WorkflowType workflowType, List<GroupMember> groupMembers )
+        private void AddPersonToGroup( RockContext rockContext, Person person, WorkflowType workflowType, List<GroupMember> groupMembers, bool emailOnly )
         {
             if ( person != null )
             {
@@ -478,6 +709,13 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
                     groupMember.GroupId = _group.Id;
                     groupMemberService.Add( groupMember );
                     rockContext.SaveChanges();
+                    if ( emailOnly )
+                    {
+                        groupMember.LoadAttributes();
+                        groupMember.SetAttributeValue( "InfoSeeker", "True" );
+                        groupMember.SaveAttributeValues();
+                        rockContext.SaveChanges();
+                    }
 
                     if ( workflowType != null )
                     {
@@ -485,11 +723,12 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
                         {
                             var workflowService = new WorkflowService( rockContext );
                             var workflow = Workflow.Activate( workflowType, person.FullName );
-
+                            workflow.LoadAttributes();
+                            workflow.SetAttributeValue( "leader", _group.Members.FirstOrDefault( m => m.GroupRole.IsLeader == true ).Person.PrimaryAlias.Guid.ToString() );
                             List<string> workflowErrors;
                             if ( workflow.Process( rockContext, groupMember, out workflowErrors ) )
                             {
-                                if ( workflow.IsPersisted || workflow.IsPersisted )
+                                if ( workflow.IsPersisted || workflowType.IsPersisted )//-----
                                 {
                                     if ( workflow.Id == 0 )
                                     {
@@ -634,5 +873,6 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
         }
 
         #endregion
+
     }
 }

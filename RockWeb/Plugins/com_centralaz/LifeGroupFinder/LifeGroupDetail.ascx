@@ -25,7 +25,7 @@
             <div class="row">
                 <div class="col-md-4">
                     <center>
-                    <asp:Literal ID="lImage" runat="server" />
+                    <asp:Literal ID="lMainMedia" runat="server" />
                     </center>
                 </div>
                 <div class="col-md-4">
@@ -55,96 +55,105 @@
                 <asp:Literal ID="lDescription" runat="server" />
             </div>
             <hr />
+            <div class="row">
+                <div class="col-md-4">
+                    <asp:Literal ID="lGroupPhoto1" runat="server" />
+                </div>
+                <div class="col-md-4">
+                    <asp:Literal ID="lGroupPhoto2" runat="server" />
+                </div>
+                <div class="col-md-4">
+                    <asp:Literal ID="lGroupPhoto3" runat="server" />
+                </div>
+            </div>
+            <hr />
             <asp:Literal ID="lLavaOverview" runat="server" />
             <asp:Literal ID="lLavaOutputDebug" runat="server" />
 
             <asp:ValidationSummary ID="valSummary" runat="server" HeaderText="Please Correct the Following" CssClass="alert alert-danger" />
+        </asp:Panel>
+        <asp:Panel ID="pnlSignup" runat="server" Visible="true">
+            <div class="row">
+                <div class="col-md-6">
+                    <Rock:RockLiteral ID="lFirstName" runat="server" Text="We treat Life Groups like family, and to us family uses real names." />
+                </div>
+                <div class="col-md-6">
+                    <Rock:RockTextBox ID="tbFirstName" runat="server" Label="First Name" Required="true"></Rock:RockTextBox>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <Rock:RockLiteral ID="lLastName" runat="server" Text="What is yours?" />
+                </div>
+                <div class="col-md-6">
+                    <Rock:RockTextBox ID="tbLastName" runat="server" Label="Last Name" Required="true"></Rock:RockTextBox>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <Rock:RockLiteral ID="lHome" runat="server" Text="Please provide your email and phone." />
+                </div>
+                <div class="col-md-6">
+                    <Rock:PhoneNumberBox ID="pnHome" runat="server" Label="Home Phone" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <Rock:RockLiteral ID="lEmail" runat="server" Text="To connect you to your selected group we would like to contact you." />
+                </div>
+                <div class="col-md-6">
+                    <Rock:EmailBox ID="tbEmail" runat="server" Label="Email" Required="true"></Rock:EmailBox>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <Rock:RockLiteral ID="lSecondSignup" runat="server" Text="Will some one else be attending with you, such as a spouse, friend, or neighbor?" />
+                </div>
+                <div class="col-md-6">
+                    <Rock:RockCheckBox ID="cbSecondSignup" runat="server" Text="Yes" OnCheckedChanged="cbSecondSignup_CheckedChanged" AutoPostBack="true" />
+                </div>
+            </div>
 
-            <div class="row">
-                <asp:Panel ID="pnlSignup" runat="server" Visible="true">
-                    <div class="row">
-                        <div class="col-md-6">
-                            We treat Life Groups like family, and to us family uses real names.
-                        </div>
-                        <div class="col-md-6">
-                            <Rock:RockTextBox ID="tbFirstName" runat="server" Label="First Name" Required="true"></Rock:RockTextBox>
-                        </div>
+            <asp:Panel ID="pnlSecondSignup" runat="server" Visible="false">
+                <div class="row">
+                    <div class="col-md-6">
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            What is yours?                       
-                        </div>
-                        <div class="col-md-6">
-                            <Rock:RockTextBox ID="tbLastName" runat="server" Label="Last Name" Required="true"></Rock:RockTextBox>
-                        </div>
+                    <div class="col-md-6">
+                        <Rock:RockTextBox ID="tbSecondFirstName" runat="server" Label="First Name" Required="true"></Rock:RockTextBox>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            Please provide your email and phone.                       
-                        </div>
-                        <div class="col-md-6">
-                            <Rock:PhoneNumberBox ID="pnHome" runat="server" Label="Home Phone" />
-                        </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            To connect you to your selected group we would like to contact you.                       
-                        </div>
-                        <div class="col-md-6">
-                            <Rock:EmailBox ID="tbEmail" runat="server" Label="Email" Required="true"></Rock:EmailBox>
-                        </div>
+                    <div class="col-md-6">
+                        <Rock:RockTextBox ID="tbSecondLastName" runat="server" Label="Last Name" Required="true"></Rock:RockTextBox>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            Will some one else be attending with you, such as a spouse, friend, or neighbor?                       
-                        </div>
-                        <div class="col-md-6">
-                            <Rock:RockCheckBox ID="cbSecondSignup" runat="server" Text="Yes" OnCheckedChanged="cbSecondSignup_CheckedChanged" />
-                        </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
                     </div>
-                </asp:Panel>
-            </div>
-            <div class="row">
-                <asp:Panel ID="pnlSecondSignup" runat="server" Visible="false">
-                    <div class="row">
-                        <div class="col-md-6">
-                        </div>
-                        <div class="col-md-6">
-                            <Rock:RockTextBox ID="tbSecondFirstName" runat="server" Label="First Name" Required="true"></Rock:RockTextBox>
-                        </div>
+                    <div class="col-md-6">
+                        <Rock:PhoneNumberBox ID="pnSecondHome" runat="server" Label="Home Phone" />
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                        </div>
-                        <div class="col-md-6">
-                            <Rock:RockTextBox ID="tbSecondLastName" runat="server" Label="Last Name" Required="true"></Rock:RockTextBox>
-                        </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                        </div>
-                        <div class="col-md-6">
-                            <Rock:PhoneNumberBox ID="pnSecondHome" runat="server" Label="Home Phone" />
-                        </div>
+                    <div class="col-md-6">
+                        <Rock:EmailBox ID="tbSecondEmail" runat="server" Label="Email" Required="true"></Rock:EmailBox>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                        </div>
-                        <div class="col-md-6">
-                            <Rock:EmailBox ID="tbSecondEmail" runat="server" Label="Email" Required="true"></Rock:EmailBox>
-                        </div>
-                    </div>
-                </asp:Panel>
-            </div>
+                </div>
+            </asp:Panel>
 
             <div class="pull-right">
                 <div class="actions">
                     <asp:LinkButton ID="btnRegister" runat="server" Text="Sign up!" CssClass="btn btn-primary" OnClick="btnRegister_Click" />
+                    <asp:LinkButton ID="btnEmail" runat="server" Text="Send Email" CssClass="btn btn-primary" OnClick="btnEmail_Click" Visible="false" />
                 </div>
             </div>
         </asp:Panel>
 
-        <asp:Panel ID="pnlResult" runat="server" Visible="true">
+        <asp:Panel ID="pnlResult" runat="server" Visible="false">
             <center>
             <h3>Success!</h3>
             <hr />

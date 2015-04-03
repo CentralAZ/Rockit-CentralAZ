@@ -20,6 +20,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Net;
+using System.Xml.Linq;
 
 using Rock;
 using Rock.Attribute;
@@ -42,7 +44,25 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
     public partial class LifeGroupList : RockBlock
     {
         private int _groupTypesCount = 0;
+        public Dictionary<string, string> ParameterState
+        {
+            get
+            {
+                var parameterState = Session["ParameterState"] as Dictionary<string, string>;
+                if ( parameterState == null )
+                {
+                    parameterState = new Dictionary<string, string>();
 
+                    Session["ParameterState"] = parameterState;
+                }
+                return parameterState;
+            }
+
+            set
+            {
+                Session["ParameterState"] = value;
+            }
+        }
         #region Control Methods
 
         /// <summary>
@@ -52,10 +72,11 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
         protected override void OnInit( EventArgs e )
         {
             base.OnInit( e );
-
             this.BlockUpdated += GroupList_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlGroupList );
         }
+
+
 
         /// <summary>
         /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
@@ -83,6 +104,11 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
 
         #endregion
 
+        protected void lbReturn_Click( object sender, EventArgs e )
+        {
+            NavigateToParentPage();
+        }
+
         #region Internal Methods
 
         private void LoadList()
@@ -93,139 +119,155 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             AttributeValueService attributeValueService = new AttributeValueService( rockContext );
             var qry = new GroupService( rockContext ).Queryable()
                 .Where( g => smallGroupTypeId == g.GroupTypeId );
-            if ( PageParameter( "Campus" ).AsIntegerOrNull() != null )
+            if ( ParameterState["Campus"].AsIntegerOrNull() != null )
             {
-                qry = qry.Where( g => g.CampusId == PageParameter( "Campus" ).AsIntegerOrNull() );
+                qry = qry.Where( g => g.CampusId == ParameterState["Campus"].AsIntegerOrNull() );
             }
-            if ( !String.IsNullOrWhiteSpace( PageParameter( "Days" ) ) )
+            if ( !String.IsNullOrWhiteSpace( ParameterState["Days"] ) )
             {
-                List<String> daysList = PageParameter( "Days" ).Split( ';' ).ToList();
+                List<DayOfWeek> daysList = ParameterState["Days"].Split( ';' ).ToList().Select( i => (DayOfWeek)( i.AsInteger() ) ).ToList();
                 if ( daysList.Any() )
                 {
                     //TODO: find out how days works
-                    qry = qry.Where( g => daysList.Contains( g.Schedule.WeeklyDayOfWeek.Value.ConvertToInt().ToString() ) );
+                    qry = qry.Where( g => daysList.Contains( g.Schedule.WeeklyDayOfWeek.Value ) );
                 }
             }
-            bool? hasPets = PageParameter( "Pets" ).AsBooleanOrNull();
-            if ( hasPets != null || hasPets.Value )
+            bool? hasPets = ParameterState["Pets"].AsBooleanOrNull();
+            if ( hasPets != null && hasPets.Value )
             {
                 var attributeValues = attributeValueService
                                         .Queryable()
-                                        .Where( v => v.Attribute.Key == "HasPets" && v.Value == "False");
+                                        .Where( v => v.Attribute.Key == "HasPets" && v.Value == "False" );
 
                 qry = qry.Where( g => attributeValues.Select( v => v.EntityId ).Contains( g.Id ) );
             }
-            if ( !String.IsNullOrWhiteSpace( PageParameter( "Children" ) ) )
-            {
-                List<String> childrenList = PageParameter( "Children" ).Split( ';' ).ToList();
-                if ( childrenList.Any() )
-                {
-                    var attributeValues = attributeValueService
-                                        .Queryable()
-                                        .Where( v => v.Attribute.Key == "HasChildren" );
 
-                    qry = qry.Where( g => childrenList.Intersect( attributeValues.FirstOrDefault( v => v.EntityId == g.Id ).Value.Split( ',' ).ToList() ).Any() );
-                }
-            }
-            if ( PageParameter( "StreetAddress1" ).AsIntegerOrNull() != null )
-            {
-                qry = qry.Where( g => g.CampusId == PageParameter( "StreetAddress1" ).AsIntegerOrNull() );
-            }
 
             bool shadeRow = false;
             // Construct List
-            foreach ( Group group in qry )
+            var attributeChildValues = attributeValueService
+                                        .Queryable()
+                                        .Where( v => v.Attribute.Key == "HasChildren" );
+
+            if ( qry.Count() > 0 )
             {
-                if ( shadeRow )
+                foreach ( Group group in qry )
                 {
-                    phGroups.Controls.Add( new LiteralControl( "<div class='row' >" ) );
-                }
-                else
-                {
-                    phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
-                }
-                phGroups.Controls.Add( new LiteralControl( "<div class='col-md-1'>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='photo'>" ) );
-                GroupMember leader = group.Members.FirstOrDefault( m => m.GroupRole.IsLeader == true );
-                if ( leader != null )
-                {
-                    Person person = leader.Person;
-                    string imgTag = Rock.Model.Person.GetPhotoImageTag( person.PhotoId, person.Age, person.Gender, 200, 200 );
-                    if ( person.PhotoId.HasValue )
+                    bool displayGroup = true;
+                    if ( !String.IsNullOrWhiteSpace( ParameterState["Children"] ) )
                     {
-                        phGroups.Controls.Add( new LiteralControl( String.Format( "<a href='{0}'>{1}</a>", person.PhotoUrl, imgTag ) ) );
+                        List<String> childrenList = ParameterState["Children"].Split( ';' ).ToList();
+                        if ( !childrenList.Intersect( attributeChildValues.FirstOrDefault( v => v.EntityId == group.Id ).Value.Split( ',' ).ToList() ).Any() )
+                        {
+                            displayGroup = false;
+                        }
                     }
-                    else
+                    if ( displayGroup )
                     {
-                        phGroups.Controls.Add( new LiteralControl( "imgTag" ) );
+                        if ( shadeRow )
+                        {
+                            phGroups.Controls.Add( new LiteralControl( "<div class='row' >" ) );
+                        }
+                        else
+                        {
+                            phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
+                        }
+                        phGroups.Controls.Add( new LiteralControl( "<div class='col-md-1'>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='photo'>" ) );
+                        GroupMember leader = group.Members.FirstOrDefault( m => m.GroupRole.IsLeader == true );
+                        if ( leader != null )
+                        {
+                            Person person = leader.Person;
+                            string imgTag = Rock.Model.Person.GetPhotoImageTag( person.PhotoId, person.Age, person.Gender, 200, 200 );
+                            if ( person.PhotoId.HasValue )
+                            {
+                                phGroups.Controls.Add( new LiteralControl( String.Format( "<a href='{0}'>{1}</a>", person.PhotoUrl, imgTag ) ) );
+                            }
+                            else
+                            {
+                                phGroups.Controls.Add( new LiteralControl( "imgTag" ) );
+                            }
+                        }
+
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='col-md-1'>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
+                        group.LoadAttributes();
+                        if ( group.GetAttributeValue( "HasPets" ).AsBoolean() )
+                        {
+                            phGroups.Controls.Add( new LiteralControl( "<i class='fa fa-paw fa-4x text-primary fa-fw'></i>" ) );
+                        }
+                        else
+                        {
+                            phGroups.Controls.Add( new LiteralControl( "<i class='fa fa-paw fa-4x text-muted fa-fw'></i>" ) );
+                        }
+
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
+
+                        if ( group.GetAttributeValues( "HasChildren" ).Any() )
+                        {
+                            phGroups.Controls.Add( new LiteralControl( "<i class='fa fa-child fa-4x text-primary fa-fw'></i>" ) );
+                        }
+                        else
+                        {
+                            phGroups.Controls.Add( new LiteralControl( "<i class='fa fa-child fa-4x text-muted fa-fw'></i>" ) );
+                        }
+
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='col-md-10'>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='pull-left'>" ) );
+                        phGroups.Controls.Add( new LiteralControl( String.Format( "<u><b><p style='font-size:24px'>{0}</p></b></u>", group.Name ) ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='pull-right'>" ) );
+                        phGroups.Controls.Add( new LiteralControl( string.Format( "<a href='{0}'>View>></a>", ResolveUrl( string.Format( "~/LifeGroup/{0}", group.Id ) ) ) ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
+                        phGroups.Controls.Add( new LiteralControl( group.GetAttributeValue( "ListDescription" ) ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<hr />" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='pull-left'>" ) );
+                        phGroups.Controls.Add( new LiteralControl( group.Schedule.ToString() ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<center>" ) );
+                        phGroups.Controls.Add( new LiteralControl( group.GetAttributeValue( "Crossroads" ) ) );
+                        phGroups.Controls.Add( new LiteralControl( "</center>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "<div class='pull-right'>" ) );
+                        phGroups.Controls.Add( new LiteralControl( GetDistance( group ) ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "</div>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "</br>" ) );
+                        phGroups.Controls.Add( new LiteralControl( "</br>" ) );
+                        shadeRow = !shadeRow;
                     }
                 }
-
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='col-md-1'>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
-                group.LoadAttributes();
-                if ( group.GetAttributeValue( "HasPets" ).AsBoolean() )
-                {
-                    phGroups.Controls.Add( new LiteralControl( "<i class='fa fa-paw fa-4x text-primary fa-fw'></i>" ) );
-                }
-                else
-                {
-                    phGroups.Controls.Add( new LiteralControl( "<i class='fa fa-paw fa-4x text-muted fa-fw'></i>" ) );
-                }
-
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
-
-                if ( group.GetAttributeValues( "HasChildren" ).Any() )
-                {
-                    phGroups.Controls.Add( new LiteralControl( "<i class='fa fa-child fa-4x text-primary fa-fw'></i>" ) );
-                }
-                else
-                {
-                    phGroups.Controls.Add( new LiteralControl( "<i class='fa fa-child fa-4x text-muted fa-fw'></i>" ) );
-                }
-
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='col-md-10'>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='pull-left'>" ) );
-                phGroups.Controls.Add( new LiteralControl( String.Format( "<u><b><p style='font-size:24px'>{0}</p></b></u>", group.Name ) ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='pull-right'>" ) );
-                phGroups.Controls.Add( new LiteralControl( string.Format( "<a href='{0}'>View>></a>", ResolveUrl( string.Format( "~/LifeGroup/{0}", group.Id ) ) ) ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
-                phGroups.Controls.Add( new LiteralControl( group.Description ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<hr />" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='row'>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='pull-left'>" ) );
-                phGroups.Controls.Add( new LiteralControl( group.Schedule.ToString() ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<center>" ) );
-                phGroups.Controls.Add( new LiteralControl( group.GetAttributeValue( "Crossroads" ) ) );
-                phGroups.Controls.Add( new LiteralControl( "</center>" ) );
-                phGroups.Controls.Add( new LiteralControl( "<div class='pull-right'>" ) );
-                phGroups.Controls.Add( new LiteralControl( GetDistance( group ) ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "</div>" ) );
-                phGroups.Controls.Add( new LiteralControl( "</br>" ) );
-                phGroups.Controls.Add( new LiteralControl( "</br>" ) );
-                shadeRow = !shadeRow;
+            }
+            else
+            {
+                phGroups.Controls.Add( new LiteralControl( "<h1>" ) );
+                phGroups.Controls.Add( new LiteralControl( "No Results" ) );
+                phGroups.Controls.Add( new LiteralControl( "</h1>" ) );
             }
 
         }
         protected string GetDistance( Group group )
         {
-            Location personLocation = new LocationService( new RockContext() )
-                        .Get( PageParameter( "StreetAddress1" ), PageParameter( "StreetAddress2" ), PageParameter( "City" ),
-                            PageParameter( "State" ), PageParameter( "PostalCode" ), PageParameter( "Country" ) );
+            RockContext rockContext = new RockContext();
+            Location personLocation = new LocationService( rockContext )
+                        .Get( ParameterState["StreetAddress1"], ParameterState["StreetAddress2"], ParameterState["City"],
+                            ParameterState["State"], ParameterState["PostalCode"], ParameterState["Country"] );
+            if ( personLocation.GeoPoint == null )
+            {
+                SetGeoPointFromAddress( personLocation );
+                rockContext.SaveChanges();
+            }
             double? closestLocation = null;
             foreach ( var groupLocation in group.GroupLocations
                         .Where( gl => gl.Location.GeoPoint != null ) )
@@ -252,13 +294,29 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             }
             if ( closestLocation != null )
             {
-                return closestLocation.Value.ToString( "0.0" );
+                return String.Format( "{0}m", closestLocation.Value.ToString( "0.0" ) );
             }
             else
             {
                 return String.Empty;
             }
         }
+
+        private static void SetGeoPointFromAddress( Location personLocation )
+        {
+            var requestUri = string.Format( "http://maps.googleapis.com/maps/api/geocode/xml?address={0}&sensor=false", Uri.EscapeDataString( personLocation.GetFullStreetAddress() ) );
+
+            var request = WebRequest.Create( requestUri );
+            var response = request.GetResponse();
+            var xdoc = XDocument.Load( response.GetResponseStream() );
+
+            var result = xdoc.Element( "GeocodeResponse" ).Element( "result" );
+            var locationElement = result.Element( "geometry" ).Element( "location" );
+            var lat = locationElement.Element( "lat" );
+            var lng = locationElement.Element( "lng" );
+            personLocation.SetLocationPointFromLatLong( (double)lat, (double)lng );
+        }
         #endregion
+
     }
 }
