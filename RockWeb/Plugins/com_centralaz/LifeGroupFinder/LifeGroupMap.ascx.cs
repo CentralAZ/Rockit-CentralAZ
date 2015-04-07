@@ -847,7 +847,18 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             // Display a map on the page
             map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
             map.setTilt(45);
+            if (locationData==null)
+            {{
+                navigator.geolocation.getCurrentPosition(function(position) {{
+                    var items = addUserItem(0, position, '{4}');
+                    for (var j = 0; j < items.length; j++) {{
+                        items[j].setMap(map);
+                    }}
+                var latlong = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                   map.setCenter(latlong);
 
+                }});
+            }}
             if ( locationData != null )
             {{
                 var items = addMapItem(0, locationData, '{4}');
@@ -980,7 +991,32 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             return items;
 
         }}
-        
+         function addUserItem( i, position, color ) {{
+
+            var items = [];
+
+                var position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                bounds.extend(position);
+
+                var pinImage = new google.maps.MarkerImage('http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|0080ff',
+                    new google.maps.Size(21, 34),
+                    new google.maps.Point(0,0),
+                    new google.maps.Point(10, 34));
+
+                marker = new google.maps.Marker({{
+                    position: position,
+                    map: map,
+                    title: htmlDecode('You'),
+                    icon: pinImage,
+                    shadow: pinShadow
+                }});
+                items.push(marker);
+                allMarkers.push(marker);
+
+            return items;
+
+        }}
+
         function setAllMap(markers, map) {{
             for (var i = 0; i < markers.length; i++) {{
                 markers[i].setMap(map);

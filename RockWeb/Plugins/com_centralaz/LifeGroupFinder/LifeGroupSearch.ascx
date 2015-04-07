@@ -22,7 +22,7 @@
                     </div>
                     <div class="col-md-4">
                         View a
-                        <asp:LinkButton ID="lbMap" runat="server" Text="map" OnClick="lbMap_Click" />
+                        <asp:LinkButton ID="lbMap" runat="server" Text="map" OnClick="lbMap_Click" CausesValidation="false"/>
                         from all groups on this campus.                   
                     </div>
                 </div>
