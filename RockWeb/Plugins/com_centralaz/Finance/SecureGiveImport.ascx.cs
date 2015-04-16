@@ -107,15 +107,15 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                 PersonAliasService personAliasService = new PersonAliasService( rockContext );
 
                 // Find/verify the anonymous person alias ID
-                var aliasId = personAliasService.GetPersonId( GetAttributeValue( "AnonymousGiverPersonAliasID" ).AsInteger() );
-                if ( aliasId == null )
+                var personAlias = personAliasService.GetByAliasId( GetAttributeValue( "AnonymousGiverPersonAliasID" ).AsInteger() );
+                if ( personAlias == null )
                 {
                     nbMessage.Text = "Invalid AnonymousGiverPersonAliasID block setting.";
                     return;
                 }
                 else
                 {
-                    _anonymousPersonAliasId = aliasId.GetValueOrDefault();
+                    _anonymousPersonAliasId = personAlias.Id;
                 }
 
                 _financialBatch = new FinancialBatch();
@@ -218,7 +218,14 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                         contributionTenderType = definedValueService.Queryable()
                             .Where( d => d.DefinedTypeId == tenderType.Id && d.Value == elemValue )
                             .FirstOrDefault();
-                        _tenderTypeDefinedValueCache.Add( elemValue, contributionTenderType );
+                        if ( contributionTenderType != null )
+                        {
+                            _tenderTypeDefinedValueCache.Add( elemValue, contributionTenderType );
+                        }
+                        else
+                        {
+                            throw new Exception( string.Format( "Unable to match contribution type {0}", elemValue ) );
+                        }
                     }
                     else
                     {
@@ -238,13 +245,13 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                     int aliasId = elemGift.Element( "IndividualID" ).Value.AsInteger();
 
                     // verify that this is a real person alias by trying to fetch it.
-                    var personId = personAliasService.GetPersonId( aliasId );
-                    if ( personId == null )
+                    var personAlias = personAliasService.GetByAliasId( aliasId );
+                    if ( personAlias == null )
                     {
                         throw new Exception( string.Format( "Invalid person alias Id {0}", aliasId ) );
                     }
 
-                    financialTransaction.AuthorizedPersonAliasId = aliasId;
+                    financialTransaction.AuthorizedPersonAliasId = personAlias.Id;
                 }
                 else
                 {
@@ -324,6 +331,7 @@ namespace RockWeb.Plugins.com_centralaz.Finance
             }
             gContributions.DataBind();
 
+            gContributions.Actions.ShowExcelExport = false;
             pnlGrid.Visible = gContributions.Rows.Count > 0;
         }
 

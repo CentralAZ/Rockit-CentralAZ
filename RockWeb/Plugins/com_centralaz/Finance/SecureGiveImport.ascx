@@ -92,7 +92,7 @@
             </div>
             <div class="panel-body">
                 <div class="grid grid-panel">
-                    <Rock:Grid ID="gContributions" runat="server" AllowSorting="true">
+                    <Rock:Grid ID="gContributions" runat="server" AllowSorting="false" AllowPaging="false" >
                         <Columns>
                             <asp:TemplateField SortExpression="TransactionId" HeaderText="Transaction ID">
                                         <ItemTemplate>
