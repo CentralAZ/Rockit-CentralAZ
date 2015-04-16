@@ -169,16 +169,16 @@ $('.groupsearch-filter > .panel-body').on('validation-error', function() {
 
         protected void btnSearch_Click( object sender, EventArgs e )
         {
-            ParameterState.Add( "Children", cblChildren.SelectedValues.AsDelimited( ";" ) );
-            ParameterState.Add( "Days", cblDays.SelectedValues.AsDelimited( ";" ) );
-            ParameterState.Add( "Pets", cbPets.Checked.ToTrueFalse() );
-            ParameterState.Add( "Campus", ddlCampus.SelectedValue );
-            ParameterState.Add( "StreetAddress1", acAddress.Street1 );
-            ParameterState.Add( "StreetAddress2", acAddress.Street2 );
-            ParameterState.Add( "City", acAddress.City );
-            ParameterState.Add( "State", acAddress.State );
-            ParameterState.Add( "PostalCode", acAddress.PostalCode );
-            ParameterState.Add( "Country", acAddress.Country );
+            ParameterState.AddOrReplace( "Children", cblChildren.SelectedValues.AsDelimited( ";" ) );
+            ParameterState.AddOrReplace( "Days", cblDays.SelectedValues.AsDelimited( ";" ) );
+            ParameterState.AddOrReplace( "Pets", cbPets.Checked.ToTrueFalse() );
+            ParameterState.AddOrReplace( "Campus", ddlCampus.SelectedValue );
+            ParameterState.AddOrReplace( "StreetAddress1", acAddress.Street1 );
+            ParameterState.AddOrReplace( "StreetAddress2", acAddress.Street2 );
+            ParameterState.AddOrReplace( "City", acAddress.City );
+            ParameterState.AddOrReplace( "State", acAddress.State );
+            ParameterState.AddOrReplace( "PostalCode", acAddress.PostalCode );
+            ParameterState.AddOrReplace( "Country", acAddress.Country );
             NavigateToLinkedPage( "LifeGroupListPage" );
         }
 

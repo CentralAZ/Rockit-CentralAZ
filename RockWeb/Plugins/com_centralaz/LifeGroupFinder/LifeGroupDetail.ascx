@@ -1,10 +1,21 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeFile="LifeGroupDetail.ascx.cs" Inherits="RockWeb.Plugins.com_centralaz.LifeGroupFinder.LifeGroupDetail" %>
-
 <asp:UpdatePanel ID="upnlContent" runat="server">
     <ContentTemplate>
-
+        <script type="text/javascript">
+            function jumpToControl() {
+                var $item = $("[id$='tbFirstName']");
+                if ($item.length > 0) {
+                    $('html, body').animate({
+                        scrollTop: $item.offset().top
+                    }, 1000);
+                }
+            };
+        </script>
         <Rock:NotificationBox ID="nbNotice" runat="server" Visible="false" NotificationBoxType="Danger" />
-
+        <asp:Panel ID="pnlEmailSent" runat="server" Visible="false">
+            <h1>Your request for information has been sent.
+            </h1>
+        </asp:Panel>
         <asp:Panel ID="pnlView" runat="server" Visible="true">
             <div class="row">
                 <h2>
@@ -18,9 +29,10 @@
                 <div class="pull-left">
                     <asp:LinkButton ID="lbGoBack" runat="server" Text="Back" OnClick="lbGoBack_Click" />
                 </div>
-                <div class="pull-right">
-                    <Rock:RockLiteral ID="lSignin" runat="server" />
-                </div>
+                <asp:Panel ID="pnlLogin" runat="server">
+                    <asp:LinkButton ID='lbLogin' runat='server' Text='Sign in' OnClick='lbLogin_Click' CausesValidation="false" />
+                    to autocomplete forms. 
+                </asp:Panel>
             </div>
             <div class="row">
                 <div class="col-md-4">
@@ -31,12 +43,12 @@
                 <div class="col-md-4">
                     <div class="row">
                         <center>
-                            <asp:LinkButton ID="lbRegister" runat="server" Text="Sign up!" CssClass="btn btn-primary" OnClick="lbRegister_Click" />
+                            <asp:LinkButton ID="lbRegister" runat="server" Text="Sign up!" CssClass="btn btn-primary" OnClick="lbRegister_Click" CausesValidation="false"  />
                         </center>
                     </div>
                     <div class="row">
                         <center>                
-                            <asp:LinkButton ID="lbEmail" runat="server" Text="Email" OnClick="lbEmail_Click" />
+                            <asp:LinkButton ID="lbEmail" runat="server" Text="Email" OnClick="lbEmail_Click" CausesValidation="false"/>
                         </center>
                     </div>
                     <div class="row">
@@ -73,6 +85,8 @@
             <asp:ValidationSummary ID="valSummary" runat="server" HeaderText="Please Correct the Following" CssClass="alert alert-danger" />
         </asp:Panel>
         <asp:Panel ID="pnlSignup" runat="server" Visible="true">
+            <Rock:NotificationBox ID="nbErrorMessage" runat="server" NotificationBoxType="Danger" />
+
             <div class="row">
                 <div class="col-md-6">
                     <Rock:RockLiteral ID="lFirstName" runat="server" Text="We treat Life Groups like family, and to us family uses real names." />
@@ -110,7 +124,7 @@
                     <Rock:RockLiteral ID="lSecondSignup" runat="server" Text="Will some one else be attending with you, such as a spouse, friend, or neighbor?" />
                 </div>
                 <div class="col-md-6">
-                    <Rock:RockCheckBox ID="cbSecondSignup" runat="server" Text="Yes" OnCheckedChanged="cbSecondSignup_CheckedChanged" AutoPostBack="true" />
+                    <Rock:RockCheckBox ID="cbSecondSignup" runat="server" Text="Yes" AutoPostBack="true" OnCheckedChanged="cbSecondSignup_CheckedChanged" />
                 </div>
             </div>
 
@@ -168,10 +182,10 @@
                     This is the information that was submitted, is this correct?
                 </div>
                 <div class="row">
-                    <asp:LinkButton ID="lbChange" runat="server" Text="Nope, it needs changes" CssClass="btn btn-primary" OnClick="lbChange_Click" />
+                    <asp:LinkButton ID="lbChange" runat="server" Text="Nope, it needs changes" CssClass="btn btn-primary" OnClick="lbChange_Click" Visible="false" />
                 </div>
                 <div class="row">
-                    <asp:LinkButton ID="lbExit" runat="server" Text="Looks perfect!" CssClass="btn btn-primary" OnClick="lbExit_Click" />
+                    <asp:LinkButton ID="lbExit" runat="server" Text="Looks perfect!" CssClass="btn btn-primary" OnClick="lbExit_Click" Visible="false" />
                 </div>
             </div>
             <div class="col-md-6">

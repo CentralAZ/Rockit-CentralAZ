@@ -31,9 +31,9 @@ namespace com.centralaz.LifeGroupFinder.Migrations
             RockMigrationHelper.AddGroupTypeGroupAttribute( "50FCFB30-F51A-49DF-86F4-2B176EA1820B", "9C204CD0-1233-41C5-818A-C5DA439445AA", "List Description", "", 4, "", "8F0A6B55-8DA5-42EC-9369-E1BF11C903E8" );
             RockMigrationHelper.AddGroupTypeGroupAttribute( "50FCFB30-F51A-49DF-86F4-2B176EA1820B", "97F8157D-A8C8-4AB3-96A2-9CB2A9049E6D", "Main Photo", "", 5, "", "36F6FFFE-6BD9-4DC6-81F3-F125492EECD5" );
             RockMigrationHelper.AddGroupTypeGroupAttribute( "50FCFB30-F51A-49DF-86F4-2B176EA1820B", "F1F5B59D-F086-4627-A94A-DFA7E67950F3", "Main Video", "", 6, null, "6775AD18-BA1A-4696-9D62-F950751537B2" );
-            RockMigrationHelper.AddGroupTypeGroupAttribute( "50FCFB30-F51A-49DF-86F4-2B176EA1820B", "97F8157D-A8C8-4AB3-96A2-9CB2A9049E6D", "GroupPhoto1", "", 7, "", "D578D2B5-A549-4E7E-98C9-C44A4E5A654D" );
-            RockMigrationHelper.AddGroupTypeGroupAttribute( "50FCFB30-F51A-49DF-86F4-2B176EA1820B", "97F8157D-A8C8-4AB3-96A2-9CB2A9049E6D", "GroupPhoto2", "", 8, "", "667C780E-1543-499A-82FC-7B415820977D" );
-            RockMigrationHelper.AddGroupTypeGroupAttribute( "50FCFB30-F51A-49DF-86F4-2B176EA1820B", "97F8157D-A8C8-4AB3-96A2-9CB2A9049E6D", "GroupPhoto3", "", 9, "", "9DA055F3-9B8A-4399-BB93-9783502273DF" );
+            RockMigrationHelper.AddGroupTypeGroupAttribute( "50FCFB30-F51A-49DF-86F4-2B176EA1820B", "97F8157D-A8C8-4AB3-96A2-9CB2A9049E6D", "Group Photo 1", "", 7, "", "D578D2B5-A549-4E7E-98C9-C44A4E5A654D" );
+            RockMigrationHelper.AddGroupTypeGroupAttribute( "50FCFB30-F51A-49DF-86F4-2B176EA1820B", "97F8157D-A8C8-4AB3-96A2-9CB2A9049E6D", "Group Photo 2", "", 8, "", "667C780E-1543-499A-82FC-7B415820977D" );
+            RockMigrationHelper.AddGroupTypeGroupAttribute( "50FCFB30-F51A-49DF-86F4-2B176EA1820B", "97F8157D-A8C8-4AB3-96A2-9CB2A9049E6D", "Group Photo 3", "", 9, "", "9DA055F3-9B8A-4399-BB93-9783502273DF" );
             RockMigrationHelper.AddAttributeQualifier( "D6E4B310-FFDC-4166-8803-04C084277F68", "allowmultiple", "True", "7092B70D-08BC-4B3B-9E64-227D53DAD149" );
             RockMigrationHelper.AddAttributeQualifier( "D6E4B310-FFDC-4166-8803-04C084277F68", "definedtype", "55", "9AF45EBE-3154-402D-B5C5-03BA338170AC" );
             RockMigrationHelper.AddAttributeQualifier( "D6E4B310-FFDC-4166-8803-04C084277F68", "displaydescription", "False", "B406ED42-7770-422D-9AF1-CEEF22AF3E48" );
@@ -46,10 +46,13 @@ namespace com.centralaz.LifeGroupFinder.Migrations
             GroupTypeCache theGroupType = GroupTypeCache.Read( "50FCFB30-F51A-49DF-86F4-2B176EA1820B" );
             int id = theGroupType.Id;
             String theId = id.ToString();
-            RockMigrationHelper.AddEntityAttribute( "Rock.Model.GroupMember", Rock.SystemGuid.FieldType.BOOLEAN, "GroupTypeId", theId, "Info Seeker", "", "Is this someone just wanting more information?", 0, "False", "94DBC590-26B4-4A7F-B555-520D57D10C12" );
+            RockMigrationHelper.AddEntityAttribute( "Rock.Model.GroupMember", Rock.SystemGuid.FieldType.BOOLEAN, "GroupTypeId", theId, "Information Request", "", "Is this someone just wanting more information?", 0, "False", "94DBC590-26B4-4A7F-B555-520D57D10C12" );
             RockMigrationHelper.AddAttributeQualifier( "94DBC590-26B4-4A7F-B555-520D57D10C12", "falsetext", "No", "73CC9D86-0988-435B-A9DB-EA559050E196" );
             RockMigrationHelper.AddAttributeQualifier( "94DBC590-26B4-4A7F-B555-520D57D10C12", "truetext", "Yes", "69D4E5B4-5370-4D03-A18E-E254B0BDDB14" );
 
+            RockMigrationHelper.UpdateSystemEmail( "Groups", "New member - To member", "", "", "", "", "", "New member - To member", "New member - To member", "B83EF8B4-67DF-4824-B38F-B7CF5527A381" );
+            RockMigrationHelper.UpdateSystemEmail( "Groups", "New member - To leader", "", "", "", "", "", "New member - To leader", "New member - To leader", "CAAFA7D3-B8F2-4FB5-9C57-EBCB91DE5A2E" );
+            RockMigrationHelper.UpdateSystemEmail( "Groups", "Information Request - To Leader", "", "", "", "", "", "Information Request - To Leader", "Information Request - To Leader", "8091E0D6-1F54-4015-A298-F87D36982DAF" );
         }
 
         /// <summary>

@@ -55,6 +55,27 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
 ", "", 8 )]
     public partial class LifeGroupDetail : RockBlock
     {
+        public String focusOnState
+        {
+            get
+            {
+                var focusOnState = Session["FocusOn"] as String;
+                if ( focusOnState == null )
+                {
+                    focusOnState = String.Empty;
+
+                    Session["FocusOn"] = focusOnState;
+                }
+                Session["FocusOn"] = String.Empty;
+                return focusOnState;
+            }
+
+            set
+            {
+                Session["FocusOn"] = value;
+            }
+        }
+
         #region Fields
 
         RockContext _rockContext = null;
@@ -92,7 +113,11 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
         protected override void OnLoad( EventArgs e )
         {
             base.OnLoad( e );
-
+            ClearErrorMessage();
+            if ( CurrentPerson != null )
+            {
+                pnlLogin.Visible = false;
+            }
             if ( !CheckSettings() )
             {
                 nbNotice.Visible = true;
@@ -107,6 +132,8 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
                 }
                 BuildMap();
             }
+            lbRegister.Attributes.Add( "onclick", "return jumpToControl()" );
+            lbEmail.Attributes.Add( "onclick", "return jumpToControl()" );
         }
 
         #endregion
@@ -123,6 +150,15 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             ShowDetails();
         }
 
+        protected void lbLogin_Click( object sender, EventArgs e )
+        {
+            var site = RockPage.Layout.Site;
+            if ( site.LoginPageId.HasValue )
+            {
+                site.RedirectToLoginPage( true );
+            }
+        }
+
         /// <summary>
         /// Handles the Click event of the btnRegister control.
         /// </summary>
@@ -132,171 +168,179 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
         {
             if ( Page.IsValid )
             {
-                var rockContext = new RockContext();
-                var personService = new PersonService( rockContext );
-
-                Person person = null;
-                Person secondPerson = null;
-                Group family = null;
-                Group secondFamily = null;
-
-                var changes = new List<string>();
-                var secondPersonChanges = new List<string>();
-                var familyChanges = new List<string>();
-                var secondFamilyChanges = new List<string>();
-
-                // Only use current person if the name entered matches the current person's name
-                if ( CurrentPerson != null &&
-                    tbFirstName.Text.Trim().Equals( CurrentPerson.FirstName.Trim(), StringComparison.OrdinalIgnoreCase ) &&
-                    tbLastName.Text.Trim().Equals( CurrentPerson.LastName.Trim(), StringComparison.OrdinalIgnoreCase ) )
+                if ( !String.IsNullOrWhiteSpace( tbEmail.Text ) && !String.IsNullOrWhiteSpace( tbSecondEmail.Text ) && tbEmail.Text == tbSecondEmail.Text )
                 {
-                    person = personService.Get( CurrentPerson.Id );
-                }
-
-                // Try to find person by name/email 
-                if ( person == null )
-                {
-                    var matches = personService.GetByMatch( tbFirstName.Text.Trim(), tbLastName.Text.Trim(), tbEmail.Text.Trim() );
-                    if ( matches.Count() == 1 )
-                    {
-                        person = matches.First();
-                    }
-                }
-
-                // Check to see if this is a new person
-                if ( person == null )
-                {
-                    // If so, create the person and family record for the new person
-                    person = new Person();
-                    person.FirstName = tbFirstName.Text.Trim();
-                    person.LastName = tbLastName.Text.Trim();
-                    person.Email = tbEmail.Text.Trim();
-                    person.IsEmailActive = true;
-                    person.EmailPreference = EmailPreference.EmailAllowed;
-                    person.RecordTypeValueId = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.PERSON_RECORD_TYPE_PERSON.AsGuid() ).Id;
-                    person.ConnectionStatusValueId = _dvcConnectionStatus.Id;
-                    person.RecordStatusValueId = _dvcRecordStatus.Id;
-                    person.Gender = Gender.Unknown;
-
-                    family = PersonService.SaveNewPerson( person, rockContext, _group.CampusId, false );
+                    nbErrorMessage.Title = "Error";
+                    nbErrorMessage.Text = "Please enter a different email for each person.";
                 }
                 else
                 {
-                    // updating current existing person
-                    History.EvaluateChange( changes, "Email", person.Email, tbEmail.Text );
-                    person.Email = tbEmail.Text;
+                    var rockContext = new RockContext();
+                    var personService = new PersonService( rockContext );
 
-                    // Get the current person's families
-                    var families = person.GetFamilies( rockContext );
-                    family = families.FirstOrDefault();
+                    Person person = null;
+                    Person secondPerson = null;
+                    Group family = null;
+                    Group secondFamily = null;
 
-                }
+                    var changes = new List<string>();
+                    var secondPersonChanges = new List<string>();
+                    var familyChanges = new List<string>();
+                    var secondFamilyChanges = new List<string>();
 
-                SetPhoneNumber( rockContext, person, pnHome, null, Rock.SystemGuid.DefinedValue.PERSON_PHONE_TYPE_HOME.AsGuid(), changes );
-
-                if ( pnlSecondSignup.Visible )
-                {
-                    // Try to find second person by name/email 
-                    if ( secondPerson == null )
+                    // Only use current person if the name entered matches the current person's name
+                    if ( CurrentPerson != null &&
+                        tbFirstName.Text.Trim().Equals( CurrentPerson.FirstName.Trim(), StringComparison.OrdinalIgnoreCase ) &&
+                        tbLastName.Text.Trim().Equals( CurrentPerson.LastName.Trim(), StringComparison.OrdinalIgnoreCase ) )
                     {
-                        var matches = personService.GetByMatch( tbSecondFirstName.Text.Trim(), tbSecondLastName.Text.Trim(), tbSecondEmail.Text.Trim() );
+                        person = personService.Get( CurrentPerson.Id );
+                    }
+
+                    // Try to find person by name/email 
+                    if ( person == null )
+                    {
+                        var matches = personService.GetByMatch( tbFirstName.Text.Trim(), tbLastName.Text.Trim(), tbEmail.Text.Trim() );
                         if ( matches.Count() == 1 )
                         {
-                            secondPerson = matches.First();
+                            person = matches.First();
                         }
                     }
 
                     // Check to see if this is a new person
-                    if ( secondPerson == null )
+                    if ( person == null )
                     {
-                        // If so, create the second person and family record for the new person
-                        secondPerson = new Person();
-                        secondPerson.FirstName = tbSecondFirstName.Text.Trim();
-                        secondPerson.LastName = tbSecondLastName.Text.Trim();
-                        secondPerson.Email = tbSecondEmail.Text.Trim();
-                        secondPerson.IsEmailActive = true;
-                        secondPerson.EmailPreference = EmailPreference.EmailAllowed;
-                        secondPerson.RecordTypeValueId = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.PERSON_RECORD_TYPE_PERSON.AsGuid() ).Id;
-                        secondPerson.ConnectionStatusValueId = _dvcConnectionStatus.Id;
-                        secondPerson.RecordStatusValueId = _dvcRecordStatus.Id;
-                        secondPerson.Gender = Gender.Unknown;
+                        // If so, create the person and family record for the new person
+                        person = new Person();
+                        person.FirstName = tbFirstName.Text.Trim();
+                        person.LastName = tbLastName.Text.Trim();
+                        person.Email = tbEmail.Text.Trim();
+                        person.IsEmailActive = true;
+                        person.EmailPreference = EmailPreference.EmailAllowed;
+                        person.RecordTypeValueId = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.PERSON_RECORD_TYPE_PERSON.AsGuid() ).Id;
+                        person.ConnectionStatusValueId = _dvcConnectionStatus.Id;
+                        person.RecordStatusValueId = _dvcRecordStatus.Id;
+                        person.Gender = Gender.Unknown;
 
-                        family = PersonService.SaveNewPerson( secondPerson, rockContext, _group.CampusId, false );
+                        family = PersonService.SaveNewPerson( person, rockContext, _group.CampusId, false );
                     }
                     else
                     {
                         // updating current existing person
-                        History.EvaluateChange( changes, "Email", secondPerson.Email, tbSecondEmail.Text );
-                        secondPerson.Email = tbSecondEmail.Text;
+                        History.EvaluateChange( changes, "Email", person.Email, tbEmail.Text );
+                        person.Email = tbEmail.Text;
 
                         // Get the current person's families
-                        var families = secondPerson.GetFamilies( rockContext );
+                        var families = person.GetFamilies( rockContext );
                         family = families.FirstOrDefault();
 
                     }
 
-                    SetPhoneNumber( rockContext, secondPerson, pnSecondHome, null, Rock.SystemGuid.DefinedValue.PERSON_PHONE_TYPE_HOME.AsGuid(), changes );
-                }
+                    SetPhoneNumber( rockContext, person, pnHome, null, Rock.SystemGuid.DefinedValue.PERSON_PHONE_TYPE_HOME.AsGuid(), changes );
 
-                // Save the person and change history 
-                rockContext.SaveChanges();
-                HistoryService.SaveChanges( rockContext, typeof( Person ),
-                    Rock.SystemGuid.Category.HISTORY_PERSON_DEMOGRAPHIC_CHANGES.AsGuid(), person.Id, changes );
-                HistoryService.SaveChanges( rockContext, typeof( Person ),
-                    Rock.SystemGuid.Category.HISTORY_PERSON_FAMILY_CHANGES.AsGuid(), person.Id, familyChanges );
-                if ( secondPerson != null )
-                {
+                    if ( pnlSecondSignup.Visible )
+                    {
+                        // Try to find second person by name/email 
+                        if ( secondPerson == null )
+                        {
+                            var matches = personService.GetByMatch( tbSecondFirstName.Text.Trim(), tbSecondLastName.Text.Trim(), tbSecondEmail.Text.Trim() );
+                            if ( matches.Count() == 1 )
+                            {
+                                secondPerson = matches.First();
+                            }
+                        }
+
+                        // Check to see if this is a new person
+                        if ( secondPerson == null )
+                        {
+                            // If so, create the second person and family record for the new person
+                            secondPerson = new Person();
+                            secondPerson.FirstName = tbSecondFirstName.Text.Trim();
+                            secondPerson.LastName = tbSecondLastName.Text.Trim();
+                            secondPerson.Email = tbSecondEmail.Text.Trim();
+                            secondPerson.IsEmailActive = true;
+                            secondPerson.EmailPreference = EmailPreference.EmailAllowed;
+                            secondPerson.RecordTypeValueId = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.PERSON_RECORD_TYPE_PERSON.AsGuid() ).Id;
+                            secondPerson.ConnectionStatusValueId = _dvcConnectionStatus.Id;
+                            secondPerson.RecordStatusValueId = _dvcRecordStatus.Id;
+                            secondPerson.Gender = Gender.Unknown;
+
+                            family = PersonService.SaveNewPerson( secondPerson, rockContext, _group.CampusId, false );
+                        }
+                        else
+                        {
+                            // updating current existing person
+                            History.EvaluateChange( changes, "Email", secondPerson.Email, tbSecondEmail.Text );
+                            secondPerson.Email = tbSecondEmail.Text;
+
+                            // Get the current person's families
+                            var families = secondPerson.GetFamilies( rockContext );
+                            family = families.FirstOrDefault();
+
+                        }
+
+                        SetPhoneNumber( rockContext, secondPerson, pnSecondHome, null, Rock.SystemGuid.DefinedValue.PERSON_PHONE_TYPE_HOME.AsGuid(), changes );
+                    }
+
+                    // Save the person and change history 
                     rockContext.SaveChanges();
                     HistoryService.SaveChanges( rockContext, typeof( Person ),
-                        Rock.SystemGuid.Category.HISTORY_PERSON_DEMOGRAPHIC_CHANGES.AsGuid(), secondPerson.Id, changes );
+                        Rock.SystemGuid.Category.HISTORY_PERSON_DEMOGRAPHIC_CHANGES.AsGuid(), person.Id, changes );
                     HistoryService.SaveChanges( rockContext, typeof( Person ),
-                        Rock.SystemGuid.Category.HISTORY_PERSON_FAMILY_CHANGES.AsGuid(), secondPerson.Id, secondFamilyChanges );
+                        Rock.SystemGuid.Category.HISTORY_PERSON_FAMILY_CHANGES.AsGuid(), person.Id, familyChanges );
+                    if ( secondPerson != null )
+                    {
+                        rockContext.SaveChanges();
+                        HistoryService.SaveChanges( rockContext, typeof( Person ),
+                            Rock.SystemGuid.Category.HISTORY_PERSON_DEMOGRAPHIC_CHANGES.AsGuid(), secondPerson.Id, changes );
+                        HistoryService.SaveChanges( rockContext, typeof( Person ),
+                            Rock.SystemGuid.Category.HISTORY_PERSON_FAMILY_CHANGES.AsGuid(), secondPerson.Id, secondFamilyChanges );
+                    }
+
+                    // Check to see if a workflow should be launched for each person
+                    WorkflowType workflowType = null;
+                    Guid? workflowTypeGuid = GetAttributeValue( "Workflow" ).AsGuidOrNull();
+                    if ( workflowTypeGuid.HasValue )
+                    {
+                        var workflowTypeService = new WorkflowTypeService( rockContext );
+                        workflowType = workflowTypeService.Get( workflowTypeGuid.Value );
+                    }
+
+                    // Save the registrations ( and launch workflows )
+                    var newGroupMembers = new List<GroupMember>();
+                    AddPersonToGroup( rockContext, person, workflowType, newGroupMembers, false );
+                    if ( secondPerson != null )
+                    {
+                        AddPersonToGroup( rockContext, secondPerson, workflowType, newGroupMembers, false );
+                    }
+
+                    // Show the results
+                    pnlView.Visible = false;
+                    pnlSecondSignup.Visible = false;
+                    pnlSignup.Visible = false;
+
+                    pnlResult.Visible = true;
+                    tbResultEmail.Text = tbEmail.Text;
+                    tbResultFirstName.Text = tbFirstName.Text;
+                    pnResultHome.Text = pnHome.Text;
+                    tbResultLastName.Text = tbLastName.Text;
+                    if ( secondPerson != null )
+                    {
+                        pnlSecondResult.Visible = true;
+                        tbSecondResultEmail.Text = tbSecondEmail.Text;
+                        tbSecondResultFirstName.Text = tbSecondFirstName.Text;
+                        pnSecondResultHome.Text = pnSecondHome.Text;
+                        tbSecondResultLastName.Text = tbSecondLastName.Text;
+                    }
+
+                    // Show lava content
+                    var mergeFields = new Dictionary<string, object>();
+                    mergeFields.Add( "Group", _group );
+                    mergeFields.Add( "GroupMembers", newGroupMembers );
+
+                    bool showDebug = UserCanEdit && GetAttributeValue( "EnableDebug" ).AsBoolean();
+
+                    string template = GetAttributeValue( "ResultLavaTemplate" );
                 }
-
-                // Check to see if a workflow should be launched for each person
-                WorkflowType workflowType = null;
-                Guid? workflowTypeGuid = GetAttributeValue( "Workflow" ).AsGuidOrNull();
-                if ( workflowTypeGuid.HasValue )
-                {
-                    var workflowTypeService = new WorkflowTypeService( rockContext );
-                    workflowType = workflowTypeService.Get( workflowTypeGuid.Value );
-                }
-
-                // Save the registrations ( and launch workflows )
-                var newGroupMembers = new List<GroupMember>();
-                AddPersonToGroup( rockContext, person, workflowType, newGroupMembers, false );
-                if ( secondPerson != null )
-                {
-                    AddPersonToGroup( rockContext, secondPerson, workflowType, newGroupMembers, false );
-                }
-
-                // Show the results
-                pnlView.Visible = false;
-                pnlSecondSignup.Visible = false;
-                pnlSignup.Visible = false;
-
-                pnlResult.Visible = true;
-                tbResultEmail.Text = tbEmail.Text;
-                tbResultFirstName.Text = tbFirstName.Text;
-                pnResultHome.Text = pnHome.Text;
-                tbResultLastName.Text = tbLastName.Text;
-                if ( secondPerson != null )
-                {
-                    pnlSecondResult.Visible = true;
-                    tbSecondResultEmail.Text = tbSecondEmail.Text;
-                    tbSecondResultFirstName.Text = tbSecondFirstName.Text;
-                    pnSecondResultHome.Text = pnSecondHome.Text;
-                    tbSecondResultLastName.Text = tbSecondLastName.Text;
-                }
-
-                // Show lava content
-                var mergeFields = new Dictionary<string, object>();
-                mergeFields.Add( "Group", _group );
-                mergeFields.Add( "GroupMembers", newGroupMembers );
-
-                bool showDebug = UserCanEdit && GetAttributeValue( "EnableDebug" ).AsBoolean();
-
-                string template = GetAttributeValue( "ResultLavaTemplate" );
             }
         }
         protected void lbGoBack_Click( object sender, EventArgs e )
@@ -306,16 +350,21 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
         protected void lbRegister_Click( object sender, EventArgs e )
         {
             pnHome.Visible = true;
-            pnSecondHome.Visible = true;
             btnEmail.Visible = false;
             btnRegister.Visible = true;
             cbSecondSignup.Visible = true;
+            if ( cbSecondSignup.Checked )
+            {
+                pnlSecondSignup.Visible = true;
+            }
             lLastName.Visible = true;
             lHome.Visible = true;
             lEmail.Visible = true;
             lSecondSignup.Visible = true;
             lFirstName.Text = "We treat Life Groups like family, and to us family uses real names.";
+            focusOnState = "tbFirstName";
             tbFirstName.Focus();
+
         }
         protected void lbPhone_Click( object sender, EventArgs e )
         {
@@ -324,15 +373,16 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
         protected void lbEmail_Click( object sender, EventArgs e )
         {
             pnHome.Visible = false;
-            pnSecondHome.Visible = false;
             btnEmail.Visible = true;
             btnRegister.Visible = false;
             cbSecondSignup.Visible = false;
+            pnlSecondSignup.Visible = false;
             lLastName.Visible = false;
             lHome.Visible = false;
             lEmail.Visible = false;
             lSecondSignup.Visible = false;
             lFirstName.Text = "For more information about this group, please fill out your first name, last name, and email.";
+            focusOnState = "tbFirstName";
             tbFirstName.Focus();
         }
         protected void cbSecondSignup_CheckedChanged( object sender, EventArgs e )
@@ -448,7 +498,10 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
 
                 // Show the results            
                 // NavigateToLinkedPage( "ResultPage" );
-                NavigateToParentPage();
+                pnlView.Visible = false;
+                pnlSecondSignup.Visible = false;
+                pnlSignup.Visible = false;
+                pnlEmailSent.Visible = true;
             }
         }
 
@@ -456,6 +509,14 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
 
         #region Internal Methods
 
+        /// <summary>
+        /// Clears the error message title and text.
+        /// </summary>
+        private void ClearErrorMessage()
+        {
+            nbErrorMessage.Title = string.Empty;
+            nbErrorMessage.Text = string.Empty;
+        }
         /// <summary>
         /// Shows the details.
         /// </summary>
@@ -465,6 +526,7 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
 
             if ( _group != null )
             {
+
                 _group.LoadAttributes();
                 string vidTag = GetVideoTag( _group.GetAttributeValue( "MainVideo" ), 350, 200 );
                 if ( !string.IsNullOrWhiteSpace( _group.GetAttributeValue( "MainVideo" ) ) )
@@ -490,7 +552,7 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
                             string imgPersonTag = Rock.Model.Person.GetPhotoImageTag( person.PhotoId, person.Age, person.Gender, 200, 200 );
                             if ( person.PhotoId.HasValue )
                             {
-                                lMainMedia.Text = string.Format( "<a href='{0}'>{1}</a>", person.PhotoUrl, imgTag );
+                                lMainMedia.Text = string.Format( "<a href='{0}'>{1}</a>", person.PhotoUrl, imgPersonTag );
                             }
                             else
                             {
@@ -533,7 +595,6 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
                     lLavaOutputDebug.Text = mergeFields.lavaDebugInfo( _rockContext );
                 }
                 lGroupName.Text = _group.Name;
-                lSignin.Text = String.Format( "<a href='{0}'>Sign in</a> to autocomplete forms", LinkedPageUrl( "LoginPage" ) );
 
                 string template = GetAttributeValue( "LavaTemplate" );
                 lLavaOverview.Text = template.ResolveMergeFields( mergeFields );
@@ -631,7 +692,7 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
                 }
             }
 
-            return string.Format( "<video controls {0} name='media'><source src='{1}'{2} type='video/mp4'></video>",videoSize.ToString(), videoUrl.ToString(), styleString );
+            return string.Format( "<video controls {0} name='media'><source src='{1}'{2} type='video/mp4'></video>", videoSize.ToString(), videoUrl.ToString(), styleString );
         }
 
         private void BuildMap()
@@ -724,11 +785,12 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
                             var workflowService = new WorkflowService( rockContext );
                             var workflow = Workflow.Activate( workflowType, person.FullName );
                             workflow.LoadAttributes();
-                            workflow.SetAttributeValue( "leader", _group.Members.FirstOrDefault( m => m.GroupRole.IsLeader == true ).Person.PrimaryAlias.Guid.ToString() );
+                            workflow.SetAttributeValue( "GroupLeader", _group.Members.FirstOrDefault( m => m.GroupRole.IsLeader == true ).Person.PrimaryAlias.Guid.ToString() );
+                            workflow.SetAttributeValue( "GroupMember", person.PrimaryAlias.Guid.ToString() );
                             List<string> workflowErrors;
                             if ( workflow.Process( rockContext, groupMember, out workflowErrors ) )
                             {
-                                if ( workflow.IsPersisted || workflowType.IsPersisted )//-----
+                                if ( workflow.IsPersisted || workflowType.IsPersisted )
                                 {
                                     if ( workflow.Id == 0 )
                                     {
@@ -771,7 +833,7 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             _group = new GroupService( _rockContext )
                 .Queryable( "GroupType.DefaultGroupRole" ).AsNoTracking()
                 .FirstOrDefault( g => g.Id == groupId );
-            if ( _group == null )
+            if ( _group == null || _group.Members.FirstOrDefault( m => m.GroupRole.IsLeader == true ) == null )
             {
                 nbNotice.Heading = "Unknown Group";
                 nbNotice.Text = "<p>This page requires a valid group id parameter, and there was not one provided.</p>";

@@ -20,18 +20,18 @@
                     <div class="col-md-4">
                         <Rock:RockDropDownList ID="ddlCampus" runat="server" />
                     </div>
-                    <div class="col-md-4">
+<%--                    <div class="col-md-4">
                         View a
                         <asp:LinkButton ID="lbMap" runat="server" Text="map" OnClick="lbMap_Click" CausesValidation="false"/>
                         from all groups on this campus.                   
-                    </div>
+                    </div>--%>
                 </div>
 
                 <div class="row">
                     <div class="col-md-12">
                         <div class="pull-right">
                             <asp:Panel ID="pnlLogin" runat="server">
-                                <asp:LinkButton ID='lbLogin' runat='server' Text='Sign in' OnClick='lbLogin_Click' />
+                                <asp:LinkButton ID='lbLogin' runat='server' Text='Sign in' OnClick='lbLogin_Click' CausesValidation="false"/>
                                 to autocomplete forms. 
                             </asp:Panel>
                         </div>
@@ -48,7 +48,7 @@
 
                     <div class="col-md-12">
                         <div class="pull-right">
-                            <asp:LinkButton ID="lbSecurity" runat="server" Text="Why" OnClick="lbSecurity_Click" />
+                            <asp:LinkButton ID="lbSecurity" runat="server" Text="Why" OnClick="lbSecurity_Click" CausesValidation="false"/>
                             your information is safe.
                         </div>
                     </div>

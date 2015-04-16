@@ -123,9 +123,9 @@
 						<img src="{{ member.Person.PhotoUrl }}&height=60&width=60&mode=crop&scale=both" height="60" class="pull-left margin-r-sm" />
 						<div class="pull-left">
 							<strong>{{ member.Person.FullName }}</strong>
-							{% assign infoSeeker = member | Attribute:'InfoSeeker'%}
-							{%if infoSeeker == 'Yes' %}
-								<small>(Info Seeker)</small>
+							{% assign informationRequest = member | Attribute:'InformationRequest'%}
+							{%if informationRequest == 'Yes' %}
+								<small>(Information Request)</small>
 							{%else%}
 								<small>({{member.GroupRole.Name}})</small>
 							{%endif%}

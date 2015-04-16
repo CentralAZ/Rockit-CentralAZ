@@ -223,6 +223,8 @@ namespace com.centralaz.LifeGroupFinder.Migrations
             RockMigrationHelper.AddBlockTypeAttribute( "DAE64D60-18EE-4DC8-A0A0-3280E4201AF2", "59D5A94C-94A0-4630-B80A-BB25697D74C7", "Record Status", "RecordStatus", "", "The record status to use for new individuals (default: 'Pending'.)", 3, @"283999EC-7346-42E3-B807-BCE9B2BABB49", "0E40AB39-FF5C-41FC-BE93-95594FF9AFB2" );
 
             RockMigrationHelper.AddBlockTypeAttribute( "DAE64D60-18EE-4DC8-A0A0-3280E4201AF2", "46A03F59-55D3-4ACE-ADD5-B4642225DD20", "Workflow", "Workflow", "", "An optional workflow to start when registration is created. The GroupMember will set as the workflow 'Entity' when processing is started.", 4, @"", "42D95717-2494-4E76-B837-C78AC6E8B139" );
+            
+            RockMigrationHelper.AddBlockTypeAttribute( "DAE64D60-18EE-4DC8-A0A0-3280E4201AF2", "46A03F59-55D3-4ACE-ADD5-B4642225DD20", "Email Workflow", "EmailWorkflow", "", "An optional workflow to start when an email request is created. The GroupMember will set as the workflow 'Entity' when processing is started.", 4, @"", "C3537C7E-7105-4E3C-8FF2-6FD956D5EC40" );
 
             RockMigrationHelper.AddBlockTypeAttribute( "DAE64D60-18EE-4DC8-A0A0-3280E4201AF2", "1EDAFDED-DFE6-4334-B019-6EECBA89E05A", "Enable Debug", "EnableDebug", "", "Shows the fields available to merge in lava.", 5, @"False", "C466E238-A22B-49E9-9EA6-D9B173AC9334" );
 
@@ -241,6 +243,7 @@ namespace com.centralaz.LifeGroupFinder.Migrations
         /// </summary>
         public override void Down()
         {
+            RockMigrationHelper.DeleteAttribute( "C3537C7E-7105-4E3C-8FF2-6FD956D5EC40" );
             RockMigrationHelper.DeleteAttribute( "A6C8D708-AB6F-4CED-AA0A-1923DDB5CF87" );
             RockMigrationHelper.DeleteAttribute( "4E190755-5DD3-4D4D-987E-163889F8861A" );
             RockMigrationHelper.DeleteAttribute( "42D95717-2494-4E76-B837-C78AC6E8B139" );

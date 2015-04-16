@@ -119,6 +119,9 @@ namespace RockWeb.Plugins.com_centralaz.LifeGroupFinder
             AttributeValueService attributeValueService = new AttributeValueService( rockContext );
             var qry = new GroupService( rockContext ).Queryable()
                 .Where( g => smallGroupTypeId == g.GroupTypeId );
+
+            qry = qry.Where( g => g.Members.Any( m => m.GroupRole.IsLeader == true ) );
+
             if ( ParameterState["Campus"].AsIntegerOrNull() != null )
             {
                 qry = qry.Where( g => g.CampusId == ParameterState["Campus"].AsIntegerOrNull() );
