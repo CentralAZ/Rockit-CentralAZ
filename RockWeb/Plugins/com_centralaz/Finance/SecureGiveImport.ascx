@@ -25,7 +25,7 @@
                 <Rock:NotificationBox ID="nbMessage" runat="server" NotificationBoxType="Danger" />
 
                 <asp:Panel ID="pnlErrors" runat="server" Visible="false" CssClass="alert alert-danger block-message error">
-                        <Rock:Grid ID="gErrors" runat="server" AllowSorting="true" OnRowDataBound="gErrors_RowDataBound" RowItemText="error">
+                        <Rock:Grid ID="gErrors" runat="server" AllowSorting="false" OnRowDataBound="gErrors_RowDataBound" RowItemText="error" AllowPaging="false" RowStyle-CssClass="danger" AlternatingRowStyle-CssClass="danger" ShowActionRow="false" >
                             <Columns>
                                 <asp:TemplateField SortExpression="ReferenceNumber" HeaderText="Reference Number">
                                             <ItemTemplate>

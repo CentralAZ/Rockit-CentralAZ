@@ -363,7 +363,7 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                     }
 
                     Literal lChurchCode = e.Row.FindControl( "lChurchCode" ) as Literal;
-                    if ( lChurchCode != null )
+                    if ( lChurchCode != null && elemError.Element( "ChurchCode" ) != null )
                     {
                         lChurchCode.Text = elemError.Element( "ChurchCode" ).Value.ToString();
                     }
