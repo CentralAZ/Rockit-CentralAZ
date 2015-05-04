@@ -205,7 +205,8 @@ namespace RockWeb.Plugins.com_centralaz.Finance
 
                 if ( elemGift.Element( "ReceivedDate" ) != null )
                 {
-                    financialTransaction.ProcessedDateTime = elemGift.Element( "ReceivedDate" ).Value.AsDateTime();
+                    financialTransaction.ProcessedDateTime = Rock.RockDateTime.Now;
+                    financialTransaction.TransactionDateTime = elemGift.Element( "ReceivedDate" ).Value.AsDateTime();
                 }
 
                 if ( elemGift.Element( "ContributionType" ) != null )
@@ -261,7 +262,7 @@ namespace RockWeb.Plugins.com_centralaz.Finance
                 string summary = string.Format( "{0} donated {1} on {2}", 
                     elemGift.Element( "ContributorName" ).IsEmpty ? "Anonymous" : elemGift.Element( "ContributorName" ).Value,
                     elemGift.Element( "Amount" ).Value.AsDecimal().ToString("C")
-                    , financialTransaction.ProcessedDateTime.ToString() );
+                    , financialTransaction.TransactionDateTime.ToString() );
                 financialTransaction.Summary = summary;
 
                 FinancialAccount account = new FinancialAccount();
