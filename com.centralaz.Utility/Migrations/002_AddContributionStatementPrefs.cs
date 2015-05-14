@@ -31,7 +31,7 @@ namespace com.centralaz.Utility.Migrations
                 INSERT INTO [Attribute]
                     ([IsSystem], [FieldTypeId], [EntityTypeId], [EntityTypeQualifierColumn], [EntityTypeQualifierValue], [Key], [Name], [Description], [Order], [IsGridColumn], [DefaultValue], [IsMultiValue], [IsRequired], [Guid])
                 VALUES
-                    (0, 16, 15, N'', N'', N'StatementFrequencyPreference', N'StatementFrequencyPreference', N'The frequency a person wishes to receive paper (USPS mailed) contribution statements.', 0, 0, N'', 0, 0, N'546F10C6-58E5-4E0B-99A9-1E7B85E1C121')
+                    (0, 16, 15, N'', N'', N'StatementFrequencyPreference', N'Statement Frequency Preference', N'The frequency a person wishes to receive paper (USPS mailed) contribution statements.', 0, 0, N'', 0, 0, N'546F10C6-58E5-4E0B-99A9-1E7B85E1C121')
                 SET @CSPAttributeId = SCOPE_IDENTITY()
 
                 -- qualifier for the Statement Frequency Preference attribute
