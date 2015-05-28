@@ -175,7 +175,7 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
         private void BuildColumns()
         {
             gValues.Columns.Clear();
-            if ( _matchList.ElementAt( _dictionaryIndex ).Value != null )
+            if ( _matchList != null && _matchList.Count > 0 && _matchList.ElementAt( _dictionaryIndex ).Value != null )
             {
                 var labelCol = new BoundField();
                 labelCol.DataField = "Label";
@@ -214,7 +214,7 @@ namespace RockWeb.Plugins.com_centralaz.DpsMatch
         /// </summary>
         private void BindGrid()
         {
-            if ( _matchList.ElementAt( _dictionaryIndex ).Value != null )
+            if ( _matchList != null && _matchList.Count > 0 && _matchList.ElementAt( _dictionaryIndex ).Value != null )
             {
                 Offender offender = _offenderService.Get( _matchList.ElementAt( _dictionaryIndex ).Key );
                 List<Match> matchSubList = _matchList.ElementAt( _dictionaryIndex ).Value;
