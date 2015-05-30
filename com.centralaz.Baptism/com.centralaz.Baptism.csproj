@@ -63,6 +63,7 @@
     <Compile Include="Migrations\001_CreateDb.cs" />
     <Compile Include="Migrations\003_AddHistoryCategory.cs" />
     <Compile Include="Migrations\002_AddSystemData.cs" />
+    <Compile Include="Migrations\004_AddCampusCategoriesSchedulesAndGroups.cs" />
     <Compile Include="Model\Baptizee.cs" />
     <Compile Include="Model\BaptizeeService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
