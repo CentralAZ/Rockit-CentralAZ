@@ -182,7 +182,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void lbEditBlackout_Click( object sender, EventArgs e )
         {
-            _blackoutDate = _blackoutDates.Where( b => b.EffectiveStartDate.Value.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
+            _blackoutDate = _blackoutDates.Where( b => b.GetCalenderEvent().DTStart.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
             Dictionary<string, string> dictionaryInfo = new Dictionary<string, string>();
             dictionaryInfo.Add( "GroupId", PageParameter( "GroupId" ) );
             dictionaryInfo.Add( "SelectedDate", calBaptism.SelectedDate.ToShortDateString() );
@@ -281,7 +281,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                     e.Cell.AddCssClass( "alert-success" );
                 }
             }
-            if ( _blackoutDates.Any( b => b.EffectiveStartDate.Value.Date == day.Date ) )
+            if ( _blackoutDates.Any( b => b.GetCalenderEvent().DTStart.Date == day.Date ) )
             {
                 e.Cell.AddCssClass( "alert-danger" );
             }
@@ -349,7 +349,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             else
             {
                 lPanelHeadingDateRange.Text = String.Format( "{0}: {1} - {2}", group.Name, dateRange[0].ToString( "MMMM d" ), dateRange[1].ToString( "MMMM d" ) );
-                _blackoutDate = _blackoutDates.Where( b => b.EffectiveStartDate.Value.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
+                _blackoutDate = _blackoutDates.Where( b => b.GetCalenderEvent().DTStart.Date == calBaptism.SelectedDate.Date ).FirstOrDefault();
                 nbNoBaptisms.Visible = false;
                 if ( _blackoutDate != null )
                 {

@@ -156,7 +156,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
                 nbErrorWarning.Visible = true;
                 return;
             }
-            if ( _blackoutDates.Any( b => b.EffectiveStartDate.Value == dtpBaptismDate.SelectedDateTime.Value.Date ) )
+            if ( _blackoutDates.Any( b => b.GetCalenderEvent().DTStart.Date == dtpBaptismDate.SelectedDateTime.Value.Date ) )
             {
                 nbErrorWarning.Text = "The date you selected is a blackout date";
                 nbErrorWarning.Visible = true;

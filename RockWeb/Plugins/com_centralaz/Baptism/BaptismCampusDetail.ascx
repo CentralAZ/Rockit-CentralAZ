@@ -31,12 +31,12 @@
                     <div class="panel-body">
                         <center>
                         <div id="calendar">
-                            <asp:Calendar ID="calBaptism" runat="server" DayNameFormat="FirstLetter" SelectionMode="Day" BorderColor="#999999"
-                                TitleStyle-BackColor="#e5e5e5" NextPrevStyle-ForeColor="#333333" FirstDayOfWeek="Monday" Width="200" CssClass="calendar" OnSelectionChanged="calBaptism_SelectionChanged" OnDayRender="calBaptisms_DayRender">
-                                <DayStyle CssClass="calendar-day" />
+                            <asp:Calendar ID="calBaptism" runat="server"  DayNameFormat="FirstTwoLetters" SelectionMode="Day" PrevMonthText="«" NextMonthText="»"
+                                TitleStyle-BackColor="#ffffff" NextPrevStyle-ForeColor="#333333" FirstDayOfWeek="Monday" Width="200" CssClass="calendar table-condensed" OnSelectionChanged="calBaptism_SelectionChanged" OnDayRender="calBaptisms_DayRender">
+                                <DayStyle CssClass="calendar-day" ForeColor="#6a6a6a" />
                                 <TodayDayStyle CssClass="calendar-today" />
                                 <SelectedDayStyle CssClass="calendar-selected" />
-                                <OtherMonthDayStyle CssClass="calendar-last-month" ForeColor="#999999" />
+                                <OtherMonthDayStyle CssClass="calendar-last-month" ForeColor="#dddddd" />
                                 <DayHeaderStyle CssClass="calendar-day-header" />
                                 <NextPrevStyle CssClass="calendar-next-prev" ForeColor="#777777" />
                                 <TitleStyle CssClass="calendar-title" />

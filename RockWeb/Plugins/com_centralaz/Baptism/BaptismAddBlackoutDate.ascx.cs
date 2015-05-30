@@ -137,7 +137,7 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             //baptisms exist for blackout date
             //blackout date already exists
             GetBlackoutDates();
-            if ( _blackoutDates.Any( b => ( b.EffectiveStartDate.Value.Date == dpBlackOutDate.SelectedDate.Value.Date ) && ( b.CategoryId == GetCategoryId() ) && ( b.Id != PageParameter( "BlackoutId" ).AsIntegerOrNull() ) ) )
+            if ( _blackoutDates.Any( b => ( b.GetCalenderEvent().DTStart.Date == dpBlackOutDate.SelectedDate.Value.Date ) && ( b.CategoryId == GetCategoryId() ) && ( b.Id != PageParameter( "BlackoutId" ).AsIntegerOrNull() ) ) )
             {
                 nbNotification.Text = "Blackout already exists for that date";
                 nbNotification.Visible = true;
@@ -248,10 +248,9 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
         protected void BindValues( int blackoutId )
         {
             Schedule blackoutDate = new ScheduleService( new RockContext() ).Get( blackoutId );
-            dpBlackOutDate.SelectedDate = blackoutDate.EffectiveStartDate;
+            dpBlackOutDate.SelectedDate = blackoutDate.GetCalenderEvent().DTStart.Date;
             tbDescription.Text = blackoutDate.Description;
             lPanelTitle.Text = "Edit Blackout Date";
-
         }
 
         /// <summary>

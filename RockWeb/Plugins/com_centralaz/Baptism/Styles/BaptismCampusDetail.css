@@ -1,10 +1,19 @@
-﻿div#calendar
+﻿table.calendar
+{
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    padding: 5px;
+}
+div#calendar
 {
     float: left;
     width: 210px;
 }
     div#calendar th.calendar-day-header{
-        border-bottom: 1px solid #ccc;
+        /*border-bottom: 1px solid #ccc;*/
         text-align: center;
     }
     div#calendar a
@@ -21,7 +30,7 @@
     div#calendar table.calendar-title a
     {
         font-weight: bold;
-        font-size: 12px;
+        font-size: 14px;
         color: #777777;
     }
     
@@ -49,13 +58,14 @@
     
         div#calendar td.calendar-last-month a
         {
-            color: #999999;
-            font-size: 11px;
+            color: #dfdfdf;
+            font-size: 12px;
         }
         
         div#calendar td.calendar-day a,
         div#calendar td.calendar-today a,
         div#calendar td.calendar-selected a
         {
-            font-size: 11px;
+            font-size: 14px;
+            color: #6a6a6a;
         }
