@@ -23,7 +23,19 @@
 		<div class="col-md-6">
 		<h4>Group Details:</h4>
 		{% for attribute in Group.AttributeValues %}
-		<strong>{{ attribute.AttributeName }}:</strong> {{ attribute.ValueFormatted }} <br />
+			{% if attribute.AttributeName != 'List Description'%}
+				{% if attribute.AttributeName != 'GroupPhoto1'%}
+					{% if attribute.AttributeName != 'GroupPhoto2'%}
+						{% if attribute.AttributeName != 'GroupPhoto3'%}
+							{% if attribute.AttributeName != 'Main Photo'%}
+								{% if attribute.AttributeName != 'Main Video'%}
+									<strong>{{ attribute.AttributeName }}:</strong> {{ attribute.ValueFormatted }} <br />
+								{%endif%}
+							{%endif%}
+						{%endif%}
+					{%endif%}
+				{%endif%}
+			{%endif%}
 		{% endfor %}
 		</div>
 
@@ -111,7 +123,12 @@
 						<img src="{{ member.Person.PhotoUrl }}&height=60&width=60&mode=crop&scale=both" height="60" class="pull-left margin-r-sm" />
 						<div class="pull-left">
 							<strong>{{ member.Person.FullName }}</strong>
-							<small>({{ member.GroupRole.Name}})</small>
+							{% assign informationRequest = member | Attribute:'InformationRequest'%}
+							{%if informationRequest == 'Yes' %}
+								<small>(Information Request)</small>
+							{%else%}
+								<small>({{member.GroupRole.Name}})</small>
+							{%endif%}
 
 							{% for phone in member.Person.PhoneNumbers %}
 							<br />{{ phone.NumberFormatted }} <small>({{ phone.NumberTypeValue.Value }})</small>
