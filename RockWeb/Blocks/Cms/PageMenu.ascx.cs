@@ -85,14 +85,13 @@ namespace RockWeb.Blocks.Cms
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void PageMenu_BlockUpdated( object sender, EventArgs e )
         {
-            ObjectCache cache = RockMemoryCache.Default;
+            RockMemoryCache cache = RockMemoryCache.Default;
             cache.Remove( CacheKey() );
         }
 
         private void Render()
         {
-            RockContext rockContext = new RockContext();
-            PageCache currentPage = PageCache.Read( RockPage.PageId, rockContext );
+            PageCache currentPage = PageCache.Read( RockPage.PageId );
             PageCache rootPage = null;
 
             Guid pageGuid = Guid.Empty;
@@ -129,7 +128,10 @@ namespace RockWeb.Blocks.Cms
             }
 
             var pageProperties = new Dictionary<string, object>();
-            pageProperties.Add( "Page", rootPage.GetMenuProperties( levelsDeep, CurrentPerson, rockContext, pageHeirarchy, pageParameters, queryString ) );
+            using ( var rockContext = new RockContext() )
+            {
+                pageProperties.Add( "Page", rootPage.GetMenuProperties( levelsDeep, CurrentPerson, rockContext, pageHeirarchy, pageParameters, queryString ) );
+            }
             string content = GetTemplate().Render( Hash.FromDictionary( pageProperties ) );
 
             // check for errors
@@ -168,7 +170,7 @@ namespace RockWeb.Blocks.Cms
         {
             string cacheKey = CacheKey();
 
-            ObjectCache cache = RockMemoryCache.Default;
+            RockMemoryCache cache = RockMemoryCache.Default;
             Template template = cache[cacheKey] as Template;
 
             if ( template != null )

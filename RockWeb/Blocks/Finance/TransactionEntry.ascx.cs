@@ -359,15 +359,12 @@ namespace RockWeb.Blocks.Finance
                 btnAddAccount.Title = GetAttributeValue( "AddAccountText" );
 
                 bool displayEmail = GetAttributeValue( "DisplayEmail" ).AsBoolean();
-
                 txtEmail.Visible = displayEmail;
-                txtEmail.Required = displayEmail;
                 tdEmailConfirm.Visible = displayEmail;
                 tdEmailReceipt.Visible = displayEmail;
 
                 bool displayPhone = GetAttributeValue( "DisplayPhone" ).AsBoolean();
                 pnbPhone.Visible = displayPhone;
-                pnbPhone.Required = displayPhone;
                 tdPhoneConfirm.Visible = displayPhone;
                 tdPhoneReceipt.Visible = displayPhone;
 
@@ -1053,42 +1050,46 @@ namespace RockWeb.Blocks.Finance
                 if ( _ccGateway != null )
                 {
                     var ccCurrencyType = DefinedValueCache.Read( new Guid( Rock.SystemGuid.DefinedValue.CURRENCY_TYPE_CREDIT_CARD ) );
-
-                    rblSavedCC.DataSource = savedAccounts
-                        .Where( a =>
-                            a.GatewayEntityTypeId == _ccGateway.TypeId &&
-                            a.CurrencyTypeValueId == ccCurrencyType.Id )
-                        .OrderBy( a => a.Name )
-                        .Select( a => new
-                        {
-                            Id = a.Id,
-                            Name = "Use " + a.Name + " (" + a.MaskedAccountNumber + ")"
-                        } ).ToList();
-                    rblSavedCC.DataBind();
-                    if ( rblSavedCC.Items.Count > 0 )
+                    if ( _ccGateway.SupportsSavedAccount( ccCurrencyType ) )
                     {
-                        rblSavedCC.Items.Add( new ListItem( "Use a different card", "0" ) );
+                        rblSavedCC.DataSource = savedAccounts
+                            .Where( a =>
+                                a.GatewayEntityTypeId == _ccGateway.TypeId &&
+                                a.CurrencyTypeValueId == ccCurrencyType.Id )
+                            .OrderBy( a => a.Name )
+                            .Select( a => new
+                            {
+                                Id = a.Id,
+                                Name = "Use " + a.Name + " (" + a.MaskedAccountNumber + ")"
+                            } ).ToList();
+                        rblSavedCC.DataBind();
+                        if ( rblSavedCC.Items.Count > 0 )
+                        {
+                            rblSavedCC.Items.Add( new ListItem( "Use a different card", "0" ) );
+                        }
                     }
                 }
 
                 if ( _achGateway != null )
                 {
                     var achCurrencyType = DefinedValueCache.Read( new Guid( Rock.SystemGuid.DefinedValue.CURRENCY_TYPE_ACH ) );
-
-                    rblSavedAch.DataSource = savedAccounts
-                        .Where( a =>
-                            a.GatewayEntityTypeId == _achGateway.TypeId &&
-                            a.CurrencyTypeValueId == achCurrencyType.Id )
-                        .OrderBy( a => a.Name )
-                        .Select( a => new
-                        {
-                            Id = a.Id,
-                            Name = "Use " + a.Name + " (" + a.MaskedAccountNumber + ")"
-                        } ).ToList();
-                    rblSavedAch.DataBind();
-                    if ( rblSavedAch.Items.Count > 0 )
+                    if ( _achGateway.SupportsSavedAccount( achCurrencyType ) )
                     {
-                        rblSavedAch.Items.Add( new ListItem( "Use a different bank account", "0" ) );
+                        rblSavedAch.DataSource = savedAccounts
+                            .Where( a =>
+                                a.GatewayEntityTypeId == _achGateway.TypeId &&
+                                a.CurrencyTypeValueId == achCurrencyType.Id )
+                            .OrderBy( a => a.Name )
+                            .Select( a => new
+                            {
+                                Id = a.Id,
+                                Name = "Use " + a.Name + " (" + a.MaskedAccountNumber + ")"
+                            } ).ToList();
+                        rblSavedAch.DataBind();
+                        if ( rblSavedAch.Items.Count > 0 )
+                        {
+                            rblSavedAch.Items.Add( new ListItem( "Use a different bank account", "0" ) );
+                        }
                     }
                 }
             }
@@ -1137,7 +1138,14 @@ namespace RockWeb.Blocks.Finance
                 }
             }
 
-            if ( string.IsNullOrWhiteSpace( txtEmail.Text ) )
+            bool displayPhone = GetAttributeValue( "DisplayPhone" ).AsBoolean();
+            if ( displayPhone && string.IsNullOrWhiteSpace( pnbPhone.Number ) )
+            {
+                errorMessages.Add( "Make sure to enter a valid phone number.  A phone number is required for us to process this transaction" );
+            }
+
+            bool displayEmail = GetAttributeValue( "DisplayEmail" ).AsBoolean();
+            if ( displayEmail && string.IsNullOrWhiteSpace( txtEmail.Text ) )
             {
                 errorMessages.Add( "Make sure to enter a valid email address.  An email address is required for us to send you a payment confirmation" );
             }
@@ -1578,7 +1586,7 @@ namespace RockWeb.Blocks.Finance
 
                 // If there was a transaction code returned and this was not already created from a previous saved account,
                 // show the option to save the account.
-                if ( !( paymentInfo is ReferencePaymentInfo ) && !string.IsNullOrWhiteSpace( TransactionCode ) )
+                if ( !( paymentInfo is ReferencePaymentInfo ) && !string.IsNullOrWhiteSpace( TransactionCode ) && gateway.SupportsSavedAccount( paymentInfo.CurrencyTypeValue ) )
                 {
                     cbSaveAccount.Visible = true;
                     pnlSaveAccount.Visible = true;
@@ -1641,7 +1649,7 @@ namespace RockWeb.Blocks.Finance
             if ( !string.IsNullOrWhiteSpace( text ) )
             {
                 nbMessage.Text = text;
-                nbMessage.Title = title;
+                nbMessage.Title = string.Format( "<p>{0}</p>", title );
                 nbMessage.NotificationBoxType = type;
                 nbMessage.Visible = true;
             }

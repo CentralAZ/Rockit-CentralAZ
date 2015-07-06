@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright 2013 by the Spark Development Network
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -227,7 +227,7 @@ namespace RockWeb.Blocks.Cms
                     site.PageNotFoundPageId ?? -1
                 };
 
-                var qry = pageService.Queryable()
+                var qry = pageService.Queryable("Layout")
                     .Where( t => 
                         t.Layout.SiteId == siteId ||
                         sitePages.Contains( t.Id ) );

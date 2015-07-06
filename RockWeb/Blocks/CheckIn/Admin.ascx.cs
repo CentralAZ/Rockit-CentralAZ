@@ -40,6 +40,7 @@ namespace RockWeb.Blocks.CheckIn
     [BooleanField( "Allow Manual Setup", "If enabled, the block will allow the kiosk to be setup manually if it was not set via other means.", true )]
     [BooleanField( "Enable Location Sharing", "If enabled, the block will attempt to determine the kiosk's location via location sharing geocode.", false, "Geo Location", 0 )]
     [IntegerField( "Time to Cache Kiosk GeoLocation", "Time in minutes to cache the coordinates of the kiosk. A value of zero (0) means cache forever. Default 20 minutes.", false, 20, "Geo Location", 1 )]
+    [BooleanField( "Enable Kiosk Match By Name", "Enable a kiosk match by computer name by doing reverseIP lookup to get computer name based on IP address", false, "", 2, "EnableReverseLookup" )]
     public partial class Admin : CheckInBlock
     {
         protected override void OnLoad( EventArgs e )
@@ -115,9 +116,12 @@ namespace RockWeb.Blocks.CheckIn
 
                     Guid kioskDeviceType = Rock.SystemGuid.DefinedValue.DEVICE_TYPE_CHECKIN_KIOSK.AsGuid();
                     ddlKiosk.Items.Clear();
-                    ddlKiosk.DataSource = new DeviceService( new RockContext() ).Queryable()
-                        .Where( d => d.DeviceType.Guid.Equals( kioskDeviceType ) )
-                        .ToList();
+                    using ( var rockContext = new RockContext() )
+                    {
+                        ddlKiosk.DataSource = new DeviceService( rockContext ).Queryable()
+                            .Where( d => d.DeviceType.Guid.Equals( kioskDeviceType ) )
+                            .ToList();
+                    }
                     ddlKiosk.DataBind();
                     ddlKiosk.Items.Insert( 0, new ListItem( None.Text, None.IdValue ) );
 
@@ -145,16 +149,20 @@ namespace RockWeb.Blocks.CheckIn
         {
             // try to find matching kiosk by REMOTE_ADDR (ip/name).
             var checkInDeviceTypeId = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.DEVICE_TYPE_CHECKIN_KIOSK ).Id;
-            var device = new DeviceService( new RockContext() ).GetByIPAddress( Request.ServerVariables["REMOTE_ADDR"], checkInDeviceTypeId, false );
-            if ( device != null )
+            using ( var rockContext = new RockContext() )
             {
-                ClearMobileCookie();
-                CurrentKioskId = device.Id;
-                CurrentGroupTypeIds = GetAllKiosksGroupTypes( device ); ;
-                CurrentCheckInState = null;
-                CurrentWorkflow = null;
-                SaveState();
-                NavigateToNextPage();
+                bool enableReverseLookup = GetAttributeValue( "EnableReverseLookup" ).AsBoolean( false );
+                var device = new DeviceService( rockContext ).GetByIPAddress( Request.ServerVariables["REMOTE_ADDR"], checkInDeviceTypeId, !enableReverseLookup );
+                if ( device != null )
+                {
+                    ClearMobileCookie();
+                    CurrentKioskId = device.Id;
+                    CurrentGroupTypeIds = GetAllKiosksGroupTypes( device, rockContext ); ;
+                    CurrentCheckInState = null;
+                    CurrentWorkflow = null;
+                    SaveState();
+                    NavigateToNextPage();
+                }
             }
         }
 
@@ -252,7 +260,10 @@ namespace RockWeb.Blocks.CheckIn
                 SetDeviceIdCookie( kiosk );
 
                 CurrentKioskId = kiosk.Id;
-                CurrentGroupTypeIds = GetAllKiosksGroupTypes( kiosk ); ;
+                using ( var rockContext = new RockContext() )
+                {
+                    CurrentGroupTypeIds = GetAllKiosksGroupTypes( kiosk, rockContext ); ;
+                }
                 CurrentCheckInState = null;
                 CurrentWorkflow = null;
                 SaveState();
@@ -303,9 +314,9 @@ namespace RockWeb.Blocks.CheckIn
         /// </summary>
         /// <param name="kiosk"></param>
         /// <returns></returns>
-        private List<int> GetAllKiosksGroupTypes( Device kiosk )
+        private List<int> GetAllKiosksGroupTypes( Device kiosk, RockContext rockContext )
         {
-            var groupTypes = GetDeviceGroupTypes( kiosk.Id );
+            var groupTypes = GetDeviceGroupTypes( kiosk.Id, rockContext );
             var groupTypeIds = groupTypes.Select( gt => gt.Id ).ToList();
             return groupTypeIds;
         }
@@ -380,11 +391,11 @@ namespace RockWeb.Blocks.CheckIn
         /// </summary>
         /// <param name="deviceId">The device identifier.</param>
         /// <returns></returns>
-        private List<GroupType> GetDeviceGroupTypes( int deviceId )
+        private List<GroupType> GetDeviceGroupTypes( int deviceId, RockContext rockContext )
         {
             var groupTypes = new Dictionary<int, GroupType>();
 
-            var locationService = new LocationService( new RockContext() );
+            var locationService = new LocationService( rockContext );
 
             // Get all locations (and their children) associated with device
             var locationIds = locationService
@@ -424,11 +435,14 @@ namespace RockWeb.Blocks.CheckIn
 
             if ( ddlKiosk.SelectedValue != None.IdValue )
             {
-                var kiosk = new DeviceService( new RockContext() ).Get( Int32.Parse( ddlKiosk.SelectedValue ) );
-                if ( kiosk != null )
+                using ( var rockContext = new RockContext() )
                 {
-                    cblGroupTypes.DataSource = GetDeviceGroupTypes( kiosk.Id );
-                    cblGroupTypes.DataBind();
+                    var kiosk = new DeviceService( rockContext ).Get( Int32.Parse( ddlKiosk.SelectedValue ) );
+                    if ( kiosk != null )
+                    {
+                        cblGroupTypes.DataSource = GetDeviceGroupTypes( kiosk.Id, rockContext );
+                        cblGroupTypes.DataBind();
+                    }
                 }
 
                 if ( selectedValues != string.Empty )
@@ -472,9 +486,11 @@ namespace RockWeb.Blocks.CheckIn
             var checkInDeviceTypeId = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.DEVICE_TYPE_CHECKIN_KIOSK ).Id;
 
             // We need to use the DeviceService until we can get the GeoFence to JSON Serialize/Deserialize.
-            Device kiosk = new DeviceService( new RockContext() ).GetByGeocode( latitude, longitude, checkInDeviceTypeId );
-
-            return kiosk;
+            using ( var rockContext = new RockContext() )
+            {
+                Device kiosk = new DeviceService( rockContext ).GetByGeocode( latitude, longitude, checkInDeviceTypeId );
+                return kiosk;
+            }
         }
 
         private void RedirectToNewTheme(string theme)
