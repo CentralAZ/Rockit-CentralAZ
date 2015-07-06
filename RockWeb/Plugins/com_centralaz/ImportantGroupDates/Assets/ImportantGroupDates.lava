@@ -1,0 +1,28 @@
+<div class="panel panel-default">
+  <div class="panel-heading">Dates</div>
+
+  {% assign dateCount = Dates | Size %}
+
+  {% if dateCount == 0 %}
+  <div class="margin-all-md"> No Groups Available To List</div>
+  {% endif %}
+
+  <ul class="list-group list-group-panel">
+    {% for date in Dates %}
+    <li class="list-group-item">
+      <a href="{{ LinkedPages.DetailPage }}?GroupId={{group.Group.Id}}" class="js-group-item" data-toggle="tooltip" data-placement="top">
+        {{ date.Occasion}} - {{date.Date}}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+
+</div>
+
+<script type="text/javascript">
+
+  $( document ).ready(function() {
+  $('.js-group-item').tooltip();
+  });
+
+</script>
