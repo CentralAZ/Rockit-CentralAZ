@@ -120,7 +120,7 @@ namespace RockWeb
 
                     // Preload the commonly used objects
                     LoadCacheObjects( rockContext );
-                     
+
 
                     // Run any plugin migrations
                     MigratePlugins( rockContext );
@@ -222,7 +222,7 @@ namespace RockWeb
 
                 LogMessage( APP_LOG_FILENAME, "Application Started Succesfully" );
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 SetError66();
                 throw ( new Exception( "Error occurred during application startup", ex ) );
@@ -380,7 +380,7 @@ namespace RockWeb
 
                 // mark any user login stored as 'IsOnline' in the database as offline
                 MarkOnlineUsersOffline();
-            
+
             }
             catch
             {
@@ -479,6 +479,11 @@ namespace RockWeb
                             if ( !assemblies.ContainsKey( assemblyName ) )
                             {
                                 assemblies.Add( assemblyName, new Dictionary<int, Type>() );
+                            }
+                            //Logs an error becasue it's illegal to have the same migration number
+                            if ( assemblies[assemblyName].ContainsKey( migrationNumberAttr.Number ) )
+                            {
+                                LogError( new Exception( string.Format( "Exception on trying to add plugin migrations to queue: duplicate migration number {0} for assembly {1}", migrationNumberAttr.Number, assemblyName ) ), null );
                             }
                             assemblies[assemblyName].Add( migrationNumberAttr.Number, migrationType );
                         }
@@ -682,7 +687,7 @@ namespace RockWeb
         private void SendNotification( Exception ex )
         {
             int? pageId = ( Context.Items["Rock:PageId"] ?? "" ).ToString().AsIntegerOrNull(); ;
-            int? siteId = ( Context.Items["Rock:SiteId"] ?? "" ).ToString().AsIntegerOrNull();;
+            int? siteId = ( Context.Items["Rock:SiteId"] ?? "" ).ToString().AsIntegerOrNull(); ;
             PersonAlias personAlias = null;
 
             try
@@ -789,7 +794,7 @@ namespace RockWeb
             }
 
             return message;
-        } 
+        }
 
         #region Static Methods
 
@@ -891,7 +896,7 @@ namespace RockWeb
                     Directory.CreateDirectory( directory );
                 }
 
-                string filePath = Path.Combine( directory, fileName +  ".csv" );
+                string filePath = Path.Combine( directory, fileName + ".csv" );
                 string when = RockDateTime.Now.ToString();
 
                 File.AppendAllText( filePath, string.Format( "{0},{1}\r\n", when, message ) );
