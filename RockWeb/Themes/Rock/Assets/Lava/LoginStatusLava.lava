@@ -1,0 +1,12 @@
+<ul class="nav navbar-nav">    
+    <li>
+		<span>Hello {{CurrentPerson.NickName}}</span>
+	</li>
+
+	{% if LinkedPages.SignupPage != '' %}
+		<li>
+			<a href="{{ LinkedPages.MyAccountPage }}">My Account</a>
+		</li>
+	{% endif %}
+    </li>
+</ul>
