@@ -38,17 +38,27 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
     [Category( "com_centralaz > Widgets" )]
     [Description( "Template block for developers to use to start a new detail block." )]
     [EmailField( "Email" )]
+    [TextField("Image Folder Path")]
     public partial class PhotoGallery : Rock.Web.UI.RockBlock
     {
         #region Fields
 
-        // used for private variables
+        private string virtualPath;
+        private string physicalPath;
 
         #endregion
 
         #region Properties
 
-        // used for public / protected properties
+        /// <summary>
+        /// Relative path to the Images Folder
+        /// </summary>
+        public string ImageFolderPath { get; set; }
+
+        /// <summary>
+        /// Get or Set the Admin Mode 
+        /// </summary>
+        public bool AdminMode { get; set; }
 
         #endregion
 
@@ -66,6 +76,7 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
 
             RockPage.AddCSSLink( ResolveRockUrl( "~/Plugins/com_centralaz/Widgets/Styles/dropzone.css" ) );
             RockPage.AddScriptLink( "~/Plugins/com_centralaz/Widgets/Scripts/dropzone.js" );
+            ImageFolderPath = GetAttributeValue( "ImageFolderPath" );
 
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
@@ -80,17 +91,45 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
         {
 
             base.OnLoad( e );
+
+            //Update the path
+            //use a default path
+            virtualPath = "~/Content/ExternalSite/Gallery";
+            physicalPath = Server.MapPath( virtualPath );
+
+            //If ImageFolderPath is specified then use that path
+            if ( !string.IsNullOrEmpty( ImageFolderPath ) )
+            {
+                physicalPath = Server.MapPath( ImageFolderPath );
+                virtualPath = ImageFolderPath;
+            }
+
+            //Show AdminMode specific controls
+            if ( AdminMode )
+            {
+                lvImages.InsertItemPosition = InsertItemPosition.FirstItem;
+            }
+
             if ( !Page.IsPostBack )
             {
                 // added for your convenience
             }
         }
 
+        /// <summary>
+        /// Pre render operations
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void Page_PreRender( object sender, EventArgs e )
+        {
+            //Binds the Data Before Rendering
+            BindData();
+        }
+
         #endregion
 
         #region Events
-
-        // handlers called by the controls on your block
 
         /// <summary>
         /// Handles the BlockUpdated event of the control.
@@ -102,12 +141,163 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
 
         }
 
+        protected void lvImages_ItemDataBound( object sender, ListViewItemEventArgs e )
+        {
+            //In case of AdminMode, we would want to show the delete button 
+            //which is not visible by iteself for Non-Admin users
+            if ( AdminMode )
+            {
+                var lbDelete = e.Item.FindControl( "lbDelete" ) as LinkButton;
+                if ( lbDelete == null ) return;
+
+                lbDelete.Visible = true;
+            }
+
+            //Get the required controls
+            var fupImage = e.Item.FindControl( "fupImage" ) as FileUpload;
+            if ( fupImage != null )
+            {
+                var parent = fupImage.Parent;
+                if ( parent != null )
+                {
+                    var lblImageUploadStatus = parent.FindControl( "lblImageUploadStatus" ) as Label;
+                    if ( lblImageUploadStatus != null )
+                    {
+                        //If a file is posted, save it
+                        if ( this.IsPostBack )
+                        {
+                            if ( fupImage.PostedFile != null && fupImage.PostedFile.ContentLength > 0 )
+                            {
+                                try
+                                {
+                                    fupImage.PostedFile.SaveAs( string.Format( "{0}\\{1}",
+                                        physicalPath, GetFileName( fupImage.PostedFile.FileName ) ) );
+                                    lblImageUploadStatus.Text = string.Format(
+                                        "Image {0} successfully uploaded!",
+                                        fupImage.PostedFile.FileName );
+                                }
+                                catch ( Exception ex )
+                                {
+                                    lblImageUploadStatus.Text = string.Format( "Error uploading {0}!",
+                                        fupImage.PostedFile.FileName );
+                                }
+                            }
+                            else
+                            {
+                                lblImageUploadStatus.Text = string.Empty;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Redirects to the full image when the image is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void imbItem_Command( object sender, CommandEventArgs e )
+        {
+            Response.Redirect( e.CommandArgument as string );
+        }
+
+        /// <summary>
+        /// Performs commands for bound buttons in the ImageListView. In this case 
+        /// 'Remove (Delete)'
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void lvImages_ItemCommand( object sender, ListViewCommandEventArgs e )
+        {
+            /* We have not bound the control to any DataSource derived controls, 
+            nor do we use any key to identify the image. Hence, it makes more sense not to 
+            use 'delete' but to use a custom command 'Remove' which can be fired as a 
+            generic ItemCommand, and the ListViewCommandEventArgs e will have 
+            the CommandArgument passed by the 'Remove' button In this case, it is the bound 
+            ImageUrl that we are passing, and making use it of to delete the image.*/
+            switch ( e.CommandName )
+            {
+                case "Remove":
+                    var path = e.CommandArgument as string;
+                    if ( path != null )
+                    {
+                        try
+                        {
+                            FileInfo fi = new FileInfo( Server.MapPath( path ) );
+                            fi.Delete();
+
+                            //Display message
+                            Parent.Controls.Add( new Label()
+                            {
+                                Text = GetFileName( path ) + " deleted successfully!"
+                            } );
+
+                        }
+                        catch ( Exception ex )
+                        {
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
         #endregion
 
         #region Methods
 
-        // helper functional methods (like BindGrid(), etc.)
+        /// <summary>
+        /// Get File Name
+        /// </summary>
+        /// <param name="path">full path</param>
+        /// <returns>string containing the file name</returns>
+        private string GetFileName( string path )
+        {
+            DateTime timestamp = DateTime.Now;
+            string fileName = string.Empty;
+            try
+            {
+                if ( path.Contains( '\\' ) ) fileName = path.Split( '\\' ).Last();
+                if ( path.Contains( '/' ) ) fileName = path.Split( '/' ).Last();
+            }
+            catch ( Exception ex )
+            {
+            }
+            return fileName;
+        }
+
+        /// <summary>
+        /// Binds the ImageListView to current DataSource
+        /// </summary>
+        private void BindData()
+        {
+            var images = new List<string>();
+
+            try
+            {
+                var imagesFolder = new DirectoryInfo( physicalPath );
+                foreach ( var item in imagesFolder.EnumerateFiles() )
+                {
+                    if ( item is FileInfo )
+                    {
+                        //add virtual path of the image to the images list
+                        images.Add( string.Format( "{0}/{1}", virtualPath, item.Name ) );
+                    }
+                }
+            }
+            catch ( Exception ex )
+            {
+                //log exception
+            }
+
+            lvImages.DataSource = images;
+            lvImages.DataBind();
+
+        }
 
         #endregion
+
     }
 }

@@ -6,53 +6,31 @@
                 <input name="file" type="file" multiple />
             </div>
         </div>
-        <Rock:BootstrapButton ID="btnUpload" runat="server" Text="Upload" CssClass="btn btn-primary" />
+        <asp:ListView runat="server" ID="lvImages" OnItemCommand="lvImages_ItemCommand" OnItemDataBound="lvImages_ItemDataBound">
+            <ItemTemplate>
+                <asp:ImageButton ID="imbItem" runat="server"
+                    CommandArgument="<%# Container.DataItem %>"
+                    ImageUrl="<%# Container.DataItem %>" Width="320" Height="240"
+                    OnCommand="imbItem_Command" />
+                <asp:LinkButton ID="lbDelete" runat="server" CommandName="Remove"
+                    CommandArgument="<%# Container.DataItem %>" Text="Delete" Visible="false" />
+            </ItemTemplate>
+            <InsertItemTemplate>
+                <p>
+                    <asp:Label Text="Please upload an image" runat="server" ID="lblImageUpload" />
+                    <asp:FileUpload runat="server" ID="fupImage" />
+                    <asp:Button ID="btnUpload" Text="Upload" runat="server" />
+                </p>
+                <p>
+                    <asp:Label Text="" runat="server" ID="lblImageUploadStatus" />
+                </p>
+            </InsertItemTemplate>
+        </asp:ListView>
         <script>
             Sys.Application.add_load(function () {
-
                 $("#<%=divPhotoDropzone.ClientID%>").dropzone({
-                    url: "/file/post",
-                    // Prevents Dropzone from uploading dropped files immediately
-                    autoProcessQueue: false,
-                    maxFiles: 5,
-                    init: function () {
-                        var submitButton = document.getElementById("#<%=divPhotoDropzone.ClientID%>");
-                        myDropzone = this;
-                        submitButton.addEventListener("click", function () {
-                            myDropzone.processQueue();  // Tell Dropzone to process all queued files.
-                        });
-                        // to handle the added file event
-                        this.on("addedfile", function (file) {
-                            var removeButton = Dropzone.createElement("<button> Remove file </button>");
-                            // Capture the Dropzone instance as closure.
-                            var _this = this;
+                    url: "../FileUploader.ashx?rootFolder=" + encodeURIComponent('<%= Rock.Security.Encryption.EncryptString(GetAttributeValue( "ImageFolderPath" )) %>'),
 
-                            // Listen to the click event
-                            removeButton.addEventListener("click", function (e) {
-                                // Make sure the button click doesn't submit the form:
-                                e.preventDefault();
-                                e.stopPropagation();
-
-                                // Remove the file preview.
-                                _this.removeFile(file);
-                                // If you want to the delete the file on the server as well,
-                                // you can do the AJAX request here.
-                            });
-                            file.previewElement.appendChild(removeButton);
-                        });
-                        this.on("maxfilesexceeded", function (file) {
-                            this.removeFile(file);
-                        });
-                    }
-                });
-
-                $("#<%=divPhotoDropzone.ClientID%>").sortable({
-                    items: '.dz-preview',
-                    cursor: 'move',
-                    opacity: 0.5,
-                    containment: '#image-dropzone',
-                    distance: 20,
-                    tolerance: 'pointer'
                 });
             });
         </script>
