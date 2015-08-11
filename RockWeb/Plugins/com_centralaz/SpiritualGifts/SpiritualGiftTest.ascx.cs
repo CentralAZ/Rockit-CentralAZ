@@ -305,10 +305,10 @@ namespace Rockweb.Plugins.com_centralaz.SpiritualGifts
             {
                 mergeFields.Add( "Person", _targetPerson );
             }
-
-            Rock.Web.Cache.GlobalAttributesCache.Read().AttributeValues
-                .ToList()
-                .ForEach( v => mergeFields.Add( v.Key, v.Value ) );
+            //TODO
+            //Rock.Web.Cache.GlobalAttributesCache.Read().AttributeValues
+            //    .ToList()
+            //    .ForEach( v => mergeFields.Add( v.Key, v.Value ) );
 
             lInstructions.Text = GetAttributeValue( "Instructions" ).ResolveMergeFields( mergeFields );
         }

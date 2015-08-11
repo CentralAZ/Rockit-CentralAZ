@@ -142,7 +142,7 @@ namespace RockWeb.Plugins.com_centralaz.Accountability
                         e.Row.AddCssClass( "inactive" );
                     }
 
-                    if ( groupMember.Person.IsDeceased ?? false )
+                    if ( groupMember.Person.IsDeceased )
                     {
                         e.Row.AddCssClass( "deceased" );
                     }

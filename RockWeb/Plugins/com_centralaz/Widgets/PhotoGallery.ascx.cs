@@ -19,27 +19,35 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web.UI;
+using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-
 using Rock;
+using Rock.Attribute;
 using Rock.Data;
 using Rock.Model;
+using Rock.Security;
 using Rock.Web.Cache;
+using Rock.Web.UI;
 using Rock.Web.UI.Controls;
-using Rock.Attribute;
 
 namespace RockWeb.Plugins.com_centralaz.Widgets
 {
     /// <summary>
-    /// Template block for developers to use to start a new block.
+    /// Adds an editable HTML fragment to the page.
     /// </summary>
     [DisplayName( "Photo Gallery" )]
     [Category( "com_centralaz > Widgets" )]
-    [Description( "Template block for developers to use to start a new detail block." )]
-    [EmailField( "Email" )]
-    [TextField("Image Folder Path")]
-    public partial class PhotoGallery : Rock.Web.UI.RockBlock
+    [Description( "Allows a user to select photos to display in a carousel." )]
+
+    [SecurityAction( Authorization.EDIT, "The roles and/or users that can edit the HTML content.")]
+    [SecurityAction( Authorization.APPROVE, "The roles and/or users that have access to approve HTML content." )]
+
+    [TextField( "Image Root Folder", "The folder to use as the root when browsing or uploading images.", false, "~/Content", "", 2 )]
+
+    [ContextAware]
+    public partial class PhotoGallery : RockBlockCustomSettings
     {
         #region Fields
 
@@ -56,15 +64,22 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
         public string ImageFolderPath { get; set; }
 
         /// <summary>
-        /// Get or Set the Admin Mode 
+        /// Gets the settings tool tip.
         /// </summary>
-        public bool AdminMode { get; set; }
+        /// <value>
+        /// The settings tool tip.
+        /// </value>
+        public override string SettingsToolTip
+        {
+            get
+            {
+                return "Edit Photos";
+            }
+        }
 
         #endregion
 
         #region Base Control Methods
-
-        //  overrides of the base RockBlock methods (i.e. OnInit, OnLoad)
 
         /// <summary>
         /// Raises the <see cref="E:System.Web.UI.Control.Init" /> event.
@@ -78,9 +93,8 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
             RockPage.AddScriptLink( "~/Plugins/com_centralaz/Widgets/Scripts/dropzone.js" );
             ImageFolderPath = GetAttributeValue( "ImageFolderPath" );
 
-            // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
-            this.BlockUpdated += Block_BlockUpdated;
-            this.AddConfigurationUpdateTrigger( upnlContent );
+            this.BlockUpdated += HtmlContentDetail_BlockUpdated;
+            this.AddConfigurationUpdateTrigger( upnlHtmlContent );
         }
 
         /// <summary>
@@ -89,7 +103,6 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
         protected override void OnLoad( EventArgs e )
         {
-
             base.OnLoad( e );
 
             //Update the path
@@ -104,27 +117,14 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
                 virtualPath = ImageFolderPath;
             }
 
-            //Show AdminMode specific controls
-            if ( AdminMode )
+            if ( !this.IsPostBack )
             {
-                lvImages.InsertItemPosition = InsertItemPosition.FirstItem;
+                ShowView();
             }
-
-            if ( !Page.IsPostBack )
+            else
             {
-                // added for your convenience
+                BindEditData();
             }
-        }
-
-        /// <summary>
-        /// Pre render operations
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected void Page_PreRender( object sender, EventArgs e )
-        {
-            //Binds the Data Before Rendering
-            BindData();
         }
 
         #endregion
@@ -132,64 +132,43 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
         #region Events
 
         /// <summary>
-        /// Handles the BlockUpdated event of the control.
+        /// Handles the BlockUpdated event of the HtmlContentDetail control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        protected void Block_BlockUpdated( object sender, EventArgs e )
-        {
+        protected void HtmlContentDetail_BlockUpdated( object sender, EventArgs e )
+        {            
+            ShowView();
+        }
 
+        /// <summary>
+        /// Handles the Click event of the lbSave control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected void lbSave_Click( object sender, EventArgs e )
+        {      
+            ShowView();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the lbCancel control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected void lbCancel_Click( object sender, EventArgs e )
+        {
+            ShowView();
         }
 
         protected void lvImages_ItemDataBound( object sender, ListViewItemEventArgs e )
         {
-            //In case of AdminMode, we would want to show the delete button 
-            //which is not visible by iteself for Non-Admin users
-            if ( AdminMode )
-            {
-                var lbDelete = e.Item.FindControl( "lbDelete" ) as LinkButton;
-                if ( lbDelete == null ) return;
 
-                lbDelete.Visible = true;
-            }
+        }
 
-            //Get the required controls
-            var fupImage = e.Item.FindControl( "fupImage" ) as FileUpload;
-            if ( fupImage != null )
-            {
-                var parent = fupImage.Parent;
-                if ( parent != null )
-                {
-                    var lblImageUploadStatus = parent.FindControl( "lblImageUploadStatus" ) as Label;
-                    if ( lblImageUploadStatus != null )
-                    {
-                        //If a file is posted, save it
-                        if ( this.IsPostBack )
-                        {
-                            if ( fupImage.PostedFile != null && fupImage.PostedFile.ContentLength > 0 )
-                            {
-                                try
-                                {
-                                    fupImage.PostedFile.SaveAs( string.Format( "{0}\\{1}",
-                                        physicalPath, GetFileName( fupImage.PostedFile.FileName ) ) );
-                                    lblImageUploadStatus.Text = string.Format(
-                                        "Image {0} successfully uploaded!",
-                                        fupImage.PostedFile.FileName );
-                                }
-                                catch ( Exception ex )
-                                {
-                                    lblImageUploadStatus.Text = string.Format( "Error uploading {0}!",
-                                        fupImage.PostedFile.FileName );
-                                }
-                            }
-                            else
-                            {
-                                lblImageUploadStatus.Text = string.Empty;
-                            }
-                        }
-                    }
-                }
-            }
+        protected void rptPhoto_ItemDataBound( object sender, RepeaterItemEventArgs e )
+        {
+
         }
 
         /// <summary>
@@ -238,15 +217,61 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
                         {
                         }
                     }
+                    BindEditData();
                     break;
                 default:
                     break;
             }
         }
 
+
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Shows the settings.
+        /// </summary>
+        /// <exception cref="System.NotImplementedException"></exception>
+        protected override void ShowSettings()
+        {
+
+            pnlEditModel.Visible = true;
+            upnlHtmlContent.Update();
+            mdEdit.Show();
+         
+        }
+
+        private Dictionary<string, object> GetPageProperties()
+        {
+            Dictionary<string, object> pageProperties = new Dictionary<string, object>();
+            pageProperties.Add( "Id", this.RockPage.PageId.ToString() );
+            pageProperties.Add( "BrowserTitle", this.RockPage.BrowserTitle );
+            pageProperties.Add( "PageTitle", this.RockPage.PageTitle );
+            pageProperties.Add( "Site", this.RockPage.Site.Name );
+            pageProperties.Add( "SiteId", this.RockPage.Site.Id.ToString() );
+            pageProperties.Add( "LayoutId", this.RockPage.Layout.Id.ToString() );
+            pageProperties.Add( "Layout", this.RockPage.Layout.Name );
+            pageProperties.Add( "SiteTheme", this.RockPage.Site.Theme );
+            pageProperties.Add( "PageIcon", this.RockPage.PageIcon );
+            pageProperties.Add( "Description", this.RockPage.MetaDescription );
+            return pageProperties;
+        }
+
+        /// <summary>
+        /// Shows the view.
+        /// </summary>
+        protected void ShowView()
+        {
+            mdEdit.Hide();
+            pnlEditModel.Visible = false;
+            upnlHtmlContent.Update();
+
+            string html = string.Empty;
+
+            // add content to the content window
+            BindViewData();
+        }
 
         /// <summary>
         /// Get File Name
@@ -269,9 +294,27 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
         }
 
         /// <summary>
-        /// Binds the ImageListView to current DataSource
+        /// Binds the lvImage to current DataSource
         /// </summary>
-        private void BindData()
+        private void BindEditData()
+        {
+            var images = GetImageList();
+
+            lvImages.DataSource = images;
+            lvImages.DataBind();
+
+        }
+
+        private void BindViewData()
+        {
+            var images = GetImageList();
+
+            rptPhoto.DataSource = images;
+            rptPhoto.DataBind();
+
+        }
+
+        private List<string> GetImageList()
         {
             var images = new List<string>();
 
@@ -291,13 +334,10 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
             {
                 //log exception
             }
-
-            lvImages.DataSource = images;
-            lvImages.DataBind();
-
+            return images;
         }
 
         #endregion
 
-    }
+}
 }

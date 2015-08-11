@@ -234,7 +234,7 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
                 SELECT [so].[Id] [OffenderId]
                     ,[a].[Id] [PersonAliasId]
                 FROM (
-                    SELECT [l].[PostalCode]
+                    SELECT SUBSTRING([l].[PostalCode],0, 6) AS PostalCode
 						,[p].[LastName]
 						,[p].[Gender]
 			            ,[pa].[Id]
@@ -253,7 +253,7 @@ CREATE PROCEDURE [dbo].[_com_centralaz_spDpsMatch_Match]
 						,[p].[Gender]
 			            ,[pa].[Id]
                     ) [a]
-                JOIN [_com_centralaz_DpsMatch_Offender] [so] ON [so].[ResidentialZip] = [a].[PostalCode]
+                JOIN [_com_centralaz_DpsMatch_Offender] [so] ON CAST([so].[ResidentialZip] AS NVARCHAR(5)) = [a].[PostalCode]
 				AND (([a].[Gender]=1 and [so].[Sex]='M') or ([a].[Gender]=2 and [so].[Sex]='F'))
 				and [so].[LastName] = [a].[LastName]
 	            WHERE @compareByPostalCode = 1

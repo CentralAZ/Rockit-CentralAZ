@@ -33,13 +33,14 @@ using Rock.Web.UI.Controls;
 
 namespace RockWeb.Plugins.com_centralaz.Widgets
 {
-    [DisplayName( "Login Status Lava" )]
+    [DisplayName( "Twitter Block" )]
     [Category( "com_centralaz > Widgets" )]
-    [Description( "A lava block for login." )]
-    [LinkedPage( "My Account Page", "The page used to log in" )]
-    [CodeEditorField( "Lava Template", "Lava template to use to display the package details.", CodeEditorMode.Liquid, CodeEditorTheme.Rock, 400, true, @"{% include '~~/Assets/Lava/LoginStatusLava.lava' %}", "", 2 )]
+    [Description( "Displays a twitter feed" )]
+    [TextField("Twitter Username")]
+    [IntegerField( "Number Of Tweets", required: true )]
+    [CodeEditorField( "Lava Template", "Lava template to use to display the package details.", CodeEditorMode.Liquid, CodeEditorTheme.Rock, 400, true, @"{% include '~~/Assets/Lava/TwitterLava.lava' %}", "", 2 )]
     [BooleanField( "Enable Debug", "Display a list of merge fields available for lava.", false, "", 3 )]
-    public partial class LoginStatusLava : RockBlock
+    public partial class TwitterBlock : RockBlock
     {
 
         #region Control Methods
@@ -61,8 +62,6 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
         protected override void OnLoad( EventArgs e )
         {
             base.OnLoad( e );
-
-            RouteAction();
         }
 
         #endregion
@@ -82,78 +81,7 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
         #endregion
 
         #region Internal Methods
-        // route the request to the correct panel
-        private void RouteAction()
-        {
-            var sm = ScriptManager.GetCurrent( Page );
 
-            if ( Request.Form["__EVENTARGUMENT"] != null )
-            {
-
-                string[] eventArgs = Request.Form["__EVENTARGUMENT"].Split( '^' );
-
-                if ( eventArgs.Length == 2 )
-                {
-                    string action = eventArgs[0];
-                    string parameters = eventArgs[1];
-
-                    int argument = 0;
-                    int.TryParse( parameters, out argument );
-
-                    switch ( action )
-                    {
-                        case "UserLoginLogout":
-                            UserLoginLogout();
-                            break;
-                    }
-                }
-            }
-            else
-            {
-                LoadContent();
-            }
-        }
-
-        private void UserLoginLogout()
-        {
-            if ( CurrentUser == null )
-            {
-                var site = RockPage.Layout.Site;
-                if ( site.LoginPageId.HasValue )
-                {
-                    site.RedirectToLoginPage( true );
-                }
-                else
-                {
-                    FormsAuthentication.RedirectToLoginPage();
-                }
-            }
-            else
-            {
-
-                var transaction = new Rock.Transactions.UserLastActivityTransaction();
-                transaction.UserId = CurrentUser.Id;
-                transaction.LastActivityDate = RockDateTime.Now;
-                transaction.IsOnLine = false;
-                Rock.Transactions.RockQueue.TransactionQueue.Enqueue( transaction );
-
-
-                FormsAuthentication.SignOut();
-
-                // After logging out check to see if an anonymous user is allowed to view the current page.  If so
-                // redirect back to the current page, otherwise redirect to the site's default page
-                var currentPage = Rock.Web.Cache.PageCache.Read( RockPage.PageId );
-                if ( currentPage != null && currentPage.IsAuthorized( Authorization.VIEW, null ) )
-                {
-                    Response.Redirect( CurrentPageReference.BuildUrl() );
-                    Context.ApplicationInstance.CompleteRequest();
-                }
-                else
-                {
-                    RockPage.Layout.Site.RedirectToDefaultPage();
-                }
-            }
-        }
 
         public void LoadContent()
         {
@@ -161,8 +89,7 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
 
             // add linked pages
             Dictionary<string, object> linkedPages = new Dictionary<string, object>();
-            linkedPages.Add( "MyAccountPage", LinkedPageUrl( "MyAccountPage", null ) );
-            mergeFields.Add( "LinkedPages", linkedPages );
+            mergeFields.Add( "TwitterWidgetId", GetAttributeValue( "TwitterWidgetId" ) );
 
             mergeFields.Add( "CurrentPerson", CurrentPerson );
             mergeFields.Add( "CurrentUser", CurrentUser );
@@ -170,7 +97,7 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
             var globalAttributeFields = Rock.Web.Cache.GlobalAttributesCache.GetMergeFields( CurrentPerson );
             globalAttributeFields.ToList().ForEach( d => mergeFields.Add( d.Key, d.Value ) );
 
-            lOutput.Text = GetAttributeValue( "LavaTemplate" ).ResolveMergeFields( mergeFields );
+            //lOutput.Text = GetAttributeValue( "LavaTemplate" ).ResolveMergeFields( mergeFields );
 
             //// show debug info
             //if ( GetAttributeValue( "EnableDebug" ).AsBoolean() && IsUserAuthorized( Authorization.EDIT ) )

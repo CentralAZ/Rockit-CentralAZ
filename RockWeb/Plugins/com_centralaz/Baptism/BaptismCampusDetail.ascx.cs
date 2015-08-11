@@ -215,16 +215,23 @@ namespace RockWeb.Plugins.com_centralaz.Baptism
             var subTitleFont = FontFactory.GetFont( font, 14, Color.GRAY );
 
             //Add church logo
-            var logo = iTextSharp.text.Image.GetInstance( Server.MapPath( ResolveRockUrl( "~/Assets/Icons/CentralChristianChurchArizona_165_90.png" ) ) );
-            logo.Alignment = iTextSharp.text.Image.RIGHT_ALIGN;
-            logo.ScaleAbsolute( 100, 55 );
-            document.Add( logo );
+            try
+            {
+                var logo = iTextSharp.text.Image.GetInstance( Server.MapPath( ResolveRockUrl( "~/Plugins/com_centralaz/Baptism/Assets/Icons/CentralChristianChurchArizona_165_90.png" ) ) );
+                logo.Alignment = iTextSharp.text.Image.RIGHT_ALIGN;
+                logo.ScaleAbsolute( 100, 55 );
+                document.Add( logo );
+            }
+            catch
+            {
+
+            }
 
             //Write the document
             String title = String.Format( "{0}: {1} - {2}", group.Name, dateRange[0].ToString( "MMMM d" ), dateRange[1].ToString( "MMMM d" ) );
             document.Add( new Paragraph( title, titleFont ) );
 
-            String campusName =  (group.Campus != null ) ? group.Campus.ToString() : "Unknown Campus";
+            String campusName = ( group.Campus != null ) ? group.Campus.ToString() : "Unknown Campus";
             String subTitle = String.Format( "Baptism Schedule for {0}", campusName );
             document.Add( new Paragraph( subTitle, subTitleFont ) );
 
