@@ -53,6 +53,9 @@ namespace RockWeb.Plugins.com_centralaz.Widgets
         {
             base.OnInit( e );
 
+            RockPage.AddCSSLink( ResolveRockUrl( "~/Plugins/com_centralaz/Widgets/Styles/twitterstyle.css" ) );
+            RockPage.AddScriptLink( "~/Plugins/com_centralaz/Widgets/Scripts/twitterFetcher_min.js" );
+
         }
 
         /// <summary>
